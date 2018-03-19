@@ -1,2 +1,2 @@
-# sbmadhav.github.io
+# sbmadhav.com
 my mindspace
