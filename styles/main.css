@@ -1,0 +1,66 @@
+@font-face {
+    font-family: 'doves';
+    src: url(../assets/doves.woff),
+        url(../assets/doves.ttf)  format('truetype');
+  }
+
+  @font-face {
+    font-family: '5years';
+    src: url(../assets/5yearsoldfont.ttf)  format('truetype');
+  }
+
+html,body {
+    cursor: url('../assets/abu.webp'), auto !important;
+    min-width: 320px;
+}
+
+.profile-image {
+    border-radius: 60px 1px;
+    width: 160px;
+    height: 100%;
+    align-self: flex-start;
+    filter: grayscale(100);
+}
+
+.header-label {
+    font-family: 'doves', sans-serif;
+    padding: 10px;
+}
+
+.header-label h1 {
+    font-size: 64px;
+    margin-bottom: 20px
+}
+
+.header-label h2 {
+    font-size: 48px;
+}
+
+header {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    background-color:#e8e8e8;
+}
+
+header:hover {
+    background-color: #bdcbea
+}
+
+header:hover .profile-image{
+    filter: grayscale(0);
+}
+
+header:hover h1, header:hover h2 {
+    color: blue;
+    text-shadow: black;
+}
+
+section {
+    margin: 12px;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    font-family: '5years', sans-serif;
+    font-size: 16px;
+}
