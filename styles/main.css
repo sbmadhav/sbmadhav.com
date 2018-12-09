@@ -1,15 +1,16 @@
 @font-face {
     font-family: 'doves';
     src: url(../assets/doves.woff),
-        url(../assets/doves.ttf)  format('truetype');
-  }
+        url(../assets/doves.ttf) format('truetype');
+}
 
-  @font-face {
+@font-face {
     font-family: '5years';
-    src: url(../assets/5yearsoldfont.ttf)  format('truetype');
-  }
+    src: url(../assets/5yearsoldfont.ttf) format('truetype');
+}
 
-html,body {
+html,
+body {
     cursor: url('../assets/abu.webp'), auto !important;
     min-width: 320px;
 }
@@ -23,35 +24,53 @@ html,body {
 }
 
 .header-label {
-    font-family: 'doves', sans-serif;
     padding: 10px;
 }
 
 .header-label h1 {
-    font-size: 64px;
-    margin-bottom: 20px
+    font-family: 'doves', sans-serif;
+    font-size: 32px;
+    margin-bottom: 20px;
+    text-align: center;
 }
 
 .header-label h2 {
-    font-size: 48px;
+    font-family: '5years', sans-serif;
+    font-size: 18px;
+    text-align: center;
 }
+
+@media only screen and (min-width: 765px) {
+
+    .header-label h1 {
+        font-size: 64px;
+        margin-bottom: 20px
+    }
+
+    .header-label h2 {
+        font-size: 32px;
+    }
+}
+
 
 header {
     display: flex;
     flex-flow: row wrap;
     justify-content: space-around;
-    background-color:#e8e8e8;
+    background-color: #e8e8e8;
+    margin: auto;
 }
 
 header:hover {
     background-color: #bdcbea
 }
 
-header:hover .profile-image{
+header:hover .profile-image {
     filter: grayscale(0);
 }
 
-header:hover h1, header:hover h2 {
+header:hover h1,
+header:hover h2 {
     color: blue;
     text-shadow: black;
 }
