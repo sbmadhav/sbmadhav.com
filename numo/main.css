@@ -1,0 +1,11 @@
+.hide {
+    display: none;
+}
+.center {
+    margin: 0 auto;
+    width: 100%;
+    text-align: center;
+}
+#name-total-container {
+    font-weight: bold;
+}

@@ -1,13 +1,15 @@
-import * as dictionary from './numo.json';
-const nameTotal = ( input ) => {
-    const pattern = new RegExp( /^[a-z0-9]+$/i );
-    if ( typeof input !== 'string' && pattern.test( input ) ) {
-        throw new Error('Accepts only string input');
+import nameTotal from "./app/name-total.js";
+
+const nameInputEle = document.getElementById('name-input');
+const nameTotalEle = document.getElementById('name-total');
+const nameTotalContainerEle = document.getElementById('name-total-container');
+nameInputEle.addEventListener("keyup", () => {
+    const total = nameTotal(nameInputEle.value);
+    if ( total > 0 ) {
+        nameTotalEle.innerHTML = total;
+        nameTotalContainerEle.classList.remove('hide');
+    } else {
+        nameTotalContainerEle.classList.add('hide');
     }
-    const characters = input.toLowerCase().replace( /\s/g, '' ).split ( '' );
-
-    const reducer = ( accumulator, currentValue ) => accumulator + dictionary[ currentValue ];
-    return characters.reduce( reducer, 0 );
-};
-
-export default nameTotal;
+    
+});

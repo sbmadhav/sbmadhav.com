@@ -1,4 +1,4 @@
-{
+const dictionary = {
     "a": 1,
     "b": 2,
     "c": 3,
@@ -25,4 +25,6 @@
     "x": 5,
     "y": 1,
     "z": 7
-}
+};
+
+export default dictionary;

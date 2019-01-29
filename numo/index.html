@@ -5,20 +5,28 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Numo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="./numo/main.css" />
+    <script type="module" src="./numo/main.js"></script>
 </head>
 <body>
-    <input type="text" value="" id="name-input"/>
-    <div>
-        The total of your name is <span id="name-total"></span>
+    <header>
+        <h1 class="center">
+            Numo!
+        </h1>
+    </header>
+    <div class="center">
+        <label for="name-input"> Name: </label>
+        <input type="text" value="" id="name-input"/>
     </div>
-    <script type="module">
-        import nameTotal from './main.js'
-        const nameInputEle = document.getElementById('name-input');
-        const nameTotalEle = document.getElementById('name-total');
-        nameInputEle.addEventListener("keypress", () => {
-            nameTotalEle.innerHTML = nameTotal(nameInputEle.value)
-        });
-    </script>
+    <div id="name-total-container" class="center hide">
+        The numo total for your name is <span id="name-total"></span>
+    </div>
+    <div class="center">
+            <label for="dob-input"> Date Of Birth: </label>
+            <input type="date" value="" id="dob-input"/>
+        </div>
+        <div id="name-total-container" class="center hide">
+            The numo total for your name is <span id="name-total"></span>
+        </div>
 </body>
 </html>
