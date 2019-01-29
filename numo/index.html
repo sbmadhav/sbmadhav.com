@@ -14,10 +14,10 @@
         The total of your name is <span id="name-total"></span>
     </div>
     <script>
-        const nameInput = document.getElementById('name-input');
-        const nameTotal = document.getElementById('name-total');
-        nameInput.addEventListener("keypress", () => {
-            nameTotal.innerHTML = nameTotal(nameInput.value)
+        const nameInputEle = document.getElementById('name-input');
+        const nameTotalEle = document.getElementById('name-total');
+        nameInputEle.addEventListener("keypress", () => {
+            nameTotalEle.innerHTML = nameTotal(nameInputEle.value)
         });
     </script>
 </body>
