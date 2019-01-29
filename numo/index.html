@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Numo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+    <script type="module" src="main.js"></script>
+</head>
+<body>
+    <input type="text" value="" id="name-input"/>
+    <div>
+        The total of your name is <span id="name-total"></span>
+    </div>
+    <script>
+        const getByID = document.getElementById;
+        getByID('name-input').addEventListener("keypress", () => {
+            getByID('name-total').innerHTML = nameTotal(getByID('name-input').value)
+        });
+    </script>
+</body>
+</html>
