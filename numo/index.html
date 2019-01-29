@@ -6,14 +6,14 @@
     <title>Numo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
-    <script type="module" src="main.js"></script>
 </head>
 <body>
     <input type="text" value="" id="name-input"/>
     <div>
         The total of your name is <span id="name-total"></span>
     </div>
-    <script>
+    <script type="module">
+        import nameTotal from './main.js'
         const nameInputEle = document.getElementById('name-input');
         const nameTotalEle = document.getElementById('name-total');
         nameInputEle.addEventListener("keypress", () => {
