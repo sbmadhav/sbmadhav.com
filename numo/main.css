@@ -1,11 +1,18 @@
 .hide {
-    display: none;
+    visibility: hidden;
 }
 .center {
     margin: 0 auto;
     width: 100%;
     text-align: center;
 }
-#name-total-container {
+.results {
     font-weight: bold;
+}
+button {
+    padding: 3px;
+    vertical-align: middle;
+}
+input {
+    min-width: 200px;
 }
