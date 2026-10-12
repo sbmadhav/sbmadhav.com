@@ -4,6 +4,7 @@
 (() => {
   const PAGES = [
     { href: '/', icon: 'home', pro: ['Home', 'Who I am, what I build, and the games'], kid: ['Home', 'Meet Madhav and Bolt'] },
+    { href: '/state-of-voice-agents/', icon: 'voice', pro: ['Voice agents at the front door', 'State of conversational voice AI in healthcare and banking, October 2026'], kid: ['Talking robots', 'How robot phone helpers learn to listen and help'] },
     { href: '/design-system/', icon: 'palette', pro: ['Design system', 'Colors, type and components behind this site'], kid: ['Paint box', 'All the colors and shapes I use'] }
   ];
   const SECTIONS = [
@@ -21,6 +22,7 @@
 
   const P = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
   const ICONS = {
+    voice: `<rect x="9" y="3" width="6" height="11" rx="3" ${P}/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" ${P}/>`,
     home: `<path d="M4 11l8-7 8 7M6.5 9.5V20h11V9.5" ${P}/><path d="M10 20v-5h4v5" ${P}/>`,
     palette: `<path d="M12 3a9 9 0 1 0 0 18c1.3 0 2-.8 2-1.8 0-1.4-1.2-1.7-1.2-3 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.3 17 3 12 3z" ${P}/><circle cx="7.5" cy="11" r="1.3" fill="currentColor"/><circle cx="10" cy="7" r="1.3" fill="currentColor"/><circle cx="15" cy="7.2" r="1.3" fill="currentColor"/>`,
     agent: `<rect x="4" y="7" width="16" height="13" rx="4" ${P}/><path d="M12 7V4" ${P}/><circle cx="9" cy="13" r="1.4" fill="currentColor"/><circle cx="15" cy="13" r="1.4" fill="currentColor"/>`,
@@ -47,22 +49,22 @@ dialog.xp[open]{animation:xpIn .32s cubic-bezier(.2,.9,.3,1.15)}
 .xp-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
 .xp-head h2{margin:0;font:600 1.6rem/1.1 var(--display,Fredoka,sans-serif)}
 .xp-head p{margin:2px 0 0;color:var(--ink-muted,var(--muted));font-size:14px}
-.xp-x{width:40px;height:40px;border-radius:50%;border:2px solid var(--edge);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none}
+.xp-x{width:40px;height:40px;border-radius:50%;border:2px solid var(--edge);background:var(--card,var(--bg));color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none}
 .xp-k{margin:22px 0 10px;font:700 12px/1 "Nunito Sans",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted,var(--muted))}
 .xp-pages{display:grid;gap:10px}
-.xp-page{position:relative;display:flex;gap:14px;align-items:center;padding:14px 16px;border:2px solid var(--edge);border-radius:18px;background:var(--card);color:var(--ink);text-decoration:none;box-shadow:0 3px 0 var(--ledge);transition:transform .15s,box-shadow .15s}
-.xp-page:hover{transform:translateY(-2px) rotate(-.4deg);box-shadow:0 5px 0 var(--ledge)}
+.xp-page{position:relative;display:flex;gap:14px;align-items:center;padding:14px 16px;border:2px solid var(--edge);border-radius:18px;background:var(--card,var(--bg));color:var(--ink);text-decoration:none;box-shadow:0 3px 0 var(--ledge,var(--edge));transition:transform .15s,box-shadow .15s}
+.xp-page:hover{transform:translateY(-2px) rotate(-.4deg);box-shadow:0 5px 0 var(--ledge,var(--edge))}
 .xp-page .xp-ic{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--sun);color:var(--on-accent,#1C2541)}
 .xp-page:nth-child(2) .xp-ic{background:var(--plum)}.xp-page:nth-child(3) .xp-ic{background:var(--teal)}.xp-page:nth-child(4) .xp-ic{background:var(--sky)}
 .xp-page b{display:block;font:600 1.1rem/1.2 var(--display,Fredoka,sans-serif)}
 .xp-page small{display:block;color:var(--ink-muted,var(--muted));font-size:14px;line-height:1.35;margin-top:2px}
 .xp-page[aria-current="page"]::after{content:"You are here";position:absolute;top:-9px;right:14px;background:var(--sun);color:var(--on-accent,#1C2541);font:700 11px/1 "Nunito Sans",sans-serif;padding:4px 8px;border-radius:99px;border:1.5px solid var(--edge)}
 .xp-secs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.xp-sec{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--ink);text-decoration:none;font-weight:700;font-size:13.5px;text-align:center;transition:transform .15s,border-color .15s}
+.xp-sec{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border:1px solid var(--line);border-radius:16px;background:var(--card,var(--bg));color:var(--ink);text-decoration:none;font-weight:700;font-size:13.5px;text-align:center;transition:transform .15s,border-color .15s}
 .xp-sec:hover{transform:translateY(-2px);border-color:var(--edge)}
 .xp-sec svg{color:var(--coral)}
 .xp-links{display:flex;gap:8px;flex-wrap:wrap}
-.xp-link{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:2px solid var(--edge);border-radius:999px;background:var(--card);color:var(--ink);text-decoration:none;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+.xp-link{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:2px solid var(--edge);border-radius:999px;background:var(--card,var(--bg));color:var(--ink);text-decoration:none;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
 .xp-link svg{width:18px;height:18px}
 .xp-foot{margin-top:22px;color:var(--ink-muted,var(--muted));font-size:13px}
 dialog.xp :focus-visible{outline:3px solid var(--sky);outline-offset:3px}
