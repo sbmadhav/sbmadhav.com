@@ -130,6 +130,15 @@ body.theme-anim, body.theme-anim *{transition:background-color .5s,color .5s,bor
 :root[data-theme="dark"] h1, :root[data-theme="dark"] h2{letter-spacing:-.025em}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) h1, :root:not([data-theme="light"]) h2{letter-spacing:-.025em}}
 
+.xp-btn{display:inline-flex;align-items:center;gap:8px;flex:none;height:40px;padding:0 14px 0 10px;border:2px solid var(--edge);border-radius:999px;background:var(--card);color:var(--ink);font:700 14px/1 "Nunito Sans",system-ui,sans-serif;cursor:pointer;box-shadow:0 3px 0 var(--ledge);transition:transform .12s,box-shadow .12s}
+.xp-btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--ledge)}
+.xp-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ledge)}
+.xp-btn svg{width:20px;height:20px}
+.xp-btn .xp-dots i{transition:transform .3s cubic-bezier(.5,1.6,.5,1)}
+.xp-btn:hover .xp-dots i:nth-child(2){transform:translate(1px,-1px)}
+@media (max-width:600px){.xp-btn{padding:0;width:40px;justify-content:center}.xp-btn .xp-lbl{display:none}}
+@media (max-width:420px){.logo .lt{display:none}}
+
 /* Space backdrop */
 #space{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;opacity:0;transition:opacity 1.2s}
 #space.on{opacity:1}
@@ -147,7 +156,7 @@ header.nav{z-index:50}
 .toggle .knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--ink);transition:transform .25s cubic-bezier(.5,1.6,.5,1)}
 body.kidmode .toggle .track{background:var(--sun)}
 body.kidmode .toggle .knob{transform:translateX(20px)}
-@media (max-width:1180px){.nav nav{display:none}.theme{margin-left:auto}}
+@media (max-width:1180px){.nav nav{display:none}.xp-btn{margin-left:auto}}
 .nav .wrap{gap:10px}
 
 /* Hero */
@@ -477,7 +486,7 @@ html:not(.ready) .blob,html:not(.ready) .bot,html:not(.ready) .dot,html:not(.rea
   <div class="wrap">
     <button class="logo" id="logo" aria-label="Madhav, home. Psst, click me a few times.">
       <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="14" width="48" height="40" rx="14" fill="#1FA39A" stroke="#1C2541" stroke-width="3"/><circle cx="24" cy="34" r="7" fill="#fff"/><circle cx="40" cy="34" r="7" fill="#fff"/><circle cx="25" cy="35" r="3" fill="#1C2541"/><circle cx="41" cy="35" r="3" fill="#1C2541"/><path d="M32 14V9" stroke="#1C2541" stroke-width="3"/><circle cx="32" cy="7" r="5" fill="#FF6B5B" stroke="#1C2541" stroke-width="3"/></svg>
-      Madhav
+      <span class="lt">Madhav</span>
     </button>
     <nav aria-label="Sections">
       <a href="#work">About</a>
@@ -487,6 +496,7 @@ html:not(.ready) .blob,html:not(.ready) .bot,html:not(.ready) .dot,html:not(.rea
       <a href="#journey">Journey</a>
       <a href="#hello">Say hi</a>
     </nav>
+    <button class="xp-btn" id="exploreBtn" aria-label="Explore all pages"><svg class="xp-dots" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7l6 4 6-5M12 11l-3 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".55"/><circle cx="6" cy="7" r="2.4" fill="var(--coral)"/><circle cx="12" cy="11" r="2.4" fill="var(--sun)" stroke="currentColor" stroke-width="1.2"/><circle cx="18" cy="6" r="2.4" fill="var(--teal)"/><circle cx="9" cy="18" r="2.4" fill="var(--sky)"/></svg><span class="xp-lbl"><span class="pro">Explore</span><span class="kid">Star map</span></span></button>
     <button class="theme" id="themeBtn" aria-label="Switch color scheme" title="Switch color scheme">
       <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="var(--sun)" stroke="currentColor" stroke-width="2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="var(--plum)" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="17" cy="5" r="1.2" fill="currentColor"/><circle cx="20.5" cy="9" r=".9" fill="currentColor"/></svg>
@@ -842,5 +852,6 @@ if(img&&img.decode)p.push(img.decode().catch(function(){}));
 Promise.all(p).then(done,done);setTimeout(done,2500)})();
 </script>
 <script src="assets/app.js?v=292e489720" defer></script>
+<script src="assets/explore.js?v=a202f12912" defer></script>
 </body>
 </html>
