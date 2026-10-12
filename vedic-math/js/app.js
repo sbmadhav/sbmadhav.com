@@ -13,6 +13,7 @@ import * as fx from './fx.js';
 import * as gm from './gamify.js';
 import * as cloud from './cloud.js';
 import { runArena, runDuel } from './arena.js';
+import { initAmbient, TRACKS, play as playMusic, stop as stopMusic, bgOn, setBg } from './ambient.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const view = $('#view');
@@ -40,6 +41,7 @@ const routes = [
   [/^#\/grade\/(\w+)$/, m => gradeView(m[1])],
   [/^#\/skill\/([\w-]+)$/, m => skillView(m[1])],
   [/^#\/mix\/(\w+)$/, m => mixView(m[1])],
+  [/^#\/run\/(\w+)$/, m => mixView(m[1], true)],
   [/^#\/(dojo|tricks)$/, dojoView],
   [/^#\/sutras$/, sutrasView],
   [/^#\/arena$/, arenaView],
@@ -180,7 +182,8 @@ function gradeView(g) {
     <span class="md-tag md-tag--sky">${G.band}</span>
     <h1 class="md-heading">${gradeLabel(g)}</h1>
     <p class="md-lede">${both(`${st.done} of ${st.total} skills mastered. A skill is mastered after at least 8 problems with a score of 85% or more, weighted toward recent answers.`, `You have ${st.done} of ${st.total} skills. Fill every ring!`)}</p>
-    <div class="mq-gradebar"><span class="mq-bar mq-bar--big"><i style="width:${pct(st.done / (st.total || 1))}%"></i></span><a class="md-btn md-btn--primary md-btn--sm" href="#/mix/${g}">Mixed review</a></div>
+    <div class="mq-gradebar"><span class="mq-bar mq-bar--big"><i style="width:${pct(st.done / (st.total || 1))}%"></i></span><a class="md-btn md-btn--primary md-btn--sm" href="#/run/${g}">${icon('bolt')} Endless run</a><a class="md-btn md-btn--sm" href="#/mix/${g}">Endless practice</a></div>
+    <p class="mq-small">Every skill here makes new questions forever. Endless practice mixes them with hints; Endless run gives you 3 lives and counts how far you get.</p>
     <div class="mq-gradejump">${prev ? `<a class="md-chip" href="#/grade/${prev.id}">&larr; ${both(prev.pro, prev.kid)}</a>` : ''}${next ? `<a class="md-chip" href="#/grade/${next.id}">${both(next.pro, next.kid)} &rarr;</a>` : ''}</div>
     ${strands.map(sd => { const S = STRANDS[sd]; return `<h2 class="mq-strand"><span class="mq-dot" style="background:var(--${S.color})"></span>${both(S.pro, S.kid)}</h2>
       <div class="mq-skills">${list.filter(s => s.strand === sd).map(s => { const [cls, lab] = status(s.id); return `<a class="mq-skill mq-${cls}" href="#/skill/${s.id}">${ring(store.mastery(s.id))}<span class="mq-skill-t"><b>${both(s.title, s.kid)}</b><small>${lab}${s.trick ? ' · ' + esc(TRICKS.find(t => t.id === s.trick).sutra) : ''}</small></span></a>`; }).join('')}</div>`; }).join('')}
@@ -238,8 +241,8 @@ function answerText(p) {
 
 /* ---------- Practice engine ---------- */
 const KEYS = { basic: ['/', '-', '.'], alg: ['x', '^', '(', ')', '/', '-', '√', 'π'], set: [',', '-', '/', '√'], ineq: ['x', '<', '>', '<=', '>=', '-'], complex: ['i', '+', '-'] };
-function practice(root, pickSkill, { mix = null } = {}) {
-  let s, p, tries = 0, hints = 0, done = false, right = 0, total = 0, run = 0;
+function practice(root, pickSkill, { mix = null, lives = 0, onOver = null } = {}) {
+  let s, p, tries = 0, hints = 0, done = false, right = 0, total = 0, run = 0, life = lives;
   const explorer = fx.mode() === 'explorer';
   const next = () => {
     s = pickSkill(); p = s.gen(store.level(s.id)); tries = 0; hints = 0; done = false;
@@ -247,7 +250,7 @@ function practice(root, pickSkill, { mix = null } = {}) {
     if (explorer && p.kind === 'num' && Number.isInteger(p.answer) && p.answer >= 0 && p.answer <= 200) { const near = [...new Set([p.answer + 1, p.answer - 1, p.answer + 2, p.answer + 10, p.answer - 2].filter(v => v >= 0))]; p = { ...p, kind: 'choice', choices: [p.answer, ...shuffle(near).slice(0, 3)].sort((a, b) => a - b).map(String), answer: String(p.answer) }; }
     const keyset = p.kind === 'expr' ? KEYS.alg : p.kind === 'set' ? KEYS.set : p.kind === 'ineq' ? KEYS.ineq : p.kind === 'complex' ? KEYS.complex : p.kind === 'num' && !['K', 1, 2].includes(s.grade) ? KEYS.basic : null;
     root.innerHTML = `
-      <div class="pr-head"><span class="pr-meter">${ring(store.mastery(s.id), 36)}<span><small>${mix ? `<a href="#/skill/${s.id}">${both(s.title, s.kid)}</a>` : 'Your turn'}</small><b id="prPct">${pct(store.mastery(s.id))}% mastery</b></span></span><span class="pr-run" id="prRun" aria-label="Streak">${run >= 2 ? `<b>${run}</b> in a row` : ''}</span><span class="pr-score" aria-label="Session score">${right}/${total}</span></div>
+      <div class="pr-head"><span class="pr-meter">${ring(store.mastery(s.id), 36)}<span><small>${mix ? `<a href="#/skill/${s.id}">${both(s.title, s.kid)}</a>` : 'Your turn'}</small><b id="prPct">${pct(store.mastery(s.id))}% mastery</b></span></span><span class="pr-run" id="prRun" aria-label="Streak">${run >= 2 ? `<b>${run}</b> in a row` : ''}</span>${lives ? `<span class="pr-lives" aria-label="${life} lives left">${'<i class="on"></i>'.repeat(life)}${'<i></i>'.repeat(lives - life)}</span>` : ''}<span class="pr-score" aria-label="Session score">${right}/${total}</span></div>
       <div class="pr-q${plain(p.q).length > 60 ? ' long' : ''}" id="prQ">${p.q}</div>
       ${p.viz ? `<div class="mq-viz">${p.viz}</div>` : ''}
       <form class="pr-form" id="prForm" autocomplete="off">${answerUI(p)}${keyset ? `<div class="pr-keys" aria-label="Symbol keys">${keyset.map(k => `<button type="button" class="pr-key" data-k="${esc(k)}">${esc(k)}</button>`).join('')}</div>` : ''}
@@ -280,6 +283,7 @@ function practice(root, pickSkill, { mix = null } = {}) {
       tries++;
       if (res.ok) { fx.sfx('ok'); const first = tries === 1 && !hints; const msg = first ? pick(PRAISE[fx.mode()] || PRAISE.challenger) : 'You got it!'; say(msg + (first ? ` <span class="pr-xp">+${10 + Math.min(store.skill(s.id).streak + 1, 5)} XP</span>` : ''), 'ok'); if (explorer) fx.speak(msg, true); finish(true); return; }
       fx.sfx('no');
+      if (lives) { life--; reveal(); say(life ? `Oops! ${life} ${life === 1 ? 'life' : 'lives'} left. See how it works, then keep going.` : 'Out of lives!', 'no'); finish(false); root.querySelector('.pr-lives').innerHTML = '<i class="on"></i>'.repeat(life) + '<i></i>'.repeat(lives - life); if (!life && onOver) { const b = $('#prCheck', root); b.textContent = 'See my score'; b.onclick = e => { e.preventDefault(); onOver(right); }; } return; }
       if (tries === 1) { say((res.msg ? res.msg + ' ' : '') + 'Not quite. Try once more.' + (p.hints[0] && !hints ? ' <button type="button" class="linkbtn" data-hint>Want a hint?</button>' : ''), 'no'); if (explorer) fx.speak('Not quite. Try again!', true); }
       else if (tries === 2) { hints = Math.max(hints, 1); say((res.msg ? res.msg + ' ' : '') + `Hint: ${p.hints[Math.min(1, p.hints.length - 1)] || p.hints[0]}`, 'no'); if (explorer) fx.speak(p.hints[0], true); }
       else { reveal(); say('That one was tricky. See how it works, then try the next one.', 'no'); finish(false); }
@@ -308,20 +312,24 @@ function answerUI(p) {
   return `<div class="pr-in"><input class="ans-in" aria-label="Your answer" placeholder="${ph}" spellcheck="false" autocapitalize="off" inputmode="${p.kind === 'num' && Number.isInteger(p.answer) && p.answer >= 0 && !p.simplest ? 'numeric' : 'text'}">${p.unit ? `<span class="pr-unit">${p.unit}</span>` : ''}</div>`;
 }
 
-function mixView(g) {
+function mixView(g, isRun = false) {
   const G = gradeOf(g); if (!G) return home();
-  document.title = `Mixed review, ${G.pro}: ${BRAND} · Madhav`;
+  document.title = `${isRun ? 'Endless run' : 'Endless practice'}, ${G.pro}: ${BRAND} · Madhav`;
   const list = skillsFor(g);
   view.innerHTML = `<section class="md-section mq-tight"><div class="md-wrap mq-narrow">
-    ${crumbs(['#/grade/' + g, gradeLabel(g)], [null, 'Mixed review'])}
-    <h1 class="md-heading">Mixed review: ${gradeLabel(g)}</h1>
-    <p class="md-lede">Questions from the whole level, all mixed up, favoring skills in progress. Mixing topics is harder, and that is exactly why it makes learning stick.</p>
+    ${crumbs(['#/grade/' + g, gradeLabel(g)], [null, isRun ? 'Endless run' : 'Endless practice'])}
+    <h1 class="md-heading">${isRun ? 'Endless run' : 'Endless practice'}: ${gradeLabel(g)}</h1>
+    <p class="md-lede">${isRun ? `Questions from every skill in this level, forever. You have 3 lives: how far can you go? Your best: <b>${store.best('run-' + g)}</b>.` : 'Questions from the whole level, all mixed up and never-ending, favoring skills in progress. Mixing topics is harder, and that is exactly why it makes learning stick.'}</p>
     <div class="mq-practice md-card" id="practice"></div></div></section>`;
   let lastId = null;
   cleanup = practice($('#practice'), () => {
     const going = list.filter(s => store.started(s.id) && !store.mastered(s.id)), pool = (going.length >= 2 && Math.random() < .7 ? going : list).filter(s => s.id !== lastId);
     const s = pick(pool.length ? pool : list); lastId = s.id; return s;
-  }, { mix: true });
+  }, { mix: true, lives: isRun ? 3 : 0, onOver: right => {
+    store.bump('runs'); const isBest = store.setBest('run-' + g, right), xp = 10 + right * 3; store.addXP(xp, 'run'); if (isBest && right) fx.confetti(90);
+    $('#practice').innerHTML = `<div class="ar-result"><div class="md-stat"><div class="md-kicker">You reached</div><div class="md-value">${right}</div><p>${isBest && right ? 'New best run!' : `Best: ${store.best('run-' + g)}`} <span class="fx-xp">+${xp} XP</span></p></div></div><p><button class="md-btn md-btn--primary" id="again">${icon('bolt')} Run again</button> <a class="md-btn" href="#/grade/${g}">Back to ${gradeLabel(g)}</a></p>`;
+    $('#again').onclick = () => mixView(g, true);
+  } });
 }
 
 /* ---------- Dojo: belts of speed tricks ---------- */
@@ -461,14 +469,15 @@ function gamesView() {
 function gameView(id) {
   const g = GAMES.find(x => x.id === id); if (!g) return gamesView();
   document.title = `${g.title}: ${BRAND} · Madhav`;
-  let option = g.options ? g.options[0].value : null, stop = null;
+  let option = g.options ? g.options[0].value : null, stop = null, endless = false, live = 0;
   view.innerHTML = `<section class="md-section mq-tight"><div class="md-wrap mq-narrow">
     ${crumbs(['#/games', 'Games'], [null, both(g.title, g.kid)])}
     <h1 class="md-heading">${both(g.title, g.kid)}</h1><p class="md-lede">${g.desc}</p>
     <div class="md-card g-shell" id="gShell"></div></div></section>`;
   const shell = $('#gShell');
   const lobby = (msg = '') => {
-    shell.innerHTML = `${msg}${g.options ? `<div class="g-optrow" role="group" aria-label="Level">${g.options.map(o => `<button class="md-chip" aria-pressed="${o.value === option}" data-o="${o.value}">${o.label}</button>`).join('')}</div>` : ''}<p class="g-best">Your best: <b>${store.best(g.id + (option ?? ''))}</b></p><button class="md-btn md-btn--primary ar-go" id="gStart">${icon('play')} Play</button>`;
+    shell.innerHTML = `${msg}${g.options ? `<div class="g-optrow" role="group" aria-label="Level">${g.options.map(o => `<button class="md-chip" aria-pressed="${o.value === option}" data-o="${o.value}">${o.label}</button>`).join('')}</div>` : ''}<div class="g-optrow" role="group" aria-label="Length"><button class="md-chip" aria-pressed="${!endless}" data-e="0">Normal round</button><button class="md-chip" aria-pressed="${endless}" data-e="1">Endless: play as long as you like</button></div><p class="g-best">Your best: <b>${store.best(g.id + (option ?? '') + (endless ? '-endless' : ''))}</b></p><button class="md-btn md-btn--primary ar-go" id="gStart">${icon('play')} Play</button>`;
+    shell.querySelectorAll('[data-e]').forEach(b => b.onclick = () => { endless = b.dataset.e === '1'; lobby(msg); });
     shell.querySelectorAll('[data-o]').forEach(b => b.onclick = () => { option = isNaN(+b.dataset.o) ? b.dataset.o : +b.dataset.o; lobby(msg); });
     $('#gStart', shell).onclick = start;
   };
@@ -476,14 +485,17 @@ function gameView(id) {
     track('game/' + g.id, 'Game: ' + g.title); fx.sfx('tap');
     shell.innerHTML = `<div class="g-head"><span class="g-sayline" id="gSay" role="status" aria-live="polite"></span><button class="md-btn md-btn--sm" id="gQuit">Stop</button></div><div class="g-area" id="gArea"></div>`;
     const sayEl = $('#gSay', shell);
-    stop = g.run($('#gArea', shell), { option, say: m => (sayEl.innerHTML = m), end: score => {
+    live = 0;
+    const finish = score => {
       if (stop) stop(); stop = null;
       store.markSeen('game:' + g.id); store.bump('gamesPlayed'); store.touchDay();
-      const isBest = store.setBest(g.id + (option ?? ''), score), xp = 10 + score * 2; store.addXP(xp, 'game');
+      const isBest = store.setBest(g.id + (option ?? '') + (endless ? '-endless' : ''), score), xp = 10 + Math.min(score, 100) * 2; store.addXP(xp, 'game');
       if (isBest && score) fx.confetti(80);
       lobby(`<div class="g-result"><div class="md-stat"><div class="md-kicker">Score</div><div class="md-value">${score}</div><p>${isBest && score ? 'New best score!' : 'Play again to beat your best.'} <span class="fx-xp">+${xp} XP</span></p></div></div>`);
-    } });
-    $('#gQuit', shell).onclick = () => { if (stop) stop(); stop = null; lobby(); };
+    };
+    stop = g.run($('#gArea', shell), { option, endless, progress: v => (live = v), say: m => (sayEl.innerHTML = m), end: finish });
+    $('#gQuit', shell).innerHTML = endless ? 'Finish' : 'Stop';
+    $('#gQuit', shell).onclick = () => { if (endless) return finish(live); if (stop) stop(); stop = null; lobby(); };
   };
   lobby();
   cleanup = () => { if (stop) stop(); };
@@ -531,7 +543,8 @@ function meView() {
     <div class="players">${store.allPlayers().map(q => `<div class="player${q.id === p.id ? ' on' : ''}">${avatar(q, 40)}<span><b>${esc(q.name)}</b><small>${q.mode ? fx.MODES[q.mode].name : 'No mode yet'}</small></span>${q.id === p.id ? '<em>Playing</em>' : `<button class="md-btn md-btn--sm" data-switch="${q.id}">Switch</button><button class="md-btn md-btn--sm" data-del="${q.id}" aria-label="Remove ${esc(q.name)}">Remove</button>`}</div>`).join('')}
       <button class="md-btn md-btn--sm" id="meAdd">${icon('plus')} Add a player</button></div>
     <h2 class="mq-strand">Settings</h2>
-    <div class="me-set"><label><input type="checkbox" id="setSound" ${fx.soundOn() ? 'checked' : ''}> Sound effects</label><label><input type="checkbox" id="setVoice" ${fx.voiceOn() ? 'checked' : ''}> Read questions aloud</label></div>
+    <div class="me-set"><label><input type="checkbox" id="setSound" ${fx.soundOn() ? 'checked' : ''}> Sound effects</label><label><input type="checkbox" id="setVoice" ${fx.voiceOn() ? 'checked' : ''}> Read questions aloud</label><label><input type="checkbox" id="setBg" ${bgOn() ? 'checked' : ''}> Moving background</label></div>
+    <p class="mq-small">Calm music: use the note button at the top right of the menu bar (singing bowls, tanpura drone, Himalayan dawn, temple chimes).</p>
     <h2 class="mq-strand">Progress by level</h2>
     <div class="mq-prog">${GRADES.map(g => { const st = gradeStats(g.id); return `<a class="mq-prog-row" href="#/grade/${g.id}"><span class="mq-prog-g">${both(g.pro, g.kid)}</span><span class="mq-bar"><i style="width:${pct(st.avg)}%"></i></span><span class="mq-prog-n">${st.done}/${st.total}</span></a>`; }).join('')}</div>
     <h2 class="mq-strand">Backup</h2>
@@ -547,6 +560,7 @@ function meView() {
   view.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { if (confirm('Remove this player and their progress from this device?')) { store.removePlayer(b.dataset.del); meView(); } });
   $('#meAdd').onclick = () => { store.addPlayer(); fx.applyMode(); location.hash = '#/'; render(); };
   $('#setSound').onchange = e => { fx.setSound(e.target.checked); fx.sfx('ok'); };
+  $('#setBg').onchange = e => { setBg(e.target.checked); const t = document.getElementById('vmBg'); if (t) t.checked = e.target.checked; };
   $('#setVoice').onchange = e => { fx.setVoice(e.target.checked); fx.speak('Read aloud is on.', e.target.checked); };
   $('#pExport').onclick = async () => { const code = btoa(unescape(encodeURIComponent(store.exportData()))); try { await navigator.clipboard.writeText(code); msg('Backup code copied. Paste it somewhere safe.'); } catch (e) { prompt('Copy this backup code:', code); } };
   $('#pImport').onclick = () => { const code = prompt('Paste your backup code:'); if (!code) return; try { store.importData(decodeURIComponent(escape(atob(code.trim())))); msg('Progress restored.'); meView(); } catch (e) { msg('That code did not work. Check that it was copied in full.'); } };
@@ -605,6 +619,8 @@ function icon(n) {
 }
 
 /* ---------- Boot ---------- */
+const rm = $('#resetMode'); if (rm) rm.onclick = () => { store.updatePlayer({ mode: null }); fx.applyMode(); location.hash = '#/'; render(); window.scrollTo({ top: 0 }); };
 fx.applyMode();
 gm.init();
 render();
+initAmbient();

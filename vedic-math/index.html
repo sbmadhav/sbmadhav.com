@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vedic Math for Everyone · Madhav</title>
+<meta name="description" content="Vedic Math for Everyone: speed tricks from the sutras, a counting-to-calculus skill map, games, daily quests, an Arena with leaderboards and duels. Three play modes for every age.">
+<!-- Apply the saved color scheme before paint so there is no flash -->
+<script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}</script>
+<meta name="theme-color" content="#FFF8EE">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='14' width='48' height='40' rx='14' fill='%231FA39A'/%3E%3Ccircle cx='24' cy='34' r='7' fill='white'/%3E%3Ccircle cx='40' cy='34' r='7' fill='white'/%3E%3Ccircle cx='25' cy='35' r='3' fill='%231C2541'/%3E%3Ccircle cx='41' cy='35' r='3' fill='%231C2541'/%3E%3Ccircle cx='32' cy='7' r='5' fill='%23FF6B5B'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/assets/fonts/nunito-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:Fredoka;font-style:normal;font-weight:600;font-display:swap;src:url(/assets/fonts/fredoka-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:Fredoka;font-style:normal;font-weight:700;font-display:swap;src:url(/assets/fonts/fredoka-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Nunito Sans";font-style:normal;font-weight:200 1000;font-display:swap;src:url(/assets/fonts/nunito-sans-latin-wght-normal.woff2) format("woff2-variations")}
+@font-face{font-family:"Space Grotesk";font-style:normal;font-weight:300 700;font-display:swap;src:url(/assets/fonts/space-grotesk-latin-wght-normal.woff2) format("woff2-variations")}
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:500;font-display:swap;src:url(/assets/fonts/jetbrains-mono-latin-500-normal.woff2) format("woff2")}
+</style>
+<link rel="stylesheet" href="/design-system/tokens.css">
+<link rel="stylesheet" href="/design-system/components.css">
+<link rel="stylesheet" href="/vedic-math/math.css">
+</head>
+<body class="md-page md-root">
+<a class="skip" href="#view">Skip to content</a>
+<header class="top">
+  <div class="md-wrap">
+    <a class="home" href="/" aria-label="Madhav, home"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="14" width="48" height="40" rx="14" fill="#1FA39A" stroke="#1C2541" stroke-width="3"/><circle cx="24" cy="34" r="7" fill="#fff"/><circle cx="40" cy="34" r="7" fill="#fff"/><circle cx="25" cy="35" r="3" fill="#1C2541"/><circle cx="41" cy="35" r="3" fill="#1C2541"/><path d="M32 14V9" stroke="#1C2541" stroke-width="3"/><circle cx="32" cy="7" r="5" fill="#FF6B5B" stroke="#1C2541" stroke-width="3"/></svg>Madhav</a>
+    <button class="xp-btn" id="exploreBtn" aria-label="Explore all pages"><svg class="xp-dots" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7l6 4 6-5M12 11l-3 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".55"/><circle cx="6" cy="7" r="2.4" fill="var(--coral)"/><circle cx="12" cy="11" r="2.4" fill="var(--sun)" stroke="currentColor" stroke-width="1.2"/><circle cx="18" cy="6" r="2.4" fill="var(--teal)"/><circle cx="9" cy="18" r="2.4" fill="var(--sky)"/></svg><span class="xp-lbl"><span class="pro">Explore</span><span class="kid">Star map</span></span></button>
+    <div class="md-modes" role="group" aria-label="Color mode">
+      <button data-mode="system" aria-pressed="true">System</button><button data-mode="light" aria-pressed="false">Daybreak</button><button data-mode="dark" aria-pressed="false">Deep Space</button>
+    </div>
+  </div>
+  <nav class="mq-nav" aria-label="Vedic Math">
+    <div class="md-wrap">
+      <a href="#/" data-match="^#?/?$">Home</a>
+      <a href="#/learn" data-match="^#/(learn|grade|skill|mix)">Learn</a>
+      <a href="#/dojo" class="hide-explorer" data-match="^#/(dojo|tricks)$">Dojo</a>
+      <a href="#/arena" data-match="^#/(arena|duel)$">Arena</a>
+      <a href="#/games" data-match="^#/games?">Games</a>
+      <a href="#/sutras" class="hide-explorer">Sutras</a>
+      <a href="#/watch">Watch</a>
+      <span class="mq-nav-sp"></span>
+      <span id="mqMusic"></span>
+      <span id="mqChip"></span>
+    </div>
+  </nav>
+</header>
+
+<main id="view" tabindex="-1">
+  <noscript><section class="md-section"><div class="md-wrap"><h1 class="md-heading">Math Quest</h1><p class="md-lede">Math Quest needs JavaScript to generate lessons and practice problems.</p></div></section></noscript>
+</main>
+
+<footer class="mq-foot">
+  <div class="md-wrap">
+    <p>Vedic Math for Everyone, built by Madhav as a free learning space. Speed tricks follow the traditional Vedic mathematics sutras; lessons, problems and visuals are original. Progress stays in this browser, and leaderboards only see a made-up nickname. <button type="button" class="linkbtn mq-reset" id="resetMode">Reset play mode</button></p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+                  set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
+  // Color mode: follow the system by default; Daybreak or Deep Space overrides and is remembered
+  const root = document.documentElement;
+  const modeBtns = document.querySelectorAll('.md-modes button');
+  const applyMode = mode => {
+    if (mode === 'system') delete root.dataset.theme; else root.dataset.theme = mode;
+    store.set('theme', mode === 'system' ? '' : mode);
+    modeBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+  };
+  modeBtns.forEach(b => b.addEventListener('click', () => applyMode(b.dataset.mode)));
+  applyMode(root.dataset.theme || 'system');
+  // No kid mode switch on this page: the play mode (Explorer, Challenger, Pro) sets the wording
+})();
+</script>
+<script type="module" src="/vedic-math/js/app.js"></script>
+<script src="/assets/explore.js" defer></script>
+<script src="/assets/analytics.js" defer></script>
+</body>
+</html>

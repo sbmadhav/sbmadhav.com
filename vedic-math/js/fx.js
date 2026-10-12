@@ -18,7 +18,7 @@ export function applyMode() {
   document.body.classList.remove('mode-explorer', 'mode-challenger', 'mode-pro', 'mode-none');
   document.body.classList.add('mode-' + m);
   // Explorer and Challenger read the friendlier copy; Pro reads the grown-up copy
-  if (m !== 'none') { const kid = m !== 'pro'; document.body.classList.toggle('kidmode', kid); const k = document.getElementById('kidBtn'); if (k) k.setAttribute('aria-checked', String(kid)); try { localStorage.setItem('kidmode', kid ? '1' : '0'); } catch (e) {} }
+  document.body.classList.toggle('kidmode', m === 'explorer' || m === 'challenger'); // page-local wording only; the portfolio's kid mode setting is untouched
 }
 /* Pick copy by mode: t({ explorer, challenger, pro }) */
 export const t = o => o[mode()] ?? o.challenger ?? o.pro ?? Object.values(o)[0];

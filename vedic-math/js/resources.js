@@ -345,7 +345,7 @@ export const RESOURCES = [
 },
 {
 "title": "Khan Academy Arithmetic",
-"url": "https://www.khanacademy.org/math/arithmetic",
+"url": "https://www.khanacademy.org/vedic-math/arithmetic",
 "type": "website",
 "vedic": false,
 "tags": [
@@ -617,7 +617,7 @@ export const RESOURCES = [
 },
 {
 "title": "Khan Academy Algebra",
-"url": "https://www.khanacademy.org/math/algebra",
+"url": "https://www.khanacademy.org/vedic-math/algebra",
 "type": "website",
 "vedic": false,
 "tags": [
@@ -630,7 +630,7 @@ export const RESOURCES = [
 },
 {
 "title": "Khan Academy Geometry",
-"url": "https://www.khanacademy.org/math/geometry",
+"url": "https://www.khanacademy.org/vedic-math/geometry",
 "type": "website",
 "vedic": false,
 "tags": [
@@ -845,7 +845,7 @@ export const RESOURCES = [
 },
 {
 "title": "Vedic Mathematics: 'Vedic' or 'Mathematics'? (arXiv)",
-"url": "https://arxiv.org/abs/math/0611347",
+"url": "https://arxiv.org/abs/vedic-math/0611347",
 "type": "website",
 "vedic": true,
 "tags": [

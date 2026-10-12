@@ -220,7 +220,7 @@ TRICKS.push(
   { id: 'sub-base', sutra: 'Ānurūpyeṇa', meaning: 'Proportionately', title: 'Multiply with a working base like 50', kid: 'Secret base', grade: 6,
     when: 'Both numbers sit near 20, 30, 40, 50 ... like 46 × 43 or 52 × 48.',
     idea: 'Use a working base such as 50 = 5 × 10. Do the near-base trick from 10, then multiply the left part by 5.',
-    inputs: [{ label: 'First number', min: 11, max: 99 }, { label: 'Second number', min: 11, max: 99 }], random: () => { const k = ri(3, 9), b = 10 * k; return [b + ri(-5, 5), b + ri(-5, 5)]; },
+    inputs: [{ label: 'First number', min: 11, max: 99 }, { label: 'Second number', min: 11, max: 99 }], random: () => { const k = ri(3, 8), b = 10 * k; return [b + ri(-5, 5), b + ri(-5, 5)]; },
     valid: ([a, b]) => { const k = Math.round((a + b) / 20); return k >= 2 && k <= 9 && Math.abs(a - 10 * k) <= 9 && Math.abs(b - 10 * k) <= 9 ? null : 'Pick two numbers near the same 20, 30, 40, ... 90.'; },
     steps([a, b]) { const k = Math.round((a + b) / 20), W = 10 * k, da = a - W, db = b - W, cross = a + db, left = cross * k, right = da * db, sg = d => (d < 0 ? '&minus;' + -d : '+' + d);
       return [
@@ -313,13 +313,13 @@ TRICKS.push(
 
 /* Dojo belts: the order tricks are learned in, from first steps to black belt */
 export const BELTS = [
-  { id: 'white', name: 'White belt', color: 'var(--card)', tricks: ['from9', 'by11', 'times5'] },
+  { id: 'white', name: 'White belt', color: 'var(--belt-white)', tricks: ['from9', 'by11', 'times5'] },
   { id: 'yellow', name: 'Yellow belt', color: 'var(--sun)', tricks: ['sq5', 'by9s', 'ends10'] },
   { id: 'orange', name: 'Orange belt', color: 'var(--coral)', tricks: ['near-base', 'square-near', 'check9'] },
   { id: 'green', name: 'Green belt', color: 'var(--teal)', tricks: ['crosswise', 'duplex', 'sub-base'] },
   { id: 'blue', name: 'Blue belt', color: 'var(--sky)', tricks: ['div9', 'osculator', 'recip'] },
   { id: 'purple', name: 'Purple belt', color: 'var(--plum)', tricks: ['sqroot', 'cuberoot', 'transpose'] },
-  { id: 'black', name: 'Black belt', color: 'var(--ink)', tricks: ['add-sub', 'ratio-zero', 'zero-sum'] }
+  { id: 'black', name: 'Black belt', color: 'var(--belt-black)', tricks: ['add-sub', 'ratio-zero', 'zero-sum'] }
 ];
 
 /* Practice problems for each trick, so tricks run through the same mastery engine as skills */

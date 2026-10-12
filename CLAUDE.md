@@ -10,6 +10,7 @@ Personal site on GitHub Pages (served at https://sbmadhav.com, www redirects to 
 - Start from `design-system/template.html`; link `/design-system/tokens.css` then `/design-system/components.css`.
 - Use tokens (`var(--coral)`, `var(--space-6)`, `var(--radius-lg)`), never raw hex. Text on accent fills uses `var(--on-accent)`, not white.
 - Support both color schemes (Daybreak light, Deep Space dark; system default with a saved override) and kid mode (`.pro` / `.kid` spans, `body.kidmode`).
+- Exception: `/vedic-math/` has no kid mode switch in its header. Its play modes (Explorer, Challenger, Pro) set the wording, and it never writes the site-wide `kidmode` setting.
 - Never use em dashes in copy.
 - If a token or the guidelines change, edit `design-system/tokens.json` or `design-system/README.md`, then run `python3 design-system/build.py` to regenerate `tokens.css` and the reference page `design-system/index.html`.
 

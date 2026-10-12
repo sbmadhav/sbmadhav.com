@@ -499,3 +499,38 @@ sup { font-size: .65em; }
 .mq-nav a.mq-chip { padding: 4px 10px 4px 4px; border: 2px solid var(--edge); color: var(--ink); text-decoration: none; }
 
 .mode-explorer .mq-split .mq-practice { order: -1; }
+
+/* Belt colors are real-world colors, fixed in both schemes (like Bolt's colors), so a white belt is always white */
+:root { --belt-white: #FBF8F1; --belt-black: #16171D; }
+.pr-lives { display: inline-flex; gap: 4px; }
+.pr-lives i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--edge); }
+.pr-lives i.on { background: var(--coral); }
+.mq-gradebar { flex-wrap: wrap; }
+
+/* Calm atmosphere: Vedic background and music */
+.vm-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+#view, .mq-foot { position: relative; z-index: 1; }
+.mq-reset { font-size: 13px; color: var(--ink-muted); margin-left: 6px; font-weight: 600; }
+#mqMusic { position: relative; }
+.vm-mbtn { position: relative; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--edge); background: var(--card); color: var(--ink); display: grid; place-items: center; cursor: pointer; margin-right: 8px; }
+.vm-mbtn.on { background: var(--plum); color: var(--on-accent); }
+.vm-eq { position: absolute; right: -3px; bottom: -3px; display: none; gap: 1px; align-items: end; height: 12px; padding: 2px 3px; border-radius: 6px; background: var(--card); border: 1px solid var(--edge); }
+.vm-mbtn.on .vm-eq { display: flex; }
+.vm-eq i { width: 2px; background: var(--plum-strong); animation: eq 1.2s ease-in-out infinite; height: 4px; }
+.vm-eq i:nth-child(2) { animation-delay: .3s; } .vm-eq i:nth-child(3) { animation-delay: .6s; }
+@keyframes eq { 50% { height: 9px; } }
+.vm-mpanel { position: absolute; right: 0; top: calc(100% + 8px); width: min(340px, 92vw); z-index: 60; padding: 16px; }
+.vm-mpanel:hover { transform: none; }
+.vm-mt { font: 600 1.15rem/1.2 var(--display); }
+.vm-tracks { display: grid; gap: 8px; margin: 10px 0; }
+.vm-track { display: grid; text-align: left; gap: 2px; padding: 10px 12px; border: 2px solid var(--edge); border-radius: var(--radius-md); background: var(--card); color: var(--ink); cursor: pointer; font: inherit; }
+.vm-track small { color: var(--ink-muted); font-size: 12.5px; }
+.vm-track[aria-pressed="true"] { background: var(--ink); color: var(--bg); } .vm-track[aria-pressed="true"] small { color: var(--bg); opacity: .8; }
+.vm-mrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.vm-vol { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; } .vm-vol input { accent-color: var(--plum-strong); }
+.vm-bgt { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-size: 14px; font-weight: 600; }
+.mq-nav { position: relative; }
+.mq-nav .md-wrap { overflow: visible; }
+@media (max-width: 700px) { .mq-nav .md-wrap { overflow-x: auto; } }
+@media (prefers-reduced-motion: reduce) { .vm-eq i { animation: none; } }
+@media (max-width: 700px) { .vm-mpanel { position: fixed; left: 12px; right: 12px; top: 128px; width: auto; } }
