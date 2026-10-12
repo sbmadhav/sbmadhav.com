@@ -632,3 +632,57 @@ sup { font-size: .65em; }
 .vv-note p { margin: 0 0 var(--space-2); font-size: 15px; }
 .vv-note div { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 @media (prefers-reduced-motion: reduce) { .vv-bar i { transition: none; } }
+
+/* ===== Levels: katas, challenge tower, game levels ===== */
+.lv-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px; margin: 14px 0 6px; }
+.lv-node { position: relative; display: grid; justify-items: center; gap: 2px; padding: 10px 4px 8px; border: 2px solid var(--edge); border-radius: var(--radius-md); background: var(--card); color: var(--ink); text-decoration: none; box-shadow: 0 3px 0 var(--ledge); transition: transform .12s; }
+.lv-node b { font: 700 1.15rem/1 var(--display); }
+.lv-node:hover { transform: translateY(-2px); }
+.lv-node.done { background: color-mix(in srgb, var(--sun) 22%, var(--card)); }
+.lv-node.next { outline: 3px solid var(--coral-strong); outline-offset: 2px; animation: lvPulse 1.8s ease-in-out infinite; }
+@keyframes lvPulse { 50% { transform: translateY(-3px); } }
+.lv-node.locked { border-style: dashed; border-color: var(--line); box-shadow: none; color: var(--ink-muted); background: transparent; }
+.lv-node.locked svg { width: 16px; height: 16px; opacity: .6; }
+.lv-stars { display: inline-flex; gap: 1px; font-size: 12px; line-height: 1; }
+.lv-stars i { font-style: normal; color: color-mix(in srgb, var(--ink) 22%, transparent); }
+.lv-stars i.on { color: var(--sun-strong); }
+.lv-result { text-align: center; padding: 8px 0; }
+.lv-big .lv-stars { font-size: 48px; gap: 6px; }
+.lv-big .lv-stars i.on { animation: starPop .5s cubic-bezier(.5,1.8,.5,1) both; }
+.lv-big .lv-stars i:nth-child(2).on { animation-delay: .15s; } .lv-big .lv-stars i:nth-child(3).on { animation-delay: .3s; }
+@keyframes starPop { from { transform: scale(0) rotate(-40deg); } }
+.lv-acts { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+.lv-acts a { text-decoration: none; }
+.lv-best { color: var(--ink-muted); }
+.lv-best .lv-stars { font-size: 18px; }
+.star-n { font: 700 13px/1 var(--font-sans); color: var(--sun-strong); white-space: nowrap; }
+.kata-of { font: 600 1rem/1 var(--font-sans); color: var(--ink-muted); }
+.kata-prog { display: flex; gap: 5px; } .kata-prog i { width: 22px; height: 8px; border-radius: 99px; background: color-mix(in srgb, var(--ink) 12%, transparent); } .kata-prog i.past { background: var(--teal); } .kata-prog i.cur { background: var(--sun-strong); }
+.dojo-cell { display: grid; gap: 6px; }
+.dojo-katas { display: flex; align-items: center; gap: 6px; justify-content: center; padding: 6px 10px; border-radius: 99px; border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-weight: 700; font-size: 13.5px; background: var(--card); }
+.dojo-katas:hover { border-color: var(--edge); }
+.dojo-katas svg { width: 18px; height: 18px; color: var(--plum-strong); }
+.tower-promo { display: flex; align-items: center; gap: 14px; padding: 14px 18px; margin-bottom: 16px; border: 2px solid var(--edge); border-radius: var(--radius-lg); background: color-mix(in srgb, var(--coral) 16%, var(--card)); color: var(--ink); text-decoration: none; box-shadow: var(--shadow-ledge); }
+.tower-promo span { flex: 1; display: grid; } .tower-promo small { color: var(--ink-muted); }
+.tower { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 10px; margin-top: 14px; }
+.tower-ch { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--card); color: var(--ink); text-decoration: none; box-shadow: var(--shadow-card); }
+.tower-ch:hover { border-color: var(--edge); }
+.tower-ch.done { border: 2px solid var(--teal-strong); }
+.tower-n { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--coral); color: var(--on-accent); font: 700 1.1rem/1 var(--display); flex: none; }
+.tower-t { flex: 1; display: grid; gap: 3px; } .tower-t small { color: var(--ink-muted); font-size: 12.5px; }
+.fmt-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13.5px; color: var(--ink-muted); margin: 6px 0 4px; } .fmt-legend b { color: var(--ink); }
+.ar-fix { text-align: center; color: var(--ink-muted); min-height: 1.4em; font-size: 14px; }
+.ar-pad--wide { grid-template-columns: repeat(4, 1fr); max-width: 380px; }
+
+/* New games */
+.g-pairs { display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); gap: 10px; max-width: 640px; margin: 0 auto; }
+.g-card { min-height: 84px; border: 2px solid var(--edge); border-radius: var(--radius-md); background: var(--plum); color: var(--ink); cursor: pointer; padding: 6px; perspective: 600px; box-shadow: 0 3px 0 var(--ledge); font: inherit; }
+.g-card-in { display: block; opacity: 0; font: 600 1rem/1.25 var(--display); transition: opacity .2s; }
+.g-card.up, .g-card.got { background: var(--card); } .g-card.up .g-card-in, .g-card.got .g-card-in { opacity: 1; }
+.g-card.got { border-color: var(--teal-strong); background: color-mix(in srgb, var(--teal) 18%, var(--card)); }
+.g-dotsm { letter-spacing: 1px; color: var(--coral-strong); font-size: 12px; overflow-wrap: anywhere; }
+.g-rain { position: relative; height: 380px; border: 2px solid var(--edge); border-radius: var(--radius-lg); overflow: hidden; background: color-mix(in srgb, var(--sky) 10%, var(--card)); }
+.g-drop { position: absolute; top: 0; min-width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--edge); background: var(--card); color: var(--ink); font: 700 1.2rem/1 var(--display); cursor: pointer; touch-action: manipulation; }
+.g-drop.hit { background: var(--teal); } .g-drop.miss { background: var(--coral); }
+.g-balance { display: grid; place-items: center; margin: 10px 0 14px; }
+@media (prefers-reduced-motion: reduce) { .lv-node.next, .lv-big .lv-stars i.on { animation: none; } }

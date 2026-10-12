@@ -3,7 +3,7 @@
    Nothing here leaves the device unless the player joins an online leaderboard (cloud.js). */
 const LEGACY = 'mathquest.v1', PKEY = 'vm.players', BOARD = 'vm.board';
 let S = null, P = null;
-const blank = () => ({ v: 2, skills: {}, xp: 0, days: {}, best: {}, last: null, grade: null, badges: {}, counts: {}, seen: {} });
+const blank = () => ({ v: 2, skills: {}, xp: 0, days: {}, best: {}, last: null, grade: null, badges: {}, counts: {}, seen: {}, stars: {} });
 const get = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
 const put = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const listeners = new Set();
@@ -54,6 +54,11 @@ export function markSeen(k) { load(); if (S.seen[k]) return false; S.seen[k] = D
 export const seen = k => (load(), !!S.seen[k]);
 export function award(badge) { load(); if (S.badges[badge]) return false; S.badges[badge] = Date.now(); save(); emit('badge', badge); return true; }
 export const badges = () => (load(), S.badges);
+/* Stars for numbered levels (Dojo katas, Arena challenges, game levels): keeps the best 0 to 3 */
+export const stars = k => (load(), (S.stars || {})[k] || 0);
+export function setStars(k, n) { load(); S.stars = S.stars || {}; const was = S.stars[k] || 0; if (n > was) { S.stars[k] = n; save(); emit('stars', { k, n, was }); } return n > was; }
+export const starsWhere = prefix => { load(); return Object.entries(S.stars || {}).filter(([k]) => k.startsWith(prefix)).reduce((t, [, v]) => t + v, 0); };
+export const doneWhere = prefix => { load(); return Object.entries(S.stars || {}).filter(([k, v]) => k.startsWith(prefix) && v > 0).length; };
 
 export function record(id, correct, hintsUsed) {
   load();

@@ -14,7 +14,9 @@ import * as store from './store.js';
 import * as fx from './fx.js';
 import * as gm from './gamify.js';
 import * as cloud from './cloud.js';
-import { runArena, runDuel } from './arena.js';
+import { runArena, runDuel, runChallenge } from './arena.js';
+import * as LV from './levels.js';
+import { LEVELS, LEVELS_PER_GAME, levelStars } from './games.js';
 import { initAmbient, bgOn, setBg, BG_NOTES, stop as stopMusic, isPlaying as musicOn } from './ambient.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -48,12 +50,18 @@ const routes = [
   [/^#\/mix\/(\w+)$/, m => mixView(m[1])],
   [/^#\/run\/(\w+)$/, m => mixView(m[1], true)],
   [/^#\/(dojo|tricks)$/, dojoView],
+  [/^#\/katas\/([\w-]+)$/, m => katasView(m[1])],
+  [/^#\/kata\/([\w-]+)\/(\d+)$/, m => kataView(m[1], +m[2])],
+  [/^#\/tower$/, towerView],
+  [/^#\/tower\/(\d+)$/, m => chapterView(+m[1])],
+  [/^#\/challenge\/(\d+)$/, m => challengeView(+m[1])],
   [/^#\/sutras$/, sutrasView],
   [/^#\/sutras\/(\w+)$/, m => { sutrasView(); openSutra(m[1], false); }],
   [/^#\/arena$/, arenaView],
   [/^#\/duel$/, duelView],
   [/^#\/games$/, gamesView],
   [/^#\/game\/([\w-]+)$/, m => gameView(m[1])],
+  [/^#\/game\/([\w-]+)\/(\d+)$/, m => gameView(m[1], +m[2])],
   [/^#\/watch$/, watchView],
   [/^#\/(me|progress)$/, meView]
 ];
@@ -351,14 +359,146 @@ function dojoView() {
     ${crumbs([null, 'Dojo'])}
     <span class="md-tag md-tag--plum">Vedic Dojo</span>
     <h1 class="md-heading">From white belt to <span class="hl-word">black belt</span></h1>
-    <p class="md-lede">${TRICKS.length} speed tricks from the Vedic sutras, in seven belts. Master all three tricks in a belt to earn it. Each trick has a step-by-step animator for any numbers you type, and its own practice track.</p>
+    <p class="md-lede">${TRICKS.length} speed tricks from the Vedic sutras, in seven belts. Master all three tricks in a belt to earn it. Each trick has a step-by-step animator, endless practice and <b>${LV.KATAS_PER_TRICK} katas</b>: numbered drills that get harder, ${LV.KATA_COUNT.toLocaleString('en-US')} in all. Earn up to 3 stars on each.</p>
+    <p class="mq-small">Kata stars: ${store.starsWhere('k:')} of ${LV.KATA_COUNT * 3} &#9733; · ${store.doneWhere('k:')} of ${LV.KATA_COUNT.toLocaleString('en-US')} katas done</p>
     <div class="belt-row">${bp.map(b => `<span class="belt-chip${b.earned ? ' on' : ''}" style="--belt:${b.color}"><span class="belt-knot" aria-hidden="true"></span>${b.name}</span>`).join('')}</div>
     <p class="mq-small">${earned} of ${BELTS.length} belts earned.</p>
     <div class="dojo-path">${bp.map((b, i) => `<section class="dojo-belt${b.earned ? ' earned' : ''}">
       <h2 class="dojo-h"><span class="belt-swatch" style="--belt:${b.color}" aria-hidden="true"></span>${b.name}<small>${b.done}/3</small></h2>
-      <div class="dojo-nodes">${b.tricks.map(id => { const t = TRICKS.find(x => x.id === id), sid = 'v-' + id, [cls, lab] = status(sid); return `<a class="dojo-node mq-${cls}" href="#/skill/${sid}">${ring(store.mastery(sid), 52)}<span><b>${t.title}</b><small lang="sa-Latn">${t.sutra}</small><em>${lab}</em></span></a>`; }).join('')}</div></section>`).join('')}</div>
+      <div class="dojo-nodes">${b.tricks.map(id => { const t = TRICKS.find(x => x.id === id), sid = 'v-' + id, [cls, lab] = status(sid); return `<div class="dojo-cell"><a class="dojo-node mq-${cls}" href="#/skill/${sid}">${ring(store.mastery(sid), 52)}<span><b>${t.title}</b><small lang="sa-Latn">${t.sutra}</small><em>${lab}</em></span></a><a class="dojo-katas" href="#/katas/${id}">${icon('belt')} Katas ${store.doneWhere(`k:${id}:`)}/${LV.KATAS_PER_TRICK} <span class="star-n">${store.starsWhere(`k:${id}:`)}&#9733;</span></a></div>`; }).join('')}</div></section>`).join('')}</div>
     <p class="mq-cta"><a class="md-btn" href="#/sutras">Read about all 29 sutras</a> <a class="md-btn" href="#/arena">Test your speed in the Arena</a></p>
   </div></section>`;
+}
+
+/* ---------- Numbered levels: shared map ---------- */
+const starHTML = n => `<span class="lv-stars" aria-label="${n} of 3 stars">${[1, 2, 3].map(i => `<i class="${i <= n ? 'on' : ''}">&#9733;</i>`).join('')}</span>`;
+function levelMap(count, keyOf, hrefOf, { openAll = false, perRow = 0 } = {}) {
+  let unlocked = true;
+  return `<div class="lv-map${perRow ? ' lv-map--rows' : ''}">${Array.from({ length: count }, (_, i) => {
+    const n = i + 1, st = store.stars(keyOf(n)), open = openAll || unlocked; unlocked = st > 0;
+    const next = open && !st;
+    return open ? `<a class="lv-node${st ? ' done' : ''}${next ? ' next' : ''}" href="${hrefOf(n)}" aria-label="Level ${n}${st ? `, ${st} stars` : ''}"><b>${n}</b>${starHTML(st)}</a>` : `<span class="lv-node locked" aria-label="Level ${n}, locked"><b>${n}</b>${icon('lock')}</span>`;
+  }).join('')}</div>`;
+}
+function resultHTML(stars, lines, nextHref, retryHref, backHref, backLabel) {
+  return `<div class="lv-result"><div class="lv-big">${starHTML(stars)}</div><h2 class="mq-h3">${stars === 3 ? 'Perfect!' : stars === 2 ? 'Great work!' : stars === 1 ? 'Level cleared!' : 'Not quite. Try again!'}</h2>${lines.map(l => `<p>${l}</p>`).join('')}
+    <p class="lv-acts">${stars && nextHref ? `<a class="md-btn md-btn--primary" href="${nextHref}">${icon('bolt')} Next level</a>` : ''}<a class="md-btn" href="${retryHref}" data-retry>Play again</a><a class="md-btn" href="${backHref}">${backLabel}</a></p></div>`;
+}
+
+/* ---------- Dojo katas ---------- */
+function katasView(trickId) {
+  const t = TRICKS.find(x => x.id === trickId); if (!t) return dojoView();
+  document.title = `${t.title} katas: ${BRAND} · Madhav`;
+  view.innerHTML = `<section class="md-section mq-tight"><div class="md-wrap">
+    ${crumbs(['#/dojo', 'Dojo'], [null, `${t.title}: katas`])}
+    <span class="md-tag md-tag--plum">${t.sutra}</span>
+    <h1 class="md-heading">${t.title}: ${LV.KATAS_PER_TRICK} katas</h1>
+    <p class="md-lede">Each kata is a short drill of 5 to 8 problems that gets harder as you climb: bigger numbers, new bases, trickier cases. Clear one to unlock the next. Three stars means every answer right, inside the par time, with no hints.</p>
+    <p class="mq-small">${store.doneWhere(`k:${trickId}:`)} of ${LV.KATAS_PER_TRICK} done · ${store.starsWhere(`k:${trickId}:`)} of ${LV.KATAS_PER_TRICK * 3} &#9733; · <a href="#/skill/v-${trickId}">Learn the trick first</a></p>
+    ${levelMap(LV.KATAS_PER_TRICK, n => LV.kataKey(trickId, n), n => `#/kata/${trickId}/${n}`)}
+  </div></section>`;
+}
+function kataView(trickId, n) {
+  const t = TRICKS.find(x => x.id === trickId); if (!t || n < 1 || n > LV.KATAS_PER_TRICK) return dojoView();
+  if (n > 1 && !store.stars(LV.kataKey(trickId, n - 1))) { location.replace(`#/katas/${trickId}`); return; }
+  const K = LV.kata(trickId, n);
+  document.title = `Kata ${n}: ${t.title} · ${BRAND}`;
+  view.innerHTML = `<section class="md-section mq-tight"><div class="md-wrap mq-narrow">
+    ${crumbs(['#/dojo', 'Dojo'], [`#/katas/${trickId}`, t.title], [null, `Kata ${n}`])}
+    <h1 class="md-heading">Kata ${n} <small class="kata-of">of ${LV.KATAS_PER_TRICK}</small></h1>
+    <p class="md-lede">${K.problems.length} problems · par time ${K.par} seconds · ${t.when}</p>
+    <div class="md-card mq-practice" id="kata"></div></div></section>`;
+  const box = $('#kata'); let i = 0, right = 0, hints = 0, tried = false; const t0 = performance.now();
+  const show = () => {
+    const p = K.problems[i];
+    box.innerHTML = `<div class="pr-head"><span class="kata-prog">${K.problems.map((_, j) => `<i class="${j < i ? 'past' : j === i ? 'cur' : ''}"></i>`).join('')}</span><span class="pr-score">${right}/${K.problems.length}</span></div>
+      <div class="pr-q${plain(p.q).length > 60 ? ' long' : ''}">${p.q}</div>
+      <form class="pr-form" id="kForm" autocomplete="off">${answerUI(p)}<div class="pr-actions"><button class="md-btn md-btn--primary" id="kGo">Check</button><button type="button" class="md-btn md-btn--sm" id="kHint">Hint</button></div></form>
+      <div class="pr-say" id="kSay" role="status" aria-live="polite"></div>`;
+    tried = false; fx.speak(p.q);
+    const f = box.querySelector('input, .pr-choice'); if (f && matchMedia('(pointer: fine)').matches) f.focus({ preventScroll: true });
+    box.querySelectorAll('.pr-choice').forEach(b => b.onclick = () => { box.querySelectorAll('.pr-choice').forEach(x => x.setAttribute('aria-pressed', 'false')); b.setAttribute('aria-pressed', 'true'); $('#kForm').requestSubmit(); });
+    $('#kHint').onclick = () => { hints++; $('#kSay').innerHTML = `${BOLT}<div class="md-bubble">Hint: ${p.hints[0] || p.steps[0]}</div>`; };
+    $('#kForm').onsubmit = e => {
+      e.preventDefault();
+      if (tried) { i++; return i < K.problems.length ? show() : done(); }
+      let ok;
+      if (p.kind === 'choice') { const c = box.querySelector('.pr-choice[aria-pressed="true"]'); if (!c) return; ok = c.dataset.v === p.answer; }
+      else if (p.kind === 'fields') { const ins = [...box.querySelectorAll('.ans-in')]; if (ins.some(x => !x.value.trim())) return; ok = ins.every((x, k) => checkOne({ kind: 'num', answer: p.fields[k].answer }, x.value).ok); }
+      else { const v = box.querySelector('.ans-in').value; if (!v.trim()) return; ok = checkOne(p, v).ok; }
+      tried = true; if (ok) right++; fx.sfx(ok ? 'ok' : 'no');
+      $('#kSay').className = 'pr-say ' + (ok ? 'ok' : 'no');
+      $('#kSay').innerHTML = `${BOLT}<div class="md-bubble">${ok ? pick(['Correct!', 'Clean!', 'Nailed it!', 'Yes!']) : `Not this time. Answer: <b>${answerText(p)}</b><br><small>${p.steps.slice(0, 3).join(' ')}</small>`}</div>`;
+      $('#kGo').textContent = i + 1 < K.problems.length ? 'Next' : 'Finish'; $('#kGo').focus({ preventScroll: true });
+      box.querySelector('.pr-score').textContent = `${right}/${K.problems.length}`;
+    };
+  };
+  const done = () => {
+    const secs = Math.round((performance.now() - t0) / 1000), stars = LV.kataStars(right, K.problems.length, secs, K.par, hints), key = LV.kataKey(trickId, n), improved = store.setStars(key, stars);
+    const xp = stars * 10 + right * 2; if (xp) store.addXP(xp, 'kata'); store.bump('katas'); store.touchDay(); track('kata/' + trickId, 'Kata ' + n);
+    if (stars === 3) fx.confetti(90); else if (stars) fx.confetti(40);
+    box.innerHTML = resultHTML(stars, [`${right} of ${K.problems.length} right in ${secs} seconds (par ${K.par})${hints ? `, ${hints} hint${hints > 1 ? 's' : ''}` : ''}.`, `<span class="fx-xp">+${xp} XP</span>${improved ? ' New best for this kata.' : ''}`], n < LV.KATAS_PER_TRICK ? `#/kata/${trickId}/${n + 1}` : null, `#/kata/${trickId}/${n}`, `#/katas/${trickId}`, 'All katas');
+    const rt = box.querySelector('[data-retry]'); if (rt) rt.onclick = e => { e.preventDefault(); kataView(trickId, n); };
+  };
+  show();
+}
+
+/* ---------- Arena challenge tower ---------- */
+function towerView() {
+  document.title = `Challenge tower: ${BRAND} · Madhav`;
+  view.innerHTML = `<section class="md-section mq-tight"><div class="md-wrap">
+    ${crumbs(['#/arena', 'Arena'], [null, 'Challenge tower'])}
+    <span class="md-tag md-tag--coral">Challenge tower</span>
+    <h1 class="md-heading">${LV.CHALLENGE_COUNT.toLocaleString('en-US')} Arena challenges</h1>
+    <p class="md-lede">${LV.TOPICS.length} chapters, ${LV.PER_CHAPTER} challenges each, in five formats: Sprint, Sharpshooter, Survival, Time attack and Boss rounds. Pick any chapter; inside a chapter, clear each challenge to unlock the next.</p>
+    <p class="mq-small">${store.doneWhere('a:')} of ${LV.CHALLENGE_COUNT} cleared · ${store.starsWhere('a:')} of ${LV.CHALLENGE_COUNT * 3} &#9733;</p>
+    <div class="tower">${LV.TOPICS.map((tp, c) => { const lo = c * LV.PER_CHAPTER + 1, done = Array.from({ length: LV.PER_CHAPTER }, (_, k) => store.stars(LV.challengeKey(lo + k))).filter(Boolean).length, st = Array.from({ length: LV.PER_CHAPTER }, (_, k) => store.stars(LV.challengeKey(lo + k))).reduce((a, b) => a + b, 0);
+      return `<a class="tower-ch${done === LV.PER_CHAPTER ? ' done' : ''}" href="#/tower/${c + 1}"><span class="tower-n">${c + 1}</span><span class="tower-t"><b>${tp.name}</b><small>Challenges ${lo} to ${lo + LV.PER_CHAPTER - 1}</small><span class="mq-bar"><i style="width:${pct(done / LV.PER_CHAPTER)}%"></i></span></span><span class="star-n">${st}&#9733;</span></a>`; }).join('')}</div>
+  </div></section>`;
+}
+function chapterView(c) {
+  const tp = LV.TOPICS[c - 1]; if (!tp) return towerView();
+  const lo = (c - 1) * LV.PER_CHAPTER;
+  document.title = `${tp.name}: Challenge tower · ${BRAND}`;
+  view.innerHTML = `<section class="md-section mq-tight"><div class="md-wrap">
+    ${crumbs(['#/arena', 'Arena'], ['#/tower', 'Challenge tower'], [null, `Chapter ${c}`])}
+    <span class="md-tag md-tag--coral">Chapter ${c} of ${LV.TOPICS.length}</span>
+    <h1 class="md-heading">${tp.name}</h1>
+    <div class="fmt-legend">${Object.values(LV.FORMATS).map(f => `<span><b>${f.name}</b> ${f.how}</span>`).join('')}</div>
+    ${levelMap(LV.PER_CHAPTER, n => LV.challengeKey(lo + n), n => `#/challenge/${lo + n}`)}
+    <p class="mq-cta">${c > 1 ? `<a class="md-btn" href="#/tower/${c - 1}">&larr; Chapter ${c - 1}</a>` : ''}${c < LV.TOPICS.length ? `<a class="md-btn" href="#/tower/${c + 1}">Chapter ${c + 1} &rarr;</a>` : ''}</p>
+  </div></section>`;
+}
+function challengeView(id) {
+  if (id < 1 || id > LV.CHALLENGE_COUNT) return towerView();
+  const ch = LV.challenge(id), chapterStart = ch.chapter * LV.PER_CHAPTER + 1;
+  if (id > chapterStart && !store.stars(LV.challengeKey(id - 1))) { location.replace(`#/tower/${ch.chapter + 1}`); return; }
+  const F = LV.FORMATS[ch.format], goalText = ch.goal === 'seconds' ? `Finish ${ch.total} with at least ${Math.ceil(ch.total * .8)} right. Stars at ${ch.targets.join(', ')} seconds or faster.` : `Stars at ${ch.targets.join(', ')} ${ch.goal}.`;
+  document.title = `Challenge ${id}: ${BRAND}`;
+  let stop = null;
+  view.innerHTML = `<section class="md-section mq-tight"><div class="md-wrap mq-narrow">
+    ${crumbs(['#/tower', 'Challenge tower'], [`#/tower/${ch.chapter + 1}`, ch.topic.name], [null, `Challenge ${id}`])}
+    <span class="md-tag md-tag--coral">${F.name}</span>
+    <h1 class="md-heading">Challenge ${id}</h1>
+    <p class="md-lede">${ch.topic.name}. ${F.how} ${ch.secs ? `${ch.secs} seconds.` : ''}${ch.total ? ` ${ch.total} questions.` : ''}${ch.lives ? ` ${ch.lives} lives.` : ''} ${goalText}</p>
+    <div class="md-card ar-shell" id="chShell"><p class="lv-best">Your best: ${starHTML(store.stars(LV.challengeKey(id)))}</p><button class="md-btn md-btn--primary ar-go" id="chGo">${icon('bolt')} Start</button></div></div></section>`;
+  const shell = $('#chShell');
+  $('#chGo').onclick = () => {
+    let n = 3; shell.innerHTML = `<div class="ar-count" aria-live="assertive">${n}</div>`; fx.sfx('tick');
+    const iv = setInterval(() => { n--; if (n === 0) { clearInterval(iv); fx.sfx('ok'); go(); } else { shell.firstChild.textContent = n; fx.sfx('tick'); } }, 650);
+    stop = () => clearInterval(iv);
+  };
+  const go = () => {
+    track('challenge/' + ch.format, 'Challenge ' + id);
+    stop = runChallenge(shell, ch, LV.challengeSet(ch), { tap: fx.mode() === 'explorer', onEnd: r => {
+      stop = null; const stars = LV.challengeStars(ch, r), improved = store.setStars(LV.challengeKey(id), stars), xp = stars * 15 + r.right * 2;
+      if (xp) store.addXP(xp, 'challenge'); store.bump('arena'); store.touchDay(); if (stars === 3) fx.confetti(100); else if (stars) fx.confetti(40);
+      const nextId = id % LV.PER_CHAPTER ? id + 1 : null;
+      shell.innerHTML = resultHTML(stars, [`${r.right} right, ${r.wrong} missed${ch.goal === 'points' ? `, ${r.score} points` : ''}${ch.goal === 'seconds' ? `, ${r.secs} seconds` : ''}.`, `<span class="fx-xp">+${xp} XP</span>${improved ? ' New best.' : ''}`], nextId ? `#/challenge/${nextId}` : `#/tower/${ch.chapter + 2 <= LV.TOPICS.length ? ch.chapter + 2 : 1}`, `#/challenge/${id}`, `#/tower/${ch.chapter + 1}`, 'Chapter map');
+      const rt = shell.querySelector('[data-retry]'); if (rt) rt.onclick = e => { e.preventDefault(); challengeView(id); };
+    } });
+  };
+  cleanup = () => { if (stop) stop(); };
 }
 
 /* ---------- Sutras: deep dive and card collection ---------- */
@@ -471,6 +611,7 @@ function arenaView() {
     <span class="md-tag md-tag--coral">Arena</span>
     <h1 class="md-heading">60 seconds. Same questions for everyone.</h1>
     <p class="md-lede">Answer as many as you can. Each right answer is worth 10, and every answer in a row adds a combo bonus. The daily round uses the same questions for every ${fx.MODES[fx.mode()].name}, so it is a fair race.</p>
+    <a class="tower-promo" href="#/tower">${icon('trophy')}<span><b>Challenge tower: ${LV.CHALLENGE_COUNT.toLocaleString('en-US')} levels</b><small>${store.doneWhere('a:')} cleared · ${store.starsWhere('a:')} &#9733; · Sprint, Survival, Sharpshooter, Time attack, Boss</small></span><span aria-hidden="true">&rarr;</span></a>
     <div class="md-card ar-shell" id="arShell"></div></div></section>`;
   const shell = $('#arShell');
   const lobby = (result = '') => {
@@ -530,26 +671,31 @@ function duelView() {
 function gamesView() {
   document.title = `Games: ${BRAND} · Madhav`;
   const m = fx.mode(), mine = GAMES.filter(g => g.modes.includes(m)), rest = GAMES.filter(g => !g.modes.includes(m));
-  const card = g => `<a class="md-card mq-game" href="#/game/${g.id}"><div class="md-icon-tile" style="background:color-mix(in srgb,var(--${g.color}) 18%,transparent);color:var(--${g.color}-strong)">${icon('game')}</div><h3>${both(g.title, g.kid)}</h3><p>${g.desc.split('. ')[0]}.</p><small class="mq-game-f">${store.seen('game:' + g.id) ? 'Played' : 'New'} · Best ${Math.max(0, ...Object.entries(store.load().best).filter(([k]) => k.startsWith(g.id)).map(([, v]) => v))}</small></a>`;
+  const card = g => `<a class="md-card mq-game" href="#/game/${g.id}"><div class="md-icon-tile" style="background:color-mix(in srgb,var(--${g.color}) 18%,transparent);color:var(--${g.color}-strong)">${icon('game')}</div><h3>${both(g.title, g.kid)}</h3><p>${g.desc.split('. ')[0]}.</p><small class="mq-game-f">${store.doneWhere(`g:${g.id}:`)}/${LEVELS_PER_GAME} levels · ${store.starsWhere(`g:${g.id}:`)} &#9733;</small></a>`;
   view.innerHTML = `<section class="md-section mq-tight"><div class="md-wrap">
     ${crumbs([null, 'Games'])}
     <span class="md-tag md-tag--plum">Games</span>
     <h1 class="md-heading">Games that build number sense</h1>
-    <p class="md-lede">Short rounds, big fun. Every game earns XP, and playing all of them unlocks a badge. Want a real race? Try the <a href="#/arena">Arena</a> or a <a href="#/duel">Duel</a>.</p>
+    <p class="md-lede">${GAMES.length} games with ${LEVELS_PER_GAME} levels each: ${(GAMES.length * LEVELS_PER_GAME).toLocaleString('en-US')} levels in all, plus free play and endless mode. Every game earns XP, and playing all of them unlocks a badge. Want a real race? Try the <a href="#/arena">Arena</a> or a <a href="#/duel">Duel</a>.</p>
     <h2 class="mq-strand">Picked for ${fx.MODES[m].name}</h2><div class="md-grid">${mine.map(card).join('')}</div>
     ${rest.length ? `<h2 class="mq-strand">More games</h2><div class="md-grid">${rest.map(card).join('')}</div>` : ''}
   </div></section>`;
 }
-function gameView(id) {
+function gameView(id, lvl = 0) {
   const g = GAMES.find(x => x.id === id); if (!g) return gamesView();
-  document.title = `${g.title}: ${BRAND} · Madhav`;
-  let option = g.options ? g.options[0].value : null, stop = null, endless = false, live = 0;
+  const gkey = n => `g:${g.id}:${n}`;
+  if (lvl && (lvl > LEVELS_PER_GAME || (lvl > 1 && !store.stars(gkey(lvl - 1))))) { location.replace(`#/game/${g.id}`); return; }
+  const L = lvl && LEVELS[g.id] ? LEVELS[g.id](lvl) : null;
+  document.title = `${g.title}${lvl ? ` level ${lvl}` : ''}: ${BRAND} · Madhav`;
+  let option = L ? L.option ?? (g.options ? g.options[0].value : null) : g.options ? g.options[0].value : null, stop = null, endless = false, live = 0;
   view.innerHTML = `<section class="md-section mq-tight"><div class="md-wrap mq-narrow">
-    ${crumbs(['#/games', 'Games'], [null, both(g.title, g.kid)])}
-    <h1 class="md-heading">${both(g.title, g.kid)}</h1><p class="md-lede">${g.desc}</p>
+    ${crumbs(['#/games', 'Games'], lvl ? [`#/game/${g.id}`, both(g.title, g.kid)] : [null, both(g.title, g.kid)], ...(lvl ? [[null, `Level ${lvl}`]] : []))}
+    <h1 class="md-heading">${both(g.title, g.kid)}${lvl ? ` <small class="kata-of">level ${lvl} of ${LEVELS_PER_GAME}</small>` : ''}</h1><p class="md-lede">${g.desc}</p>
+    ${lvl ? '' : `<h2 class="mq-strand">Levels <small class="mq-small">${store.doneWhere(`g:${g.id}:`)} of ${LEVELS_PER_GAME} cleared · ${store.starsWhere(`g:${g.id}:`)} &#9733;</small></h2>${levelMap(LEVELS_PER_GAME, gkey, n => `#/game/${g.id}/${n}`)}<h2 class="mq-strand">Free play</h2>`}
     <div class="md-card g-shell" id="gShell"></div></div></section>`;
   const shell = $('#gShell');
   const lobby = (msg = '') => {
+    if (L) { shell.innerHTML = `${msg}<p class="lv-best">Goal: ${L.goal.map((t, i) => `${'&#9733;'.repeat(i + 1)} ${t}`).join(' · ')} ${g.id === 'pairs' ? 'points' : 'or more'}</p><p class="lv-best">Your best: ${starHTML(store.stars(gkey(lvl)))}</p><button class="md-btn md-btn--primary ar-go" id="gStart">${icon('play')} Play level ${lvl}</button>`; $('#gStart', shell).onclick = start; return; }
     shell.innerHTML = `${msg}${g.options ? `<div class="g-optrow" role="group" aria-label="Level">${g.options.map(o => `<button class="md-chip" aria-pressed="${o.value === option}" data-o="${o.value}">${o.label}</button>`).join('')}</div>` : ''}<div class="g-optrow" role="group" aria-label="Length"><button class="md-chip" aria-pressed="${!endless}" data-e="0">Normal round</button><button class="md-chip" aria-pressed="${endless}" data-e="1">Endless: play as long as you like</button></div><p class="g-best">Your best: <b>${store.best(g.id + (option ?? '') + (endless ? '-endless' : ''))}</b></p><button class="md-btn md-btn--primary ar-go" id="gStart">${icon('play')} Play</button>`;
     shell.querySelectorAll('[data-e]').forEach(b => b.onclick = () => { endless = b.dataset.e === '1'; lobby(msg); });
     shell.querySelectorAll('[data-o]').forEach(b => b.onclick = () => { option = isNaN(+b.dataset.o) ? b.dataset.o : +b.dataset.o; lobby(msg); });
@@ -563,11 +709,18 @@ function gameView(id) {
     const finish = score => {
       if (stop) stop(); stop = null;
       store.markSeen('game:' + g.id); store.bump('gamesPlayed'); store.touchDay();
+      if (L) {
+        const stars = levelStars(L.goal, score), improved = store.setStars(gkey(lvl), stars), xp = 10 + stars * 10 + Math.min(score, 50); store.addXP(xp, 'game');
+        if (stars === 3) fx.confetti(100); else if (stars) fx.confetti(40);
+        shell.innerHTML = resultHTML(stars, [`Score ${score}. Goals: ${L.goal.join(', ')}.`, `<span class="fx-xp">+${xp} XP</span>${improved ? ' New best.' : ''}`], lvl < LEVELS_PER_GAME ? `#/game/${g.id}/${lvl + 1}` : null, `#/game/${g.id}/${lvl}`, `#/game/${g.id}`, 'Level map');
+        const rt = shell.querySelector('[data-retry]'); if (rt) rt.onclick = e => { e.preventDefault(); gameView(g.id, lvl); };
+        return;
+      }
       const isBest = store.setBest(g.id + (option ?? '') + (endless ? '-endless' : ''), score), xp = 10 + Math.min(score, 100) * 2; store.addXP(xp, 'game');
       if (isBest && score) fx.confetti(80);
       lobby(`<div class="g-result"><div class="md-stat"><div class="md-kicker">Score</div><div class="md-value">${score}</div><p>${isBest && score ? 'New best score!' : 'Play again to beat your best.'} <span class="fx-xp">+${xp} XP</span></p></div></div>`);
     };
-    stop = g.run($('#gArea', shell), { option, endless, progress: v => (live = v), say: m => (sayEl.innerHTML = m), end: finish });
+    stop = g.run($('#gArea', shell), { option, endless, cfg: L ? L.cfg : {}, progress: v => (live = v), say: m => (sayEl.innerHTML = m), end: finish });
     $('#gQuit', shell).innerHTML = endless ? 'Finish' : 'Stop';
     $('#gQuit', shell).onclick = () => { if (endless) return finish(live); if (stop) stop(); stop = null; lobby(); };
   };

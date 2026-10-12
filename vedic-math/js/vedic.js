@@ -323,21 +323,26 @@ export const BELTS = [
 ];
 
 /* Practice problems for each trick, so tricks run through the same mastery engine as skills */
+/* Turn a trick and its numbers into a practice problem (shared by practice, Dojo katas and the Arena) */
+export function problemFor(t, vals) {
+  const steps = t.steps(vals).map(s => s.say);
+  const q = t.q ? t.q(vals) : {
+    sq5: `${vals[0]}<sup>2</sup> = ?`, 'near-base': `${vals[0]} &times; ${vals[1]} = ?`, crosswise: `${vals[0]} &times; ${vals[1]} = ?`, from9: `${(10 ** String(vals[0]).length).toLocaleString('en-US')} &minus; ${vals[0]} = ?`,
+    by9s: `${vals[0]} &times; ${vals[1]} = ?`, ends10: `${vals[0]} &times; ${vals[1]} = ?`, 'square-near': `${vals[0]}<sup>2</sup> = ?`, by11: `${vals[0]} &times; 11 = ?`,
+    div9: `${vals[0]} &divide; 9 = ? remainder ?`, check9: `Casting out nines (answer 0 to 8), what is the digit sum of ${vals[0]} &times; ${vals[1]}?`, recip: `What is the first decimal digit of 1/${vals[0]} that is not 0?`,
+    transpose: `Solve: ${vals[0]}<i>x</i> ${vals[1] < 0 ? '&minus;' : '+'} ${Math.abs(vals[1])} = ${vals[2]}<i>x</i> ${vals[3] < 0 ? '&minus;' : '+'} ${Math.abs(vals[3])}`, 'zero-sum': `Solve: (<i>x</i> + ${vals[0]})(<i>x</i> + ${vals[1]}) = (<i>x</i> + ${vals[2]})(<i>x</i> + ${vals[3]})`
+  }[t.id];
+  if (t.fields) return { q, kind: 'fields', fields: t.fields(vals), hints: [steps[0]], steps };
+  if (t.choice) return { q, kind: 'choice', choices: t.choice, answer: t.answer(vals), hints: [steps[0]], steps };
+  if (t.id === 'div9') return { q, kind: 'fields', fields: [{ label: 'Quotient', answer: Math.floor(vals[0] / 9) }, { label: 'Remainder', answer: vals[0] % 9 }], hints: [steps[0]], steps };
+  if (t.id === 'recip') {
+    if (vals[1]) { let r = 1, dg = 0; for (let i = 0; i < vals[1]; i++) { r *= 10; dg = Math.floor(r / vals[0]); r %= vals[0]; } return { q: `1/${vals[0]} = 0.&hellip; What is digit number ${vals[1]} after the decimal point?`, kind: 'num', answer: dg, hints: [steps[0], steps[1]], steps }; }
+    const first = String(1 / vals[0]).replace(/^0\.0*/, '')[0]; return { q, kind: 'num', answer: +first, hints: [steps[0]], steps };
+  }
+  return { q, kind: 'num', answer: t.answer(vals), hints: [steps[0], steps[1]], steps };
+}
+
 export const TRICK_SKILLS = TRICKS.map(t => ({
   id: 'v-' + t.id, grade: 'V', strand: 'tricks', title: t.title, kid: t.kid, idea: t.idea, method: [t.when, ...t.steps(t.random()).map(s => s.say).slice(0, 2)], trick: t.id,
-  gen() {
-    let vals; do { vals = t.random(); } while (t.valid(vals));
-    const steps = t.steps(vals).map(s => s.say);
-    const q = t.q ? t.q(vals) : {
-      sq5: `${vals[0]}<sup>2</sup> = ?`, 'near-base': `${vals[0]} &times; ${vals[1]} = ?`, crosswise: `${vals[0]} &times; ${vals[1]} = ?`, from9: `${(10 ** String(vals[0]).length).toLocaleString('en-US')} &minus; ${vals[0]} = ?`,
-      by9s: `${vals[0]} &times; ${vals[1]} = ?`, ends10: `${vals[0]} &times; ${vals[1]} = ?`, 'square-near': `${vals[0]}<sup>2</sup> = ?`, by11: `${vals[0]} &times; 11 = ?`,
-      div9: `${vals[0]} &divide; 9 = ? remainder ?`, check9: `Casting out nines (answer 0 to 8), what is the digit sum of ${vals[0]} &times; ${vals[1]}?`, recip: `What is the first decimal digit of 1/${vals[0]} that is not 0?`,
-      transpose: `Solve: ${vals[0]}<i>x</i> ${vals[1] < 0 ? '&minus;' : '+'} ${Math.abs(vals[1])} = ${vals[2]}<i>x</i> ${vals[3] < 0 ? '&minus;' : '+'} ${Math.abs(vals[3])}`, 'zero-sum': `Solve: (<i>x</i> + ${vals[0]})(<i>x</i> + ${vals[1]}) = (<i>x</i> + ${vals[2]})(<i>x</i> + ${vals[3]})`
-    }[t.id];
-    if (t.fields) return { q, kind: 'fields', fields: t.fields(vals), hints: [steps[0]], steps };
-    if (t.choice) return { q, kind: 'choice', choices: t.choice, answer: t.answer(vals), hints: [steps[0]], steps };
-    if (t.id === 'div9') return { q, kind: 'fields', fields: [{ label: 'Quotient', answer: Math.floor(vals[0] / 9) }, { label: 'Remainder', answer: vals[0] % 9 }], hints: [steps[0]], steps };
-    if (t.id === 'recip') { const first = String(1 / vals[0]).replace(/^0\.0*/, '')[0]; return { q, kind: 'num', answer: +first, hints: [steps[0]], steps }; }
-    return { q, kind: 'num', answer: t.answer(vals), hints: [steps[0], steps[1]], steps };
-  }
+  gen() { let vals; do { vals = t.random(); } while (t.valid(vals)); return problemFor(t, vals); }
 }));
