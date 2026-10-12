@@ -1,7 +1,7 @@
 /* Site analytics: GoatCounter (free, open source, no cookies, no personal data).
    Shared by every page on sbmadhav.com, including pages from other repos.
 
-   - Counts page views and a few named events (games played, music, kid mode, menu use, outbound links).
+   - Counts page views (including in-app page changes in single-page apps) and a few named events (games played, music, kid mode, menu use, outbound links).
    - Loads only after the page has finished loading and the browser is idle, so it never slows the first view.
    - Respects Do Not Track and Global Privacy Control, and skips local development.
 
@@ -30,6 +30,20 @@
     if (!a || a.host === location.host || !/^https?:/.test(a.protocol)) return;
     window.siteTrack('out/' + a.host + a.pathname.replace(/\/$/, ''), 'Outbound: ' + (a.textContent || a.host).trim());
   }, true);
+
+  // Single-page apps (for example the Next.js splash screen app) change pages without a reload: count those too
+  let lastPath = location.pathname;
+  const onRoute = () => {
+    if (location.pathname === lastPath) return;
+    lastPath = location.pathname;
+    const pv = { path: location.pathname, title: document.title };
+    setTimeout(() => { pv.title = document.title; if (window.goatcounter && window.goatcounter.count) send(pv); else queue.push(pv); }, 150);
+  };
+  ['pushState', 'replaceState'].forEach(m => {
+    const orig = history[m];
+    history[m] = function () { const r = orig.apply(this, arguments); onRoute(); return r; };
+  });
+  addEventListener('popstate', onRoute);
 
   function load() {
     const s = document.createElement('script');
