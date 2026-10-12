@@ -1,0 +1,39 @@
+<!-- @dsCard height=320 -->
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Madhav</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--bg); color:var(--ink); font-family:var(--font-sans); overflow:hidden; }
+  .cover { position:relative; width:960px; height:320px; overflow:hidden; }
+  /* the hero image from sbmadhav.com: portrait inside the sun blob, Bolt peeking in, a few planets */
+  .hero { position:absolute; left:560px; top:24px; width:272px; height:272px; }
+  .blob { position:absolute; inset:0; border-radius:46% 54% 50% 50%/52% 46% 54% 48%; background:var(--sun); }
+  [data-theme="dark"] .blob { background:conic-gradient(from 0deg, var(--coral), var(--plum), var(--teal), var(--sun), var(--coral)); }
+  .photo { position:absolute; inset:5%; width:90%; height:90%; object-fit:cover; object-position:50% 35%; border-radius:50%; border:5px solid var(--card); box-sizing:border-box; }
+  .bolt { position:absolute; left:205px; top:150px; width:118px; filter:drop-shadow(0 8px 10px rgba(28,37,65,.25)); }
+  [data-theme="dark"] .bolt { filter:drop-shadow(0 0 12px rgba(164,123,255,.55)); }
+  .orb { position:absolute; border-radius:50%; }
+  .o1 { left:500px; top:40px; width:24px; height:24px; background:var(--coral); }
+  .o2 { left:868px; top:60px; width:40px; height:40px; background:var(--teal); }
+  .o3 { left:880px; top:236px; width:16px; height:16px; background:var(--sky); }
+  .pill { position:absolute; left:470px; top:250px; width:72px; height:24px; border-radius:12px; background:var(--plum); }
+  .words { position:absolute; left:var(--space-6); bottom:var(--space-6); max-width:440px; }
+  .name { margin:0; font-family:var(--font-display); font-size:112px; line-height:.92; font-weight:600; letter-spacing:-.02em; color:var(--ink); }
+  [data-theme="dark"] .name { font-family:var(--font-display-space); }
+  .tag { margin:var(--space-2) 0 0 4px; font-size:14px; line-height:20px; color:var(--ink-muted); }
+</style></head>
+<body>
+<div class="cover">
+  <span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span><span class="pill"></span>
+  <div class="hero">
+    <div class="blob"></div>
+    <img class="photo" src="/_blob/c74b24a98a0fd703fb4f82774516e79a" alt="Madhav">
+    <img class="bolt" src="/_blob/9f1f5cca15683a16d188b392355ef3e4" alt="">
+  </div>
+  <div class="words">
+    <p class="name">Madhav</p>
+    <p class="tag">Professional enough for recruiters, fun enough for kids.</p>
+  </div>
+</div>
+</body></html>

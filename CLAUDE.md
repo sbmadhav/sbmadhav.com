@@ -9,4 +9,4 @@ Personal site on GitHub Pages (served at https://www.sbmadhav.com; `CNAME` holds
 - Use tokens (`var(--coral)`, `var(--space-6)`, `var(--radius-lg)`), never raw hex. Text on accent fills uses `var(--on-accent)`, not white.
 - Support both color schemes (Daybreak light, Deep Space dark; system default with a saved override) and kid mode (`.pro` / `.kid` spans, `body.kidmode`).
 - Never use em dashes in copy.
-- If a token changes, edit `design-system/tokens.json` and regenerate `design-system/tokens.css` to match.
+- If a token or the guidelines change, edit `design-system/tokens.json` or `design-system/README.md`, then run `python3 design-system/build.py` to regenerate `tokens.css` and the reference page `design-system/index.html`.
