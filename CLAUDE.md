@@ -1,6 +1,6 @@
 # sbmadhav.com
 
-Personal site on GitHub Pages (served at https://www.sbmadhav.com; `CNAME` holds the domain, branch `master`).
+Personal site on GitHub Pages (served at https://sbmadhav.com, www redirects to it; `CNAME` holds the domain, branch `master`).
 
 ## Building new pages
 
