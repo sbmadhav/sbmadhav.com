@@ -5,6 +5,7 @@
   const PAGES = [
     { href: '/', icon: 'home', pro: ['Home', 'Who I am, what I build, and the games'], kid: ['Home', 'Meet Madhav and Bolt'] },
     { href: '/state-of-voice-agents/', icon: 'voice', pro: ['Voice agents at the front door', 'State of conversational voice AI in healthcare and banking, October 2026'], kid: ['Talking robots', 'How robot phone helpers learn to listen and help'] },
+    { href: '/math/', icon: 'math', pro: ['Math Quest', 'K to 12 math with visual lessons, Vedic speed tricks and games'], kid: ['Math Quest', 'Learn math from counting dots to rocket science'] },
     { href: '/design-system/', icon: 'palette', pro: ['Design system', 'Colors, type and components behind this site'], kid: ['Paint box', 'All the colors and shapes I use'] }
   ];
   const SECTIONS = [
@@ -22,6 +23,7 @@
 
   const P = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
   const ICONS = {
+    math: `<rect x="3.5" y="3.5" width="17" height="17" rx="4" ${P}/><path d="M7 9h4M9 7v4M13.5 9h4M7.5 14.5l3 3M10.5 14.5l-3 3M13.5 15h4M13.5 17.5h4" ${P}/>`,
     voice: `<rect x="9" y="3" width="6" height="11" rx="3" ${P}/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" ${P}/>`,
     home: `<path d="M4 11l8-7 8 7M6.5 9.5V20h11V9.5" ${P}/><path d="M10 20v-5h4v5" ${P}/>`,
     palette: `<path d="M12 3a9 9 0 1 0 0 18c1.3 0 2-.8 2-1.8 0-1.4-1.2-1.7-1.2-3 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.3 17 3 12 3z" ${P}/><circle cx="7.5" cy="11" r="1.3" fill="currentColor"/><circle cx="10" cy="7" r="1.3" fill="currentColor"/><circle cx="15" cy="7.2" r="1.3" fill="currentColor"/>`,
