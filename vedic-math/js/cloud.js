@@ -13,6 +13,7 @@ async function boot() {
   ready = (async () => {
     const [{ initializeApp }, auth, fs] = await Promise.all([import(`${CDN}/firebase-app.js`), import(`${CDN}/firebase-auth.js`), import(`${CDN}/firebase-firestore.js`)]);
     const app = initializeApp(FIREBASE), a = auth.getAuth(app);
+    await a.authStateReady(); /* wait for the saved session, or every visit would sign in as a new player */
     if (!a.currentUser) await auth.signInAnonymously(a);
     return { uid: a.currentUser.uid, db: fs.getFirestore(app), fs };
   })();
@@ -23,10 +24,11 @@ async function boot() {
 /* Keeps one entry per player per board; a lower score never replaces a higher one (enforced by the rules too). */
 export async function submit(board, entry) {
   const { uid, db, fs } = await boot();
+  const score = Math.max(0, Math.min(2000, Math.round(Number(entry.score) || 0))); /* rules accept an integer 0 to 2000 */
   const ref = fs.doc(db, 'boards', board, 'scores', uid);
   const cur = await fs.getDoc(ref);
-  if (cur.exists() && cur.data().score >= entry.score) return false;
-  await fs.setDoc(ref, { name: entry.name, avatar: entry.avatar, score: Math.round(entry.score), ts: fs.serverTimestamp() });
+  if (cur.exists() && cur.data().score >= score) return false;
+  await fs.setDoc(ref, { name: entry.name, avatar: entry.avatar, score, ts: fs.serverTimestamp() });
   return true;
 }
 export async function top(board, n = 20) {
