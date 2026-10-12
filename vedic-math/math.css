@@ -534,3 +534,6 @@ sup { font-size: .65em; }
 @media (max-width: 700px) { .mq-nav .md-wrap { overflow-x: auto; } }
 @media (prefers-reduced-motion: reduce) { .vm-eq i { animation: none; } }
 @media (max-width: 700px) { .vm-mpanel { position: fixed; left: 12px; right: 12px; top: 128px; width: auto; } }
+.vm-about { margin-top: 10px; font-size: 13.5px; } .vm-about summary { cursor: pointer; font-weight: 700; }
+.vm-about ul { margin: 8px 0 0; padding-left: 1.1em; display: grid; gap: 6px; max-height: 240px; overflow: auto; } .vm-about li { color: var(--ink-muted); line-height: 1.4; } .vm-about b { color: var(--ink); }
+.roots ul { margin: 8px 0 0; padding-left: 1.2em; display: grid; gap: 6px; } .roots li { font-size: 15px; line-height: 1.5; }

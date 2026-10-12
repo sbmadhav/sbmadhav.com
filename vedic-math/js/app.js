@@ -13,7 +13,7 @@ import * as fx from './fx.js';
 import * as gm from './gamify.js';
 import * as cloud from './cloud.js';
 import { runArena, runDuel } from './arena.js';
-import { initAmbient, TRACKS, play as playMusic, stop as stopMusic, bgOn, setBg } from './ambient.js';
+import { initAmbient, bgOn, setBg, BG_NOTES } from './ambient.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const view = $('#view');
@@ -367,6 +367,7 @@ function sutrasView() {
     <div class="mq-bar mq-bar--big sutra-bar"><i style="width:${pct(got / all.length)}%"></i></div>
     <div class="md-card history"><h2 class="mq-h3">Where Vedic math comes from</h2>${HISTORY.map(h => `<p>${h}</p>`).join('')}
       <p class="mq-small">Read more: ${RESOURCES.filter(r => r.vedic && r.tags.includes('history')).map(r => `<a href="${r.url}" target="_blank" rel="noopener noreferrer" data-watch>${esc(r.title)}</a>`).join(' · ')}</p></div>
+    <div class="md-card history roots"><h2 class="mq-h3">Older roots: what you see in the background</h2><p>The 1965 sutras stand on a much older tradition of Indian mathematics. The moving background draws real pieces of it.</p><ul>${BG_NOTES.map(([h, b]) => `<li><b>${h}.</b> ${b}</li>`).join('')}</ul></div>
     <h2 class="mq-strand">The 16 sutras</h2><div class="sutra-grid">${SUTRAS.map(c => card(c, false)).join('')}</div>
     <h2 class="mq-strand">The 13 sub-sutras</h2><div class="sutra-grid">${SUBSUTRAS.map(c => card(c, true)).join('')}</div>
   </div></section>`;
