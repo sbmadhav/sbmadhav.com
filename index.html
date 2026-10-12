@@ -1,1 +1,815 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Madhav Srinivasan</title>
+<meta name="description" content="Madhav Srinivasan, Director of Software Engineering. Building AI agents, voice AI, and platforms for banking and healthcare. A site grown-ups and kids can both enjoy.">
+<meta property="og:title" content="Madhav Srinivasan">
+<meta property="og:description" content="Building AI helpers for places where trust matters. Try the Brain Lab and the Bug Hunt.">
+<meta property="og:image" content="https://sbmadhav.com/assets/profile.webp">
+<meta name="theme-color" content="#FFF8EE">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='14' width='48' height='40' rx='14' fill='%231FA39A'/%3E%3Ccircle cx='24' cy='34' r='7' fill='white'/%3E%3Ccircle cx='40' cy='34' r='7' fill='white'/%3E%3Ccircle cx='25' cy='35' r='3' fill='%231C2541'/%3E%3Ccircle cx='41' cy='35' r='3' fill='%231C2541'/%3E%3Ccircle cx='32' cy='7' r='5' fill='%23FF6B5B'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF8EE; --bg2:#FDF0DC; --card:#FFFFFF; --ink:#1C2541; --muted:#5B6479; --line:#EADFCC;
+  --coral:#FF6B5B; --teal:#1FA39A; --sun:#FFC53D; --sky:#5B8DEF; --plum:#8E6BD8;
+  --shadow:0 2px 0 rgba(28,37,65,.06), 0 12px 28px -12px rgba(28,37,65,.18);
+  --radius:22px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121624; --bg2:#171C2E; --card:#1C2235; --ink:#F3F0E8; --muted:#A3AAC0; --line:#2C3450;
+    --shadow:0 2px 0 rgba(0,0,0,.25), 0 14px 30px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121624; --bg2:#171C2E; --card:#1C2235; --ink:#F3F0E8; --muted:#A3AAC0; --line:#2C3450;
+  --shadow:0 2px 0 rgba(0,0,0,.25), 0 14px 30px -14px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Nunito Sans",system-ui,sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.display{font-family:Fredoka,"Nunito Sans",sans-serif;line-height:1.1;margin:0;font-weight:600;letter-spacing:-.01em}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+@media (max-width:600px){.wrap{padding:0 16px}}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.82em}
 
+/* Kid / grown-up text swap */
+.kid{display:none}
+body.kidmode .kid{display:revert}
+body.kidmode .pro{display:none}
+
+/* Nav */
+header.nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:16px;height:66px}
+.logo{display:flex;align-items:center;gap:10px;font-family:Fredoka;font-weight:600;font-size:1.25rem;text-decoration:none;background:none;border:0;padding:0}
+.logo svg{width:34px;height:34px;transition:transform .3s}
+.logo:hover svg{transform:rotate(-12deg) scale(1.08)}
+.nav nav{display:flex;gap:4px;margin-left:auto}
+.nav nav a{text-decoration:none;padding:6px 12px;border-radius:999px;font-weight:600;font-size:.95rem;color:var(--muted)}
+.nav nav a:hover{background:var(--bg2);color:var(--ink)}
+.toggle{display:flex;align-items:center;gap:10px;border:2px solid var(--ink);border-radius:999px;padding:4px 6px 4px 12px;background:var(--card);font-weight:700;font-size:.85rem;white-space:nowrap}
+.toggle .track{width:44px;height:24px;border-radius:999px;background:var(--line);position:relative;transition:background .25s}
+.toggle .knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--ink);transition:transform .25s cubic-bezier(.5,1.6,.5,1)}
+body.kidmode .toggle .track{background:var(--sun)}
+body.kidmode .toggle .knob{transform:translateX(20px)}
+@media (max-width:860px){.nav nav{display:none}.toggle{margin-left:auto}}
+
+/* Hero */
+.hero{padding:72px 0 56px;position:relative}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+@media (max-width:860px){.hero .wrap{grid-template-columns:1fr;gap:32px}.hero{padding-top:40px}.bot{right:-2%}}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:700;font-size:.85rem;box-shadow:var(--shadow)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 0 var(--teal);animation:ping 2s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--teal) 60%,transparent)}100%{box-shadow:0 0 0 10px transparent}}
+.hero h1{font-size:clamp(2.6rem,6vw,4.4rem);margin:18px 0 8px}
+.hero h1 .wave{display:inline-block;transform-origin:70% 80%;cursor:pointer}
+.hero h1 .wave:hover{animation:wave 1s}
+@keyframes wave{20%{transform:rotate(14deg)}40%{transform:rotate(-8deg)}60%{transform:rotate(14deg)}80%{transform:rotate(-4deg)}}
+.hl{background:linear-gradient(transparent 62%,color-mix(in srgb,var(--sun) 70%,transparent) 62%);padding:0 4px}
+.lede{font-size:1.18rem;color:var(--muted);max-width:36em;margin:14px 0 22px}
+.name-say{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:.95rem;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--ink);background:var(--card);border-radius:999px;padding:9px 18px;font-weight:700;text-decoration:none;box-shadow:0 3px 0 var(--ink);transition:transform .12s,box-shadow .12s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--ink)}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.btn.primary{background:var(--coral);color:#fff;border-color:var(--ink)}
+.btn.sm{padding:5px 12px;font-size:.85rem}
+.btn svg{width:18px;height:18px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+
+.portrait{position:relative;aspect-ratio:1;max-width:400px;justify-self:center;width:100%}
+.blob{position:absolute;inset:4%;border-radius:46% 54% 50% 50%/52% 46% 54% 48%;background:var(--sun);animation:morph 12s ease-in-out infinite}
+@keyframes morph{50%{border-radius:56% 44% 42% 58%/44% 58% 42% 56%}}
+.portrait img{position:absolute;inset:9%;width:82%;height:82%;object-fit:cover;object-position:60% 30%;border-radius:50%;border:5px solid var(--card);box-shadow:var(--shadow)}
+.bot{position:absolute;right:-6%;bottom:-2%;width:44%;cursor:pointer;filter:drop-shadow(0 10px 14px rgba(28,37,65,.25));animation:bob 3.4s ease-in-out infinite;background:none;border:0;padding:0}
+@keyframes bob{50%{transform:translateY(-10px) rotate(-3deg)}}
+.bot svg{width:100%;height:auto;display:block}
+.bubble{position:absolute;left:-4%;top:2%;max-width:240px;background:var(--card);border:2px solid var(--ink);border-radius:18px;padding:10px 14px;font-weight:700;font-size:.92rem;box-shadow:0 4px 0 var(--ink);opacity:0;transform:translateY(8px) scale(.96);transition:.25s;pointer-events:none;z-index:3}
+.bubble.show{opacity:1;transform:none}
+.bubble::after{content:"";position:absolute;right:26px;bottom:-11px;width:18px;height:18px;background:var(--card);border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:rotate(45deg)}
+.spark{position:absolute;font-family:Fredoka;font-weight:700;color:var(--coral);animation:floaty 4s ease-in-out infinite}
+@keyframes floaty{50%{transform:translateY(-8px) rotate(8deg)}}
+
+/* Sections */
+section{padding:72px 0;scroll-margin-top:70px}
+.sec-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:28px;flex-wrap:wrap}
+.sec-head h2{font-size:clamp(1.9rem,4vw,2.7rem)}
+.sec-head p{margin:8px 0 0;color:var(--muted);max-width:40em}
+.tag{display:inline-block;font-family:Fredoka;font-weight:600;font-size:.9rem;padding:3px 12px;border-radius:999px;margin-bottom:10px;color:#1C2541}
+.alt{background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+
+/* Cards */
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+@media (max-width:980px){.grid4{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.grid4{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-4px) rotate(-.4deg)}
+.card .ic{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;margin-bottom:14px}
+.card .ic svg{width:30px;height:30px}
+.card h3{font-size:1.25rem;margin-bottom:6px}
+.card p{margin:0;color:var(--muted);font-size:.97rem}
+
+/* Brain Lab */
+.lab{display:grid;grid-template-columns:.9fr 1.1fr;gap:28px;align-items:start}
+@media (max-width:900px){.lab{grid-template-columns:1fr}}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.chip{border:2px solid var(--ink);background:var(--card);border-radius:999px;padding:8px 14px;font-weight:700;font-size:.93rem;transition:.15s}
+.chip:hover{background:var(--sun);color:#1C2541}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.lab-ask{display:flex;gap:8px;margin-top:6px}
+.lab-ask input{flex:1;min-width:0;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:10px 14px;font:inherit}
+.lab-ask input:focus{outline:none;border-color:var(--sky)}
+.pipeline{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+.stage{display:flex;gap:14px;align-items:flex-start;padding:12px;border-radius:16px;border:2px dashed transparent;transition:.3s}
+.stage.on{border-color:var(--sky);background:color-mix(in srgb,var(--sky) 9%,transparent)}
+.stage .num{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-family:Fredoka;font-weight:700;color:#1C2541}
+.stage h4{margin:0;font-family:Fredoka;font-weight:600;font-size:1.08rem}
+.stage .sub{color:var(--muted);font-size:.9rem}
+.thought{margin-top:6px;background:var(--bg2);border-radius:10px;padding:8px 10px;min-height:2.3em;color:var(--muted)}
+.lanes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 2px 52px}
+.lane{border:2px solid var(--line);border-radius:12px;padding:8px;text-align:center;font-weight:700;font-size:.85rem;transition:.3s;color:var(--muted)}
+.lane.pick{border-color:var(--teal);background:var(--teal);color:#fff;transform:scale(1.05)}
+.answer{margin-top:6px;background:var(--ink);color:var(--bg);border-radius:16px 16px 16px 4px;padding:12px 14px;min-height:3em;font-weight:600}
+.caret::after{content:"";display:inline-block;width:8px;height:1em;background:currentColor;margin-left:2px;vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.connector{height:14px;margin-left:31px;border-left:3px dotted var(--line)}
+
+/* Bug hunt */
+.game{display:grid;grid-template-columns:1fr 260px;gap:20px}
+@media (max-width:800px){.game{grid-template-columns:1fr}}
+.arena{position:relative;height:380px;border-radius:var(--radius);border:2px solid var(--ink);overflow:hidden;
+  background:
+    linear-gradient(var(--card),var(--card)) padding-box;
+  box-shadow:0 5px 0 var(--ink)}
+.arena .code{position:absolute;inset:0;padding:18px 20px;color:color-mix(in srgb,var(--muted) 45%,transparent);font-family:"JetBrains Mono",monospace;font-size:.85rem;line-height:1.9;white-space:pre;pointer-events:none;user-select:none}
+.arena .overlay{position:absolute;inset:0;display:grid;place-items:center;text-align:center;background:color-mix(in srgb,var(--card) 82%,transparent);z-index:5;padding:20px}
+.arena .overlay h3{font-size:1.8rem;margin-bottom:6px}
+.bug{position:absolute;width:52px;height:52px;border:0;background:none;padding:0;z-index:2;transition:left 1.2s ease-in-out,top 1.2s ease-in-out}
+.bug svg{width:100%;height:100%;animation:wiggle .35s ease-in-out infinite alternate}
+@keyframes wiggle{to{transform:rotate(8deg)}}
+.bug.squash svg{animation:none;transform:scale(1.3,.3);opacity:0;transition:.25s}
+.pop{position:absolute;font-family:Fredoka;font-weight:700;color:var(--teal);pointer-events:none;animation:popup .8s forwards;z-index:4}
+@keyframes popup{to{transform:translateY(-36px);opacity:0}}
+.scoreboard{display:flex;flex-direction:column;gap:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 18px;box-shadow:var(--shadow)}
+.stat .k{font-size:.82rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.stat .v{font-family:Fredoka;font-weight:700;font-size:2.2rem;line-height:1.1}
+.timer{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:8px}
+.timer i{display:block;height:100%;width:100%;background:var(--coral);transform-origin:left}
+
+/* Journey */
+.map{position:relative;padding:10px 0}
+.track-line{position:absolute;left:0;right:0;top:48px;height:6px;border-radius:9px;background:repeating-linear-gradient(90deg,var(--line) 0 14px,transparent 14px 24px)}
+.levels{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;position:relative}
+.level{background:none;border:0;padding:0;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.level .node{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;border:3px solid var(--ink);background:var(--card);box-shadow:0 5px 0 var(--ink);transition:.2s;position:relative}
+.level .node svg{width:44px;height:44px}
+.level:hover .node{transform:translateY(-4px)}
+.level[aria-selected="true"] .node{background:var(--sun);transform:translateY(-4px) scale(1.06)}
+.level .lv{font-family:Fredoka;font-weight:600;font-size:.82rem;color:var(--muted)}
+.level .nm{font-family:Fredoka;font-weight:600;font-size:1.05rem;line-height:1.2}
+.star{position:absolute;top:-8px;right:-8px;width:28px;height:28px}
+@media (max-width:760px){
+  .track-line{left:46px;right:auto;top:0;bottom:0;width:6px;height:auto;background:repeating-linear-gradient(180deg,var(--line) 0 14px,transparent 14px 24px)}
+  .levels{grid-template-columns:1fr;gap:16px}
+  .level{flex-direction:row;text-align:left}
+  .level .node{width:72px;height:72px;flex:none;margin-left:10px}
+  .level .node svg{width:34px;height:34px}
+}
+.detail{margin-top:28px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start}
+@media (max-width:600px){.detail{grid-template-columns:1fr;gap:12px;padding:20px}.detail .badge{width:52px!important;height:52px!important}}
+.detail .badge{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;background:var(--sun);color:#1C2541}
+.detail .badge svg{width:36px;height:36px}
+.detail h3{font-size:1.5rem}
+.detail .role{color:var(--muted);font-weight:700;margin:2px 0 8px}
+.detail ul{margin:8px 0 0;padding-left:1.1em}
+.xp{display:flex;align-items:center;gap:10px;margin-top:14px;font-weight:700;font-size:.88rem;color:var(--muted)}
+.xp .bar{flex:1;height:10px;border-radius:99px;background:var(--line);overflow:hidden;max-width:280px}
+.xp .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--sky));transition:width .5s}
+
+/* Power ups */
+.powerups{display:flex;flex-wrap:wrap;gap:10px}
+.pu{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--line);background:var(--card);border-radius:14px;padding:8px 14px;font-weight:700;font-size:.93rem;transition:.2s}
+.pu:hover{border-color:var(--ink);transform:translateY(-2px) rotate(-1deg)}
+.pu i{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+/* Footer */
+.hello{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;background:var(--ink);color:var(--bg);border-radius:28px;padding:40px;position:relative;overflow:hidden}
+.hello h2{font-size:clamp(1.8rem,4vw,2.6rem)}
+.hello p{opacity:.8;margin:8px 0 0;max-width:34em}
+.hello .btn{border-color:var(--bg);box-shadow:0 3px 0 var(--bg);background:transparent;color:var(--bg)}
+.hello .btn.primary{background:var(--coral);color:#fff}
+@media (max-width:700px){.hello{grid-template-columns:1fr;padding:28px}}
+footer{padding:28px 0 40px;color:var(--muted);font-size:.88rem}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* Confetti */
+.confetti{position:fixed;top:-12px;width:10px;height:14px;z-index:100;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s,transform .6s}
+.reveal.in{opacity:1;transform:none}
+:focus-visible{outline:3px solid var(--sky);outline-offset:3px;border-radius:8px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .reveal{opacity:1;transform:none}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-agent" viewBox="0 0 32 32"><rect x="5" y="9" width="22" height="17" rx="6" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="12" cy="17" r="2.4" fill="currentColor"/><circle cx="20" cy="17" r="2.4" fill="currentColor"/><path d="M16 9V5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="16" cy="4" r="2" fill="currentColor"/><path d="M12.5 22h7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-voice" viewBox="0 0 32 32"><rect x="12" y="4" width="8" height="15" rx="4" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M7 15a9 9 0 0 0 18 0M16 24v4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-ui" viewBox="0 0 32 32"><rect x="4" y="6" width="24" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M4 11h24M11 28h10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M10 16l-2.5 2.5L10 21M22 16l2.5 2.5L22 21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 32 32"><path d="M16 4l10 4v7c0 6.5-4.3 11-10 13C10.3 26 6 21.5 6 15V8z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M11.5 16l3.2 3.2L21 13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-book" viewBox="0 0 32 32"><path d="M5 7c4-1.5 7.5-1 11 1.5 3.5-2.5 7-3 11-1.5v18c-4-1.5-7.5-1-11 1.5-3.5-2.5-7-3-11-1.5z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M16 8.5v18" stroke="currentColor" stroke-width="2.4"/></symbol>
+    <symbol id="i-coin" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M19.5 12.5c-.8-1.2-2-1.8-3.5-1.8-2 0-3.5 1-3.5 2.6 0 3.6 7.3 1.7 7.3 5.5 0 1.6-1.6 2.7-3.8 2.7-1.6 0-3-.7-3.8-1.9M16 8.5v2.2M16 21.5v2.2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 32 32"><path d="M16 27S4.5 20 4.5 11.8A6 6 0 0 1 16 9a6 6 0 0 1 11.5 2.8C27.5 20 16 27 16 27z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M8.5 16h4l2-3.5 3 7 2-3.5h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-bank" viewBox="0 0 32 32"><path d="M4 12L16 5l12 7z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M7 14v9M12.5 14v9M19.5 14v9M25 14v9M4 27h24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-q" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-dasharray="4 3.2"/><path d="M12.5 12.5a3.6 3.6 0 1 1 5.2 3.2c-1.1.6-1.7 1.4-1.7 2.6v.6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="16" cy="22.5" r="1.6" fill="currentColor"/></symbol>
+    <symbol id="i-star" viewBox="0 0 32 32"><path d="M16 3.5l3.8 7.7 8.5 1.2-6.2 6 1.5 8.5L16 22.9l-7.6 4 1.5-8.5-6.2-6 8.5-1.2z" fill="#FFC53D" stroke="#1C2541" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-gh" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.42-2.7 5.4-5.27 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-bug" viewBox="0 0 64 64"><g stroke="#1C2541" stroke-width="3" stroke-linecap="round"><path d="M20 26l-9-6M20 34H8M20 42l-9 6M44 26l9-6M44 34h12M44 42l9 6M27 16l-5-7M37 16l5-7"/></g><ellipse cx="32" cy="36" rx="13" ry="16" fill="#FF6B5B" stroke="#1C2541" stroke-width="3"/><path d="M32 22v29" stroke="#1C2541" stroke-width="2.5"/><circle cx="32" cy="19" r="8" fill="#1C2541"/><circle cx="29" cy="18" r="2" fill="#fff"/><circle cx="35" cy="18" r="2" fill="#fff"/><circle cx="26" cy="33" r="2.4" fill="#1C2541"/><circle cx="38" cy="40" r="2.4" fill="#1C2541"/><circle cx="27" cy="44" r="1.8" fill="#1C2541"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="wrap">
+    <button class="logo" id="logo" aria-label="Madhav, home. Psst, click me a few times.">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="14" width="48" height="40" rx="14" fill="#1FA39A" stroke="#1C2541" stroke-width="3"/><circle cx="24" cy="34" r="7" fill="#fff"/><circle cx="40" cy="34" r="7" fill="#fff"/><circle cx="25" cy="35" r="3" fill="#1C2541"/><circle cx="41" cy="35" r="3" fill="#1C2541"/><path d="M32 14V9" stroke="#1C2541" stroke-width="3"/><circle cx="32" cy="7" r="5" fill="#FF6B5B" stroke="#1C2541" stroke-width="3"/></svg>
+      Madhav
+    </button>
+    <nav aria-label="Sections">
+      <a href="#work">What I do</a>
+      <a href="#lab">Brain Lab</a>
+      <a href="#bugs">Bug Hunt</a>
+      <a href="#journey">Journey</a>
+      <a href="#hello">Say hi</a>
+    </nav>
+    <button class="toggle" id="modeToggle" role="switch" aria-checked="false">
+      <span>Explain it like I'm 8</span>
+      <span class="track" aria-hidden="true"><span class="knob"></span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow"><span class="dot"></span>
+        <span class="pro">Director, Software Engineering at Capital One</span>
+        <span class="kid">I build robots that live inside computers</span>
+      </span>
+      <h1>Hi, I'm <span class="hl">Madhav</span> <span class="wave" aria-hidden="true">
+        <svg width="0.85em" height="0.85em" viewBox="0 0 32 32" style="vertical-align:-0.08em"><path d="M11 17V8a2 2 0 0 1 4 0v7M15 15V6a2 2 0 0 1 4 0v9M19 15V8a2 2 0 0 1 4 0v10c0 5.5-3.6 9.5-8.5 9.5-3.4 0-5.6-1.6-7.4-4.4L4.4 18.6a2 2 0 0 1 3.2-2.4L11 20" fill="#FFC53D" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span></h1>
+      <p class="lede">
+        <span class="pro">I lead engineering teams that build AI agents, conversational experiences, and the frontend and platform foundations underneath them, mostly in places where trust is non-negotiable: banking and healthcare.</span>
+        <span class="kid">I teach computers how to listen, think, and help people. My helpers work at banks and hospitals, where being careful and kind really, really matters.</span>
+      </p>
+      <div class="name-say">
+        <span class="pro">Full name: Brameshmadhav Srinivasan. Most people just say Madhav.</span>
+        <span class="kid">My full name is Brameshmadhav. That's a mouthful, so just call me Madhav!</span>
+        <button class="btn sm" id="sayName" aria-label="Hear how to say Madhav"><svg aria-hidden="true"><use href="#i-sound"/></svg> How to say it</button>
+      </div>
+      <div class="cta">
+        <a class="btn primary" href="#lab">
+          <span class="pro">See how my agents think</span><span class="kid">Peek inside a robot brain</span>
+        </a>
+        <a class="btn" href="#bugs"><span class="pro">Squash some bugs</span><span class="kid">Play Bug Hunt</span></a>
+      </div>
+    </div>
+
+    <div class="portrait">
+      <div class="blob" aria-hidden="true"></div>
+      <img src="assets/profile.webp" alt="Portrait of Madhav in a navy blazer and light blue shirt" width="400" height="400">
+      <span class="spark" style="left:2%;bottom:18%;font-size:2rem;animation-delay:-1s" aria-hidden="true">+</span>
+      <span class="spark" style="right:6%;top:4%;font-size:1.5rem;color:var(--sky)" aria-hidden="true">{ }</span>
+      <div class="bubble" id="bubble" role="status" aria-live="polite"></div>
+      <button class="bot" id="bot" aria-label="Talk to Bolt the robot">
+        <svg viewBox="0 0 160 170" aria-hidden="true">
+          <line x1="80" y1="34" x2="80" y2="14" stroke="#1C2541" stroke-width="5"/>
+          <circle id="antenna" cx="80" cy="12" r="9" fill="#FF6B5B" stroke="#1C2541" stroke-width="4"/>
+          <rect x="16" y="66" width="14" height="30" rx="7" fill="#5B8DEF" stroke="#1C2541" stroke-width="4"/>
+          <rect x="130" y="66" width="14" height="30" rx="7" fill="#5B8DEF" stroke="#1C2541" stroke-width="4"/>
+          <rect x="26" y="34" width="108" height="88" rx="30" fill="#1FA39A" stroke="#1C2541" stroke-width="5"/>
+          <rect x="38" y="48" width="84" height="56" rx="20" fill="#E9FBF8" stroke="#1C2541" stroke-width="4"/>
+          <circle cx="62" cy="72" r="12" fill="#fff" stroke="#1C2541" stroke-width="3"/>
+          <circle cx="98" cy="72" r="12" fill="#fff" stroke="#1C2541" stroke-width="3"/>
+          <circle class="pupil" cx="62" cy="72" r="5.5" fill="#1C2541"/>
+          <circle class="pupil" cx="98" cy="72" r="5.5" fill="#1C2541"/>
+          <path id="mouth" d="M68 92 q12 9 24 0" fill="none" stroke="#1C2541" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="48" cy="90" r="5" fill="#FF6B5B" opacity=".5"/>
+          <circle cx="112" cy="90" r="5" fill="#FF6B5B" opacity=".5"/>
+          <rect x="50" y="122" width="60" height="36" rx="14" fill="#FFC53D" stroke="#1C2541" stroke-width="4"/>
+          <circle cx="80" cy="140" r="7" fill="#fff" stroke="#1C2541" stroke-width="3"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT I DO -->
+<section id="work" class="alt">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <span class="tag" style="background:var(--sun)">What I do</span>
+        <h2><span class="pro">Four things I spend my days on</span><span class="kid">My four favorite jobs</span></h2>
+      </div>
+    </div>
+    <div class="grid4">
+      <article class="card reveal">
+        <div class="ic" style="background:color-mix(in srgb,var(--teal) 18%,transparent);color:var(--teal)"><svg><use href="#i-agent"/></svg></div>
+        <h3>Agentic AI</h3>
+        <p class="pro">Designing multi-agent systems that route work to the right specialist agent and tools, with guardrails a regulator would sign off on.</p>
+        <p class="kid">Building a team of robot helpers. Each one is great at one job, and they pass the work to whoever is best at it.</p>
+      </article>
+      <article class="card reveal">
+        <div class="ic" style="background:color-mix(in srgb,var(--coral) 18%,transparent);color:var(--coral)"><svg><use href="#i-voice"/></svg></div>
+        <h3>Voice AI</h3>
+        <p class="pro">Conversational voice agents for call centers: low latency, natural speech, and privately trained models on enterprise data.</p>
+        <p class="kid">Helpers you can talk to on the phone, like a friendly voice that actually understands what you mean.</p>
+      </article>
+      <article class="card reveal">
+        <div class="ic" style="background:color-mix(in srgb,var(--sky) 18%,transparent);color:var(--sky)"><svg><use href="#i-ui"/></svg></div>
+        <h3><span class="pro">Frontend &amp; Platform</span><span class="kid">Screens &amp; Pipes</span></h3>
+        <p class="pro">React and Next.js experiences on top of solid platforms, DevOps, and delivery pipelines that let teams ship safely and often.</p>
+        <p class="kid">The buttons and screens you tap, plus the hidden pipes that carry everything to the right place, super fast.</p>
+      </article>
+      <article class="card reveal">
+        <div class="ic" style="background:color-mix(in srgb,var(--plum) 18%,transparent);color:var(--plum)"><svg><use href="#i-shield"/></svg></div>
+        <h3>Responsible AI</h3>
+        <p class="pro">AI governance and compliance built in from day one. Member of the Responsible AI Institute.</p>
+        <p class="kid">Making sure robot helpers are fair, honest, and keep your secrets safe. Good robots follow the rules!</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- BRAIN LAB -->
+<section id="lab">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <span class="tag" style="background:var(--sky);color:#fff">Brain Lab</span>
+        <h2><span class="pro">Think first, then talk</span><span class="kid">Peek inside a robot brain</span></h2>
+        <p class="pro">People don't say every thought out loud before answering, and agents shouldn't either. My "thinker-responder" pattern: a fast, cheap System-1 model makes the silent decision (which sub-agent, which tools), then a System-2 LLM writes the reply.</p>
+        <p class="kid">Your brain has a speedy part that decides what to do, and a careful part that does the talking. My robot helpers work the same way. Pick a question and watch!</p>
+      </div>
+    </div>
+    <div class="lab">
+      <div class="reveal">
+        <h3 style="font-size:1.25rem"><span class="pro">Try a customer request</span><span class="kid">Ask the robot something</span></h3>
+        <div class="chips" id="chips"></div>
+        <form class="lab-ask" id="askForm">
+          <label class="sr" for="askInput">Type your own question</label>
+          <input id="askInput" maxlength="90" autocomplete="off" placeholder="Or type your own...">
+          <button class="btn sm" type="submit">Ask</button>
+        </form>
+        <p class="mono" style="color:var(--muted);margin-top:16px">
+          <span class="pro">Demo only. Routing here is keyword-based to illustrate the pattern.</span>
+          <span class="kid">Psst: this is a pretend robot, but real ones work a lot like this.</span>
+        </p>
+      </div>
+      <div class="pipeline reveal" aria-live="polite">
+        <div class="stage" id="st1">
+          <div class="num" style="background:var(--sun)">1</div>
+          <div style="flex:1">
+            <h4><span class="pro">System-1 thinker</span><span class="kid">The speedy brain</span></h4>
+            <div class="sub"><span class="pro">Fast typed decision. Never spoken.</span><span class="kid">Thinks super fast, but quietly.</span></div>
+            <div class="thought mono" id="thought">waiting for a question...</div>
+          </div>
+        </div>
+        <div class="lanes" id="lanes"></div>
+        <div class="connector"></div>
+        <div class="stage" id="st2">
+          <div class="num" style="background:var(--coral);color:#fff">2</div>
+          <div style="flex:1">
+            <h4><span class="pro">System-2 responder</span><span class="kid">The talking brain</span></h4>
+            <div class="sub"><span class="pro">Writes the reply using the chosen specialist's context.</span><span class="kid">Uses the right helper to give a great answer.</span></div>
+            <div class="answer" id="answer">...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BUG HUNT -->
+<section id="bugs" class="alt">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <span class="tag" style="background:var(--coral);color:#fff">Bug Hunt</span>
+        <h2><span class="pro">Every engineer's favorite pastime</span><span class="kid">Squash the bugs!</span></h2>
+        <p class="pro">A 20-second break. Bugs are fastest right before a release, naturally.</p>
+        <p class="kid">In computers, a "bug" is a mistake hiding in the code. Tap as many as you can in 20 seconds!</p>
+      </div>
+    </div>
+    <div class="game reveal">
+      <div class="arena" id="arena">
+        <div class="code" aria-hidden="true">async function helpCustomer(request) {
+  const intent = await thinker.decide(request);
+  const agent  = agents[intent.route];
+  const tools  = await mcp.connect(intent.tools);
+  const reply  = await responder.say({ agent, tools });
+  return guardrails.check(reply);
+}
+
+// ship it safely, ship it often
+export default helpCustomer;</div>
+        <div class="overlay" id="overlay">
+          <div>
+            <h3 id="ovTitle"><span class="pro">Ready to debug?</span><span class="kid">Ready, bug hunter?</span></h3>
+            <p id="ovText" style="color:var(--muted);margin:0 0 16px"><span class="pro">Click the bugs before they ship to production.</span><span class="kid">Bugs wiggle around. Tap them fast!</span></p>
+            <button class="btn primary" id="startBtn">Start</button>
+          </div>
+        </div>
+      </div>
+      <div class="scoreboard">
+        <div class="stat"><div class="k">Bugs fixed</div><div class="v" id="score">0</div></div>
+        <div class="stat"><div class="k">Time</div><div class="v" id="time">20s</div><div class="timer"><i id="timerBar"></i></div></div>
+        <div class="stat"><div class="k">Your best</div><div class="v" id="best">0</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JOURNEY -->
+<section id="journey">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <span class="tag" style="background:var(--teal);color:#fff">The Journey</span>
+        <h2><span class="pro">Career, one level at a time</span><span class="kid">My video game levels</span></h2>
+        <p class="pro">Click a level for the details.</p>
+        <p class="kid">Every job is a new level. Tap one to see what I learned there!</p>
+      </div>
+    </div>
+    <div class="map reveal">
+      <div class="track-line" aria-hidden="true"></div>
+      <div class="levels" role="tablist" id="levels"></div>
+    </div>
+    <div class="detail" id="detail" role="tabpanel" aria-live="polite"></div>
+
+    <div style="margin-top:44px" class="reveal">
+      <h3 style="font-size:1.35rem;margin-bottom:14px"><span class="pro">Power-ups (a.k.a. the toolkit)</span><span class="kid">Power-ups I've collected</span></h3>
+      <div class="powerups">
+        <span class="pu"><i style="background:var(--teal)"></i>Multi-agent systems</span>
+        <span class="pu"><i style="background:var(--teal)"></i>MCP &amp; tool use</span>
+        <span class="pu"><i style="background:var(--coral)"></i>Conversational &amp; voice AI</span>
+        <span class="pu"><i style="background:var(--coral)"></i>LLM routing</span>
+        <span class="pu"><i style="background:var(--sky)"></i>React &amp; Next.js</span>
+        <span class="pu"><i style="background:var(--sky)"></i>TypeScript &amp; Node.js</span>
+        <span class="pu"><i style="background:var(--sky)"></i>Python</span>
+        <span class="pu"><i style="background:var(--sun)"></i>DevOps &amp; platform engineering</span>
+        <span class="pu"><i style="background:var(--sun)"></i>FinOps</span>
+        <span class="pu"><i style="background:var(--plum)"></i>AI governance</span>
+        <span class="pu"><i style="background:var(--plum)"></i>Regulated domains</span>
+        <span class="pu"><i style="background:var(--plum)"></i>Building teams</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SAY HI -->
+<section id="hello" style="padding-top:24px">
+  <div class="wrap">
+    <div class="hello reveal">
+      <div>
+        <h2><span class="pro">Let's build something useful.</span><span class="kid">Want to build a robot together?</span></h2>
+        <p class="pro">Agentic AI, voice agents in regulated industries, platform strategy, or just a good engineering debate. I'm always up for the conversation.</p>
+        <p class="kid">Ask a grown-up to help you say hi. And remember: the best engineers ask lots of questions!</p>
+      </div>
+      <div class="cta" style="margin:0">
+        <a class="btn primary" href="https://github.com/sbmadhav" rel="noopener"><svg aria-hidden="true"><use href="#i-gh"/></svg> GitHub</a>
+        <a class="btn" href="numo/">Play Numo</a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>&copy; <span id="yr"></span> Madhav Srinivasan. Views are my own.</span>
+    <span>Made with curiosity in New Jersey. Bolt the robot says hi.</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const store = {
+    get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+    set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+  };
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  $('#yr').textContent = new Date().getFullYear();
+
+  /* ---------- Kid mode ---------- */
+  const toggle = $('#modeToggle');
+  const isKid = () => document.body.classList.contains('kidmode');
+  function setMode(kid, announce){
+    document.body.classList.toggle('kidmode', kid);
+    toggle.setAttribute('aria-checked', String(kid));
+    store.set('kidmode', kid ? '1' : '0');
+    renderChips(); resetLab(); renderLevel(current);
+    if (announce) say(kid ? "Kid mode ON! Everything is explained in kid words now." : "Grown-up mode. Same robot, fancier words.");
+  }
+  toggle.addEventListener('click', () => { setMode(!isKid(), true); if (isKid()) burst(40); });
+
+  /* ---------- Bolt the robot ---------- */
+  const bubble = $('#bubble');
+  let bubbleTimer;
+  function say(text){
+    bubble.textContent = text; bubble.classList.add('show');
+    clearTimeout(bubbleTimer); bubbleTimer = setTimeout(() => bubble.classList.remove('show'), 4200);
+  }
+  const lines = {
+    pro: ["Hi, I'm Bolt. I route requests so the big model doesn't have to.",
+          "Fun fact: the cheapest token is the one you never generate.",
+          "Madhav's rule: guardrails are a feature, not a tax.",
+          "Try the Brain Lab below. I'm the fast part.",
+          "Flip the switch up top. I speak kid too."],
+    kid: ["Beep boop! I'm Bolt. Madhav built me to help!",
+          "Did you know? Computers only understand 1s and 0s. That's it!",
+          "My antenna lights up when I'm thinking really hard.",
+          "Can you beat Madhav's score in Bug Hunt?",
+          "Robots should always be kind and tell the truth. That's the rule!"]
+  };
+  let li = 0;
+  $('#bot').addEventListener('click', () => {
+    const set = isKid() ? lines.kid : lines.pro;
+    say(set[li++ % set.length]);
+    const m = $('#mouth'); m.setAttribute('d','M68 90 q12 14 24 0');
+    $('#antenna').setAttribute('fill','#FFC53D');
+    setTimeout(() => { m.setAttribute('d','M68 92 q12 9 24 0'); $('#antenna').setAttribute('fill','#FF6B5B'); }, 600);
+  });
+  // eyes follow pointer
+  const pupils = [...document.querySelectorAll('.pupil')];
+  const botEl = $('#bot');
+  window.addEventListener('pointermove', e => {
+    const r = botEl.getBoundingClientRect();
+    if (!r.width) return;
+    const scale = r.width / 160;
+    pupils.forEach(p => {
+      const bx = +p.getAttribute('cx') === 62 ? 62 : 98;
+      const ex = r.left + bx * scale, ey = r.top + 72 * scale;
+      const a = Math.atan2(e.clientY - ey, e.clientX - ex);
+      const d = Math.min(5, Math.hypot(e.clientX - ex, e.clientY - ey) / 30);
+      p.setAttribute('transform', `translate(${Math.cos(a)*d} ${Math.sin(a)*d})`);
+    });
+  }, { passive:true });
+  setTimeout(() => say(isKid() ? "Hi friend! Tap me!" : "Hi there. Click me, I have opinions."), 1200);
+
+  /* ---------- Say my name ---------- */
+  $('#sayName').addEventListener('click', () => {
+    say('MAA-dhuv. Rhymes with "lava" with a "dh". Easy!');
+    try {
+      const u = new SpeechSynthesisUtterance('Maadhav');
+      u.rate = .8; u.lang = 'en-IN';
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    } catch(e){}
+  });
+
+  /* ---------- Brain Lab ---------- */
+  const LAB = {
+    pro: {
+      lanes: [{id:'billing',label:'Billing agent'},{id:'complaint',label:'Care agent'},{id:'account',label:'Account agent'}],
+      qs: [
+        {q:"I was charged twice for my order", route:'billing', tools:['payments.lookup','refunds.create'], a:"Sorry about that. I found the duplicate charge from yesterday and started a refund. You'll see it back on your card in 3 to 5 business days."},
+        {q:"What's my current balance?", route:'account', tools:['accounts.read'], a:"Your available balance is shown in the app under Accounts. I can also text it to the number on file if that's easier."},
+        {q:"I want to file a complaint", route:'complaint', tools:['cases.create','sentiment'], a:"I'm sorry it came to this. I've opened a case and flagged it for a specialist who will follow up within one business day. Want to tell me what happened?"},
+        {q:"Why was my card declined?", route:'billing', tools:['auth.decisions','fraud.signals'], a:"It looks like a security check paused that purchase. If it was you, confirm in the app and you can retry right away."}
+      ],
+      rules: [[/charg|refund|pay|bill|declin|fee|card/i,'billing'],[/complain|angry|upset|unhappy|bad|terrible/i,'complaint']],
+      fallback: {route:'account', tools:['accounts.read'], a:"Happy to help with that. Let me pull up your account details first so I get it right."}
+    },
+    kid: {
+      lanes: [{id:'joke',label:'Joke helper'},{id:'math',label:'Math helper'},{id:'science',label:'Science helper'}],
+      qs: [
+        {q:"Tell me a joke!", route:'joke', tools:['joke-book'], a:"Why did the robot go on vacation? To recharge its batteries!"},
+        {q:"What is 8 + 5?", route:'math', tools:['calculator'], a:"8 + 5 = 13. Count 5 more after 8: nine, ten, eleven, twelve, thirteen!"},
+        {q:"Why is the sky blue?", route:'science', tools:['science-book'], a:"Sunlight has every color in it. Air bounces blue light around the most, so blue fills the whole sky!"},
+        {q:"How do robots think?", route:'science', tools:['robot-facts'], a:"Robots follow instructions called code. A speedy part decides what to do, and a careful part does the talking, just like me!"}
+      ],
+      rules: [[/joke|funny|laugh|silly/i,'joke'],[/\d|plus|minus|math|count|times|add/i,'math']],
+      fallback: {route:'science', tools:['science-book'], a:"Ooh, great question! I'd look that up in my science book. Keep asking questions, that's how scientists start!"}
+    }
+  };
+  const cfg = () => LAB[isKid() ? 'kid' : 'pro'];
+  let runId = 0;
+  function renderChips(){
+    const c = $('#chips'); c.innerHTML = '';
+    cfg().qs.forEach((item, i) => {
+      const b = document.createElement('button');
+      b.className = 'chip'; b.textContent = item.q; b.setAttribute('aria-pressed','false');
+      b.addEventListener('click', () => {
+        c.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed','false'));
+        b.setAttribute('aria-pressed','true'); run(item);
+      });
+      c.appendChild(b);
+    });
+    const lanes = $('#lanes'); lanes.innerHTML = '';
+    cfg().lanes.forEach(l => { const d = document.createElement('div'); d.className='lane'; d.dataset.id=l.id; d.textContent=l.label; lanes.appendChild(d); });
+  }
+  function resetLab(){
+    runId++;
+    $('#thought').textContent = isKid() ? 'waiting for a question...' : 'idle: awaiting input';
+    $('#answer').textContent = '...'; $('#answer').classList.remove('caret');
+    $('#st1').classList.remove('on'); $('#st2').classList.remove('on');
+  }
+  const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
+  async function typeInto(el, text, id, speed=22){
+    el.textContent = ''; el.classList.add('caret');
+    if (reduce) { el.textContent = text; el.classList.remove('caret'); return; }
+    for (const ch of text){ if (id !== runId) return; el.textContent += ch; await wait(speed); }
+    el.classList.remove('caret');
+  }
+  async function run(item){
+    const id = ++runId;
+    const lanes = [...document.querySelectorAll('.lane')];
+    lanes.forEach(l => l.classList.remove('pick'));
+    $('#st2').classList.remove('on'); $('#answer').textContent = '...';
+    $('#st1').classList.add('on');
+    const th = $('#thought');
+    await typeInto(th, isKid() ? 'hmm... thinking quietly...' : 'classifying intent...', id, 28);
+    await wait(350); if (id !== runId) return;
+    lanes.forEach(l => l.classList.toggle('pick', l.dataset.id === item.route));
+    const conf = (0.86 + Math.random()*0.12).toFixed(2);
+    await typeInto(th, `{ route: "${item.route}", tools: [${item.tools.map(t=>`"${t}"`).join(', ')}], confidence: ${conf} }`, id, 12);
+    await wait(400); if (id !== runId) return;
+    $('#st1').classList.remove('on'); $('#st2').classList.add('on');
+    await typeInto($('#answer'), item.a, id, 18);
+  }
+  $('#askForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const q = $('#askInput').value.trim(); if (!q) return;
+    const c = cfg();
+    let route = null;
+    for (const [re, r] of c.rules) if (re.test(q)) { route = r; break; }
+    const hit = route && c.qs.find(x => x.route === route);
+    const item = hit ? {...hit} : {...c.fallback};
+    if (route && isKid() && route === 'math'){
+      const m = q.match(/(\d+)\s*([+\-x*])\s*(\d+)/);
+      if (m){ const a=+m[1], b=+m[3]; const v = m[2]==='+'?a+b:m[2]==='-'?a-b:a*b; item.a = `${a} ${m[2]} ${b} = ${v}. You're a math whiz!`; }
+    }
+    document.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed','false'));
+    run(item); $('#askInput').value='';
+  });
+
+  /* ---------- Bug Hunt ---------- */
+  const arena = $('#arena'), overlay = $('#overlay');
+  let score = 0, playing = false, spawnT, tickT, endAt;
+  let best = +(store.get('bugBest') || 0); $('#best').textContent = best;
+  function spawn(){
+    if (!playing) return;
+    const live = arena.querySelectorAll('.bug:not(.squash)').length;
+    if (live < 5){
+      const b = document.createElement('button');
+      b.className = 'bug'; b.setAttribute('aria-label','Squash bug');
+      b.innerHTML = '<svg aria-hidden="true"><use href="#i-bug"/></svg>';
+      const W = arena.clientWidth - 56, H = arena.clientHeight - 56;
+      const place = () => { b.style.left = Math.random()*W + 'px'; b.style.top = Math.random()*H + 'px'; b.style.transform = `rotate(${Math.random()*360}deg)`; };
+      place(); arena.appendChild(b);
+      const mv = setInterval(() => b.isConnected ? place() : clearInterval(mv), 1300 - Math.min(700, score*30));
+      const ttl = setTimeout(() => { clearInterval(mv); b.remove(); }, 4200);
+      b.addEventListener('pointerdown', e => {
+        if (!playing || b.classList.contains('squash')) return;
+        e.preventDefault(); clearInterval(mv); clearTimeout(ttl);
+        b.classList.add('squash'); score++; $('#score').textContent = score;
+        const p = document.createElement('span'); p.className='pop'; p.textContent = isKid() ? 'Squish! +1' : 'fixed +1';
+        p.style.left = b.style.left; p.style.top = b.style.top; arena.appendChild(p);
+        setTimeout(() => { b.remove(); p.remove(); }, 800);
+      });
+      b.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' '){ b.dispatchEvent(new PointerEvent('pointerdown')); }});
+    }
+    spawnT = setTimeout(spawn, Math.max(350, 900 - score*25));
+  }
+  function start(){
+    score = 0; $('#score').textContent = 0; playing = true;
+    overlay.style.display = 'none';
+    arena.querySelectorAll('.bug,.pop').forEach(n => n.remove());
+    endAt = performance.now() + 20000;
+    const bar = $('#timerBar');
+    const tick = () => {
+      const left = Math.max(0, endAt - performance.now());
+      $('#time').textContent = Math.ceil(left/1000) + 's';
+      bar.style.transform = `scaleX(${left/20000})`;
+      if (left <= 0) return end();
+      tickT = requestAnimationFrame(tick);
+    };
+    tick(); spawn();
+  }
+  function end(){
+    playing = false; clearTimeout(spawnT); cancelAnimationFrame(tickT);
+    arena.querySelectorAll('.bug').forEach(n => n.remove());
+    const newBest = score > best;
+    if (newBest){ best = score; store.set('bugBest', best); $('#best').textContent = best; }
+    const kid = isKid();
+    let msg;
+    if (score >= 25) msg = kid ? "WOW! You're a super bug hunter!" : "Zero-defect release. Principal engineer energy.";
+    else if (score >= 15) msg = kid ? "Amazing job! Those bugs didn't stand a chance." : "Clean build. Ship it.";
+    else if (score >= 6) msg = kid ? "Nice squishing! Want to try again?" : "Solid. A few made it to prod, as they do.";
+    else msg = kid ? "Bugs are sneaky! Try again, you've got this." : "The bugs won this sprint. Retro time.";
+    $('#ovTitle').textContent = `${score} bug${score===1?'':'s'} fixed${newBest ? ' (new best!)' : ''}`;
+    $('#ovText').textContent = msg;
+    $('#startBtn').textContent = 'Play again';
+    overlay.style.display = '';
+    if (newBest && score > 0) burst(70);
+  }
+  $('#startBtn').addEventListener('click', start);
+
+  /* ---------- Journey ---------- */
+  const LEVELS = [
+    { icon:'i-book', lv:'Level 1', name:{pro:'Always learning',kid:'Learning Land'},
+      role:{pro:'Ongoing',kid:'Forever!'},
+      pro:['Hackathons, developer meetups, and AI lunch-and-learns','Coursework and certifications across AI, cloud, and platforms','Uses AI as a daily strategic partner, from architecture to FinOps models'],
+      kid:['Goes to hackathons, which are like building parties for coders','Never stops taking classes, even as a grown-up','Asks lots and lots of questions'] },
+    { icon:'i-coin', lv:'Level 2', name:{pro:'Fintech & regulated platforms',kid:'Money Mountain'},
+      role:{pro:'Engineering & platform roles',kid:'Building money helpers'},
+      pro:['Built platforms in fintech and other regulated domains','Learned to design for audits, controls, and compliance from the start','Grew from building systems to leading the teams that build them'],
+      kid:['Built computer programs that help people with their money','Learned that money computers need extra-strong locks','Started leading teams of builders'] },
+    { icon:'i-heart', lv:'Level 3', name:{pro:'Ascension Health',kid:'Hospital Kingdom'},
+      role:{pro:'Sr. Director, Experience Technology, DevOps & Conversational AI',kid:'Boss of the helper builders'},
+      pro:['Led Experience Technology, DevOps, and AI initiatives for a national health system','Drove conversational and voice AI efforts in a HIPAA-regulated setting','Scaled delivery practices across web, mobile, and platform teams'],
+      kid:['Built apps and websites that help patients and nurses','Made talking helpers that answer questions for people','Helped lots of teams build things faster and safer'] },
+    { icon:'i-bank', lv:'Level 4', name:{pro:'Capital One',kid:'Bank Castle'},
+      role:{pro:'Director, Software Engineering (2026 to now)',kid:'Current level!'},
+      pro:['Leading engineering across AI, frontend, and platform work','Building agentic systems with governance baked in','Focused on experiences customers can actually trust'],
+      kid:['Builds robot helpers for a really big bank','Makes sure the helpers are safe and fair','Still squashing bugs every day'], current:true },
+    { icon:'i-q', lv:'Level 5', name:{pro:"What's next",kid:'Secret level'},
+      role:{pro:'Loading...',kid:'Not unlocked yet!'},
+      pro:['Voice agents that think before they talk','Privately trained models for regulated industries','Writing and speaking about responsible, practical AI'],
+      kid:['Smarter talking robots','Robots that help even more people','Maybe you can help build them someday!'] }
+  ];
+  let current = 3;
+  const levelsEl = $('#levels');
+  LEVELS.forEach((L, i) => {
+    const b = document.createElement('button');
+    b.className = 'level'; b.setAttribute('role','tab'); b.dataset.i = i;
+    b.innerHTML = `<span class="node"><svg aria-hidden="true"><use href="#${L.icon}"/></svg>${L.current ? '<svg class="star" aria-hidden="true"><use href="#i-star"/></svg>' : ''}</span>
+      <span><span class="lv">${L.lv}</span><br><span class="nm"></span></span>`;
+    b.addEventListener('click', () => { current = i; renderLevel(i); });
+    levelsEl.appendChild(b);
+  });
+  function renderLevel(i){
+    const L = LEVELS[i], k = isKid() ? 'kid' : 'pro';
+    levelsEl.querySelectorAll('.level').forEach((b, j) => {
+      b.setAttribute('aria-selected', String(j === i));
+      b.querySelector('.nm').textContent = LEVELS[j].name[k];
+    });
+    const xp = Math.round(((i+1) / LEVELS.length) * 100);
+    $('#detail').innerHTML = `<div class="badge"><svg aria-hidden="true"><use href="#${L.icon}"/></svg></div>
+      <div><span class="lv mono" style="color:var(--muted)">${L.lv}</span>
+      <h3>${L.name[k]}</h3><div class="role">${L.role[k]}</div>
+      <ul>${L[k].map(x => `<li>${x}</li>`).join('')}</ul>
+      <div class="xp">XP <span class="bar"><i style="width:${xp}%"></i></span> ${xp}%</div></div>`;
+  }
+
+  /* ---------- Confetti + easter egg ---------- */
+  function burst(n){
+    if (reduce) return;
+    const colors = ['#FF6B5B','#1FA39A','#FFC53D','#5B8DEF','#8E6BD8'];
+    for (let i=0;i<n;i++){
+      const c = document.createElement('i'); c.className='confetti';
+      c.style.left = Math.random()*100+'vw'; c.style.background = colors[i%colors.length];
+      c.style.animationDuration = (1.8+Math.random()*1.8)+'s'; c.style.animationDelay = (Math.random()*.4)+'s';
+      c.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+      document.body.appendChild(c); setTimeout(() => c.remove(), 4200);
+    }
+  }
+  let clicks = 0, clickT;
+  $('#logo').addEventListener('click', () => {
+    clearTimeout(clickT); clickT = setTimeout(() => clicks = 0, 1200);
+    if (++clicks >= 5){ clicks = 0; burst(120); say(isKid() ? "You found the secret party button!" : "Easter egg unlocked. Ship the confetti."); }
+    else window.scrollTo({ top:0, behavior: reduce ? 'auto' : 'smooth' });
+  });
+
+  /* ---------- Reveal on scroll ---------- */
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold:.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  /* ---------- Init ---------- */
+  const params = new URLSearchParams(location.search);
+  const startKid = params.has('kid') || store.get('kidmode') === '1';
+  setMode(startKid, false);
+})();
+</script>
+</body>
+</html>
