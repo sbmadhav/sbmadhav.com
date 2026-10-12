@@ -40,11 +40,12 @@
   const both = (pro, kid) => pro === kid ? pro : `<span class="pro">${pro}</span><span class="kid">${kid}</span>`;
 
   const css = `
-dialog.xp{position:fixed;inset:0 0 0 auto;margin:0;height:100dvh;max-height:100dvh;width:min(440px,100vw);max-width:100vw;padding:0;border:0;border-left:2px solid var(--edge);background:var(--bg);color:var(--ink);overflow:auto;font-family:"Nunito Sans",system-ui,sans-serif;box-shadow:-20px 0 60px -20px rgba(0,0,0,.35)}
-dialog.xp::backdrop{background:rgba(7,6,26,.45);backdrop-filter:blur(3px)}
-dialog.xp[open]{animation:xpIn .32s cubic-bezier(.2,.9,.3,1.15)}
+dialog.xpm{position:fixed;inset:0 0 0 auto;margin:0;height:100dvh;max-height:100dvh;width:min(440px,100vw);max-width:100vw;padding:0;border:0;border-left:2px solid var(--edge);background:var(--bg);color:var(--ink);overflow:auto;font-family:"Nunito Sans",system-ui,sans-serif;box-shadow:-20px 0 60px -20px rgba(0,0,0,.35)}
+dialog.xpm:not([open]){display:none!important}
+dialog.xpm::backdrop{background:rgba(7,6,26,.45);backdrop-filter:blur(3px)}
+dialog.xpm[open]{animation:xpIn .32s cubic-bezier(.2,.9,.3,1.15)}
 @keyframes xpIn{from{transform:translateX(40px);opacity:0}}
-@media (max-width:600px){dialog.xp{inset:auto 0 0 0;width:100vw;height:auto;max-height:88dvh;border-left:0;border-top:2px solid var(--edge);border-radius:24px 24px 0 0}dialog.xp[open]{animation-name:xpUp}@keyframes xpUp{from{transform:translateY(60px);opacity:0}}}
+@media (max-width:600px){dialog.xpm{inset:auto 0 0 0;width:100vw;height:auto;max-height:88dvh;border-left:0;border-top:2px solid var(--edge);border-radius:24px 24px 0 0}dialog.xpm[open]{animation-name:xpUp}@keyframes xpUp{from{transform:translateY(60px);opacity:0}}}
 .xp-in{padding:20px 20px 28px;background:var(--page,var(--bg));min-height:100%}
 .xp-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
 .xp-head h2{margin:0;font:600 1.6rem/1.1 var(--display,Fredoka,sans-serif)}
@@ -67,14 +68,14 @@ dialog.xp[open]{animation:xpIn .32s cubic-bezier(.2,.9,.3,1.15)}
 .xp-link{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:2px solid var(--edge);border-radius:999px;background:var(--card,var(--bg));color:var(--ink);text-decoration:none;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
 .xp-link svg{width:18px;height:18px}
 .xp-foot{margin-top:22px;color:var(--ink-muted,var(--muted));font-size:13px}
-dialog.xp :focus-visible{outline:3px solid var(--sky);outline-offset:3px}
-@media (prefers-reduced-motion:reduce){dialog.xp[open]{animation:none}.xp-page,.xp-sec,.xp-btn{transition:none}}`;
+dialog.xpm :focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){dialog.xpm[open]{animation:none}.xp-page,.xp-sec,.xp-btn{transition:none}}`;
 
   function build() {
     const here = location.pathname.replace(/index\.html$/, '');
     const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
     const d = document.createElement('dialog');
-    d.className = 'xp'; d.setAttribute('aria-labelledby', 'xpTitle');
+    d.className = 'xpm'; d.setAttribute('aria-labelledby', 'xpTitle');
     d.innerHTML = `<div class="xp-in">
       <div class="xp-head"><div><h2 id="xpTitle">${both('Explore', 'Star map')}</h2><p>${both('Every page and corner of this site.', 'Pick a place to fly to!')}</p></div>
         <button class="xp-x" aria-label="Close menu">${icon('close')}</button></div>
