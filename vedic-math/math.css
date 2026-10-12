@@ -359,19 +359,25 @@ sup { font-size: .65em; }
 .history { margin-bottom: 8px; } .history p { color: var(--ink); font-size: 15.5px; margin: 6px 0; }
 .history a { color: var(--sky-strong); font-weight: 700; }
 .sutra-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
-.sutra-card { position: relative; min-height: 210px; padding: 0; border: 2px solid var(--edge); border-radius: var(--radius-lg); background: var(--card); color: var(--ink); text-align: left; font: inherit; cursor: pointer; box-shadow: var(--shadow-ledge); perspective: 800px; overflow: hidden; }
+.sutra-card { position: relative; min-height: 220px; border: 2px solid var(--edge); border-radius: var(--radius-lg); background: var(--card); color: var(--ink); box-shadow: var(--shadow-ledge); overflow: hidden; transition: transform .2s; }
+.sutra-card:hover { transform: translateY(-3px) rotate(-.4deg); }
 .sutra-card.got { background: linear-gradient(160deg, color-mix(in srgb, var(--plum) 22%, var(--card)), var(--card) 60%); }
 .sutra-face, .sutra-back { position: absolute; inset: 0; padding: 16px; display: flex; flex-direction: column; gap: 6px; transition: transform .45s, opacity .3s; backface-visibility: hidden; }
-.sutra-back { transform: rotateY(180deg); opacity: 0; font-size: 14.5px; line-height: 1.45; overflow: auto; }
-.sutra-card.flipped .sutra-face { transform: rotateY(-180deg); opacity: 0; }
-.sutra-card.flipped .sutra-back { transform: none; opacity: 1; }
+.sutra-face { border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; width: 100%; }
+.sutra-back { transform: rotateY(180deg); opacity: 0; pointer-events: none; font-size: 14.5px; line-height: 1.45; overflow: auto; }
+.sutra-card.flipped .sutra-face { transform: rotateY(-180deg); opacity: 0; pointer-events: none; }
+.sutra-card.flipped .sutra-back { transform: none; opacity: 1; pointer-events: auto; }
 .sutra-n { font: 700 11px/1 var(--font-sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
 .sutra-face b { font: 600 1.2rem/1.25 var(--display); color: var(--plum-strong); }
 .sutra-face i { color: var(--ink-muted); }
 .sutra-got, .sutra-tap { margin-top: auto; align-self: flex-start; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
 .sutra-got { background: var(--teal); color: var(--on-accent); } .sutra-tap { border: 1px dashed var(--ink-muted); color: var(--ink-muted); }
 .sutra-back code { font: 500 13px/1.4 var(--font-mono); background: color-mix(in srgb, var(--sun) 20%, var(--card)); padding: 6px 8px; border-radius: 8px; }
-.sutra-try { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; } .sutra-try a { color: var(--sky-strong); font-weight: 700; font-size: 13.5px; }
+.sutra-acts { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 6px; }
+.sutra-more { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 99px; background: var(--plum); color: var(--on-accent); font-weight: 700; font-size: 14px; text-decoration: none; border: 2px solid var(--edge); box-shadow: 0 2px 0 var(--ledge); }
+.sutra-more svg { width: 18px; height: 18px; }
+.sutra-flipback { margin-left: auto; width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--edge); background: var(--card); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+.sutra-flipback svg { width: 18px; height: 18px; }
 
 /* Leaderboards */
 .lb-tabs { display: inline-flex; border: 2px solid var(--edge); border-radius: 99px; overflow: hidden; margin-bottom: 10px; }
@@ -557,3 +563,56 @@ sup { font-size: .65em; }
 .watch-card.plays:hover .watch-play svg { transform: scale(1.08); }
 .rel-ext { margin-left: auto; color: var(--ink-muted); font-size: 12px; font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { .vm-player[open] { animation: none; } }
+
+
+/* Sutra deep-dive modal */
+.sutra-modal { width: min(1100px, 96vw); max-width: 96vw; max-height: 92dvh; padding: 0; border: 2px solid var(--edge); border-radius: var(--radius-xl); background: var(--bg); color: var(--ink); box-shadow: 0 40px 100px -24px rgba(0,0,0,.55); overflow: auto; transform-origin: top left; }
+.sutra-modal::backdrop { background: rgba(7,6,26,.6); backdrop-filter: blur(5px); }
+.sd-inner { padding: 22px 26px 18px; }
+@media (max-width: 600px) { .sd-inner { padding: 16px; } }
+.sd-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+.sd-head h2 { font: 600 clamp(1.5rem, 3.4vw, 2.2rem)/1.15 var(--display); color: var(--plum-strong); margin: 10px 0 4px; }
+.sd-mean { font-style: italic; color: var(--ink-muted); margin: 0; font-size: 1.05rem; }
+.sd-body { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 26px; margin-top: 18px; }
+@media (max-width: 860px) { .sd-body { grid-template-columns: 1fr; } }
+.sd-fig { position: sticky; top: 0; align-self: start; padding: 14px; border-radius: var(--radius-lg); background: var(--card); border: 1px solid var(--line); }
+@media (max-width: 860px) { .sd-fig { position: static; } }
+.sd-text h3 { font: 600 1.1rem/1.2 var(--display); margin: 18px 0 6px; }
+.sd-text h3:first-child { margin-top: 0; }
+.sd-text p { margin: 6px 0; line-height: 1.6; }
+.sd-ex { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.sd-ex li { display: grid; gap: 4px; padding: 10px 12px; border-radius: var(--radius-md); background: var(--card); border: 1px solid var(--line); }
+.sd-uses { display: flex; flex-wrap: wrap; gap: 6px; } .sd-uses span { padding: 4px 10px; border-radius: 99px; background: color-mix(in srgb, var(--teal) 16%, var(--card)); font-size: 13.5px; font-weight: 700; }
+.sd-try { display: flex; flex-wrap: wrap; gap: 8px; }
+.sd-foot { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.sd-foot a { text-decoration: none; }
+
+/* Animated scenes */
+.sc-stage { min-height: 220px; display: grid; place-items: center; }
+.sc-svg { width: 100%; height: auto; overflow: visible; }
+.sc-say { min-height: 3em; margin: 10px 0 8px; font-weight: 600; line-height: 1.45; }
+.sc-ctrl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sc-pos { font: 500 13px/1 var(--font-mono); color: var(--ink-muted); }
+.sc-line { fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linecap: round; }
+.sc-c1 { stroke: var(--coral-strong); } .sc-c2 { stroke: var(--teal-strong); } .sc-c3 { stroke: var(--sky-strong); }
+.sc-faintline { stroke: var(--line); }
+.sc-arrow { stroke: var(--plum-strong); stroke-dasharray: 6 6; }
+.sc-soft { fill-opacity: .55; }
+.sc-none { fill: none; stroke: var(--ink); stroke-width: 2; stroke-dasharray: 5 5; }
+.sc-dash { fill: none; stroke: var(--coral-strong); stroke-width: 2.4; stroke-dasharray: 6 5; }
+.sc-faint { fill-opacity: .18; }
+.sc-digit { fill: var(--card); stroke: var(--edge); stroke-width: 2; }
+.sc-digit.sc-last { fill: color-mix(in srgb, var(--teal) 25%, var(--card)); }
+.sc-digit.sc-new { fill: color-mix(in srgb, var(--sun) 40%, var(--card)); }
+.sc-dt { fill: var(--ink); font: 700 24px var(--display); }
+.sc-dt2 { fill: var(--coral-strong); font: 700 22px var(--display); }
+.sc-big { fill: var(--ink); font: 700 30px var(--display); }
+.sc-svg .enter { animation: scIn .6s ease-out both; }
+.sc-svg .enter .sc-line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: scDraw .9s ease-out forwards; }
+.sc-svg .enter .sc-arrow { stroke-dasharray: 1; }
+@keyframes scIn { from { opacity: 0; transform: translateY(6px); } }
+@keyframes scDraw { to { stroke-dashoffset: 0; } }
+.sc-eq { display: grid; gap: 10px; width: 100%; padding: 6px 4px; }
+.sc-eqline { font: 600 1.25rem/1.6 var(--display); padding: 8px 12px; border-radius: var(--radius-md); background: color-mix(in srgb, var(--ink) 4%, var(--card)); overflow-wrap: anywhere; }
+.sc-eqline.enter { animation: scIn .5s ease-out both; background: color-mix(in srgb, var(--sun) 18%, var(--card)); }
+@media (prefers-reduced-motion: reduce) { .sc-svg .enter, .sc-svg .enter .sc-line, .sc-eqline.enter { animation: none; stroke-dashoffset: 0; } .sutra-card { transition: none; } }

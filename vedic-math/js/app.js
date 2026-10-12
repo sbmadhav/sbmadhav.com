@@ -5,6 +5,8 @@ import { SKILLS, byId, skillsFor, GRADES, STRANDS, gradeOf } from './skills/inde
 import { TRICKS, BELTS } from './vedic.js';
 import { GAMES } from './games.js';
 import { SUTRAS, SUBSUTRAS, HISTORY } from './sutras.js';
+import { DETAILS } from './sutra-details.js';
+import { mountScene } from './scenes.js';
 import { RESOURCES } from './resources.js';
 import { checkOne } from './check.js';
 import { pick, shuffle } from './lib.js';
@@ -47,6 +49,7 @@ const routes = [
   [/^#\/run\/(\w+)$/, m => mixView(m[1], true)],
   [/^#\/(dojo|tricks)$/, dojoView],
   [/^#\/sutras$/, sutrasView],
+  [/^#\/sutras\/(\w+)$/, m => { sutrasView(); openSutra(m[1], false); }],
   [/^#\/arena$/, arenaView],
   [/^#\/duel$/, duelView],
   [/^#\/games$/, gamesView],
@@ -58,6 +61,11 @@ function render() {
   if (cleanup) { try { cleanup(); } catch (e) {} cleanup = null; }
   try { speechSynthesis.cancel(); } catch (e) {}
   const h = location.hash || '#/';
+  // Sutra deep dives open over the sutras page without re-rendering it
+  const ms = h.match(/^#\/sutras\/(\w+)$/);
+  if (ms && document.querySelector('.sutra-grid')) { openSutra(ms[1], true); return; }
+  if (h === '#/sutras' && sutraDlg && sutraDlg.open) { closeSutra(); return; }
+  if (sutraDlg && sutraDlg.open) closeSutra(true);
   const hit = routes.find(([re]) => re.test(h));
   if (!fx.mode() && !/^#\/(watch|sutras)$/.test(h)) modePicker(); else (hit ? hit[1](h.match(hit[0])) : home());
   document.querySelectorAll('.mq-nav a[href]').forEach(a => a.setAttribute('aria-current', String(h === a.getAttribute('href') || (!!a.dataset.match && new RegExp(a.dataset.match).test(h)))));
@@ -355,26 +363,88 @@ function dojoView() {
 
 /* ---------- Sutras: deep dive and card collection ---------- */
 function collectedCard(c) { return c.tricks.some(t => store.mastered('v-' + t)) || store.seen('sutra:' + c.name); }
+const sutraId = (c, sub) => (sub ? 'u' : 's') + c.n;
+const ALL_SUTRAS = [...SUTRAS.map(c => ({ ...c, sub: false, id: 's' + c.n })), ...SUBSUTRAS.map(c => ({ ...c, sub: true, id: 'u' + c.n }))];
 function sutrasView() {
   document.title = `The Vedic sutras: ${BRAND} · Madhav`;
   store.markSeen('sutras');
-  const all = [...SUTRAS, ...SUBSUTRAS], got = all.filter(collectedCard).length;
-  const card = (c, sub) => { const have = collectedCard(c); return `<button class="sutra-card${have ? ' got' : ''}" data-name="${esc(c.name)}" aria-expanded="false">
-    <span class="sutra-face"><span class="sutra-n">${sub ? 'Sub-sutra' : 'Sutra'} ${c.n}</span><b lang="sa-Latn">${c.name}</b><i>${c.meaning}</i>${have ? '<span class="sutra-got">Collected</span>' : '<span class="sutra-tap">Tap to flip</span>'}</span>
-    <span class="sutra-back"><span>${c.plain}</span>${c.example ? `<code>${c.example}</code>` : ''}${c.tricks.length ? `<span class="sutra-try">${c.tricks.map(t => { const tr = TRICKS.find(x => x.id === t); return tr ? `<a href="#/skill/v-${t}">Try: ${tr.title}</a>` : ''; }).join('')}</span>` : ''}</span></button>`; };
+  const got = ALL_SUTRAS.filter(collectedCard).length;
+  const card = c => { const have = collectedCard(c); return `<article class="sutra-card${have ? ' got' : ''}" data-id="${c.id}" data-name="${esc(c.name)}">
+    <button class="sutra-face" aria-expanded="false" aria-label="${esc(c.name)}: ${esc(c.meaning)}. Flip card"><span class="sutra-n">${c.sub ? 'Sub-sutra' : 'Sutra'} ${c.n}</span><b lang="sa-Latn">${c.name}</b><i>${c.meaning}</i>${have ? '<span class="sutra-got">Collected</span>' : '<span class="sutra-tap">Tap to flip</span>'}</button>
+    <div class="sutra-back"><span>${c.plain}</span>${c.example ? `<code>${c.example}</code>` : ''}
+      <span class="sutra-acts"><a class="sutra-more" href="#/sutras/${c.id}">Learn more ${icon('play')}</a><button type="button" class="sutra-flipback" aria-label="Flip back">${icon('loop')}</button></span></div></article>`; };
   view.innerHTML = `<section class="md-section mq-tight"><div class="md-wrap">
     ${crumbs([null, 'Sutras'])}
     <span class="md-tag md-tag--plum">Deep dive</span>
     <h1 class="md-heading">The 16 sutras and 13 sub-sutras</h1>
-    <p class="md-lede">Each sutra is a short word formula that packs a whole method into a phrase. Flip a card to read it, master a linked trick to keep it for good. You have collected <b>${got} of ${all.length}</b>.</p>
-    <div class="mq-bar mq-bar--big sutra-bar"><i style="width:${pct(got / all.length)}%"></i></div>
+    <p class="md-lede">Each sutra is a short word formula that packs a whole method into a phrase. Flip a card for the short version, then open <b>Learn more</b> for the full story: animated diagrams, why it works, worked examples and further reading. You have collected <b>${got} of ${ALL_SUTRAS.length}</b>.</p>
+    <div class="mq-bar mq-bar--big sutra-bar"><i style="width:${pct(got / ALL_SUTRAS.length)}%"></i></div>
     <div class="md-card history"><h2 class="mq-h3">Where Vedic math comes from</h2>${HISTORY.map(h => `<p>${h}</p>`).join('')}
       <p class="mq-small">Read more: ${RESOURCES.filter(r => r.vedic && r.tags.includes('history')).map(r => `<a${wa(r)}>${esc(r.title)}</a>`).join(' · ')}</p></div>
     <div class="md-card history roots"><h2 class="mq-h3">Older roots: what you see in the background</h2><p>The 1965 sutras stand on a much older tradition of Indian mathematics. The moving background draws real pieces of it.</p><ul>${BG_NOTES.map(([h, b]) => `<li><b>${h}.</b> ${b}</li>`).join('')}</ul></div>
-    <h2 class="mq-strand">The 16 sutras</h2><div class="sutra-grid">${SUTRAS.map(c => card(c, false)).join('')}</div>
-    <h2 class="mq-strand">The 13 sub-sutras</h2><div class="sutra-grid">${SUBSUTRAS.map(c => card(c, true)).join('')}</div>
+    <h2 class="mq-strand">The 16 sutras</h2><div class="sutra-grid">${ALL_SUTRAS.filter(c => !c.sub).map(card).join('')}</div>
+    <h2 class="mq-strand">The 13 sub-sutras</h2><div class="sutra-grid">${ALL_SUTRAS.filter(c => c.sub).map(card).join('')}</div>
   </div></section>`;
-  view.querySelectorAll('.sutra-card').forEach(b => b.onclick = e => { if (e.target.closest('a')) return; const open = b.classList.toggle('flipped'); b.setAttribute('aria-expanded', String(open)); fx.sfx('tap'); if (open && store.markSeen('sutra:' + b.dataset.name)) { store.addXP(5, 'sutra'); b.classList.add('got'); } });
+  const flip = (art, open) => { art.classList.toggle('flipped', open); art.querySelector('.sutra-face').setAttribute('aria-expanded', String(open)); fx.sfx('tap'); if (open) { collect(art.dataset.name); art.classList.add('got'); art.querySelector('.sutra-more').focus({ preventScroll: true }); } else art.querySelector('.sutra-face').focus({ preventScroll: true }); };
+  view.querySelectorAll('.sutra-card').forEach(art => { art.querySelector('.sutra-face').onclick = () => flip(art, true); art.querySelector('.sutra-flipback').onclick = () => flip(art, false); });
+}
+function collect(name) { if (store.markSeen('sutra:' + name)) store.addXP(5, 'sutra'); }
+
+/* ---------- Sutra deep-dive modal: the card grows into it ---------- */
+let sutraDlg = null, sutraStop = null, sutraFrom = null, openedInPage = false;
+const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+function sutraHTML(c) {
+  const d = DETAILS[c.name], i = ALL_SUTRAS.indexOf(c), prev = ALL_SUTRAS[i - 1], next = ALL_SUTRAS[i + 1];
+  const tricks = c.tricks.map(t => TRICKS.find(x => x.id === t)).filter(Boolean);
+  const readLink = ([label, url]) => { const r = RESOURCES.find(x => x.url === url); return r ? `<a${wa(r)}>${icon(embedOf(r) ? 'play' : 'link')}<span>${esc(label)}</span></a>` : `<a href="${url}" target="_blank" rel="noopener noreferrer">${icon('link')}<span>${esc(label)}</span></a>`; };
+  return `<header class="sd-head"><div><span class="md-tag md-tag--plum">${c.sub ? 'Sub-sutra' : 'Sutra'} ${c.n} of ${c.sub ? 13 : 16}</span><h2 id="sdTitle" lang="sa-Latn">${c.name}</h2><p class="sd-mean">${c.meaning}</p></div><button class="vp-x sd-x" aria-label="Close">${icon('close')}</button></header>
+  <div class="sd-body">
+    <div class="sd-fig"><div class="sd-scene"></div><p class="mq-small">Diagram plays by itself. Use Back and Next to go at your own pace.</p></div>
+    <div class="sd-text">
+      <h3>In plain words</h3><p>${c.plain}</p><p>${d.more}</p>
+      <h3>Why it works</h3><p>${d.why}</p>
+      <h3>Worked examples</h3><ul class="sd-ex">${d.examples.map(([q, a]) => `<li><b>${q}</b><span>${a}</span></li>`).join('')}</ul>
+      <h3>Where it is used</h3><p class="sd-uses">${d.uses.map(u => `<span>${u}</span>`).join('')}</p>
+      ${tricks.length ? `<h3>Try it yourself</h3><p class="sd-try">${tricks.map(t => `<a class="md-btn md-btn--sm md-btn--primary" href="#/skill/v-${t.id}">${icon('bolt')} ${t.title}</a>`).join(' ')}</p>` : ''}
+      <h3>Learn more</h3><div class="rel-links">${d.read.map(readLink).join('')}</div>
+    </div>
+  </div>
+  <footer class="sd-foot">${prev ? `<a class="md-btn md-btn--sm" href="#/sutras/${prev.id}" data-swap>&larr; ${prev.name}</a>` : '<span></span>'}${next ? `<a class="md-btn md-btn--sm" href="#/sutras/${next.id}" data-swap>${next.name} &rarr;</a>` : ''}</footer>`;
+}
+function openSutra(id, fromPage) {
+  const c = ALL_SUTRAS.find(x => x.id === id); if (!c) return;
+  if (!sutraDlg) {
+    sutraDlg = document.createElement('dialog'); sutraDlg.className = 'sutra-modal'; sutraDlg.setAttribute('aria-labelledby', 'sdTitle'); document.body.append(sutraDlg);
+    sutraDlg.addEventListener('cancel', e => { e.preventDefault(); requestClose(); });
+    sutraDlg.addEventListener('click', e => { if (e.target === sutraDlg) requestClose(); if (e.target.closest('.sd-x')) requestClose(); const sw = e.target.closest('[data-swap]'); if (sw) { e.preventDefault(); location.replace(sw.getAttribute('href')); } if (e.target.closest('a[href^="#/skill"]')) { sutraDlg.close(); } });
+  }
+  const swapping = sutraDlg.open;
+  if (sutraStop) sutraStop();
+  sutraDlg.innerHTML = `<div class="sd-inner">${sutraHTML(c)}</div>`;
+  sutraStop = mountScene(sutraDlg.querySelector('.sd-scene'), DETAILS[c.name].scene);
+  collect(c.name); track('sutra/' + id, 'Sutra: ' + c.name);
+  document.title = `${c.name}: ${BRAND} · Madhav`;
+  if (swapping) { sutraDlg.scrollTop = 0; sutraDlg.querySelector('.sd-x').focus(); return; }
+  openedInPage = fromPage;
+  const art = document.querySelector(`.sutra-card[data-id="${id}"]`); sutraFrom = art;
+  sutraDlg.showModal(); sutraDlg.querySelector('.sd-x').focus();
+  fx.sfx('pop');
+  if (art && !reducedMotion()) {
+    const a = art.getBoundingClientRect(), b = sutraDlg.getBoundingClientRect();
+    sutraDlg.animate([{ transform: `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})`, borderRadius: '22px', opacity: .6 }, { transform: 'none', opacity: 1 }], { duration: 460, easing: 'cubic-bezier(.2,.9,.25,1.05)' });
+    sutraDlg.querySelector('.sd-inner').animate([{ opacity: 0 }, { opacity: 0, offset: .45 }, { opacity: 1 }], { duration: 520 });
+  }
+}
+function requestClose() { if (openedInPage) history.back(); else location.hash = '#/sutras'; }
+function closeSutra(instant = false) {
+  if (!sutraDlg || !sutraDlg.open) return;
+  if (sutraStop) { sutraStop(); sutraStop = null; }
+  const art = sutraFrom && document.body.contains(sutraFrom) ? sutraFrom : null;
+  const done = () => { sutraDlg.close(); document.title = `The Vedic sutras: ${BRAND} · Madhav`; if (art) art.querySelector('.sutra-face').focus({ preventScroll: true }); };
+  if (instant || !art || reducedMotion()) return done();
+  const a = art.getBoundingClientRect(), b = sutraDlg.getBoundingClientRect();
+  sutraDlg.querySelector('.sd-inner').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, fill: 'forwards' });
+  sutraDlg.animate([{ transform: 'none', opacity: 1 }, { transform: `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})`, opacity: .4 }], { duration: 340, easing: 'cubic-bezier(.5,0,.75,0)' }).onfinish = done;
 }
 
 /* ---------- Arena ---------- */
@@ -643,6 +713,8 @@ function icon(n) {
     belt: `<path d="M3 10h18v4H3z" ${P}/><path d="M10 9h4v6h-4zM11 15l-2 5M13 15l2 5" ${P}/>`,
     speaker: `<path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11" ${P}/>`,
     star: `<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" ${P}/>`,
+    loop: `<path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5" ${P}/>`,
+    close: `<path d="M6 6l12 12M18 6L6 18" ${P}/>`,
     lock: `<rect x="5" y="11" width="14" height="10" rx="2" ${P}/><path d="M8 11V8a4 4 0 0 1 8 0v3" ${P}/>`
   };
   return `<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">${I[n] || ''}</svg>`;
