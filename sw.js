@@ -1,11 +1,11 @@
 /* sbmadhav.com service worker: makes the site work offline and load instantly on repeat visits.
    VERSION is stamped by site-build.py; bump it (run the script) whenever site files change. */
-const VERSION = 'e5fa23e5da';
+const VERSION = '92fcf23795';
 const CACHE = `madhav-${VERSION}`;
 const PRECACHE = [
   './',
   'index.html',
-  'assets/app.js?v=2e146bd9f1',
+  'assets/app.js?v=292e489720',
   'assets/profile.webp',
   'assets/fonts/fredoka-latin-600-normal.woff2',
   'assets/fonts/fredoka-latin-700-normal.woff2',

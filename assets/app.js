@@ -280,7 +280,7 @@
   /* ---------- Confetti + easter egg ---------- */
   function burst(n){
     if (reduce) return;
-    const colors = ['#FF6B5B','#1FA39A','#FFC53D','#5B8DEF','#8E6BD8'];
+    const colors = ['#FF6B5B','#1FA39A','#FFC53D','#5B8DEF','#A88EEA'];
     for (let i=0;i<n;i++){
       const c = document.createElement('i'); c.className='confetti';
       c.style.left = Math.random()*100+'vw'; c.style.background = colors[i%colors.length];
@@ -313,8 +313,8 @@
     const n = Math.round(W*H/6500);
     stars = Array.from({length:n}, () => ({x:Math.random()*W, y:Math.random()*H*1.6, r:Math.random()*1.5+.4, p:Math.random()*6.28, s:.4+Math.random()*1.2, z:.15+Math.random()*.5, c:Math.random()<.15}));
   }
-  const PAL = ['#FF6B5B','#1FA39A','#FFC53D','#5B8DEF','#8E6BD8'];
-  const PAL_D = ['#FF4FD8','#22E6C8','#C8FF45','#48B6FF','#A47BFF'];
+  const PAL = ['#FF6B5B','#1FA39A','#FFC53D','#5B8DEF','#A88EEA'];
+  const PAL_D = ['#FF8F87','#45D9C3','#D6F075','#73BCFF','#B6A4F7'];
   function drawStars(t){
     cx.clearRect(0,0,W,H);
     const dark = isDark(), sy = scrollY;
@@ -844,7 +844,7 @@
   const effTheme = () => root.dataset.theme || sysTheme();
   function syncTheme(){
     const t = effTheme();
-    metaTheme.setAttribute('content', t === 'dark' ? '#07061A' : '#FFF8EE');
+    metaTheme.setAttribute('content', t === 'dark' ? '#0A0B18' : '#FFF8EE');
     themeBtn.setAttribute('aria-label', t === 'dark' ? 'Switch to Daybreak (light) scheme' : 'Switch to Deep Space (dark) scheme');
     themeBtn.title = themeBtn.getAttribute('aria-label') + (root.dataset.theme ? '' : ' (following your system)');
   }
