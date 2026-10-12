@@ -13,7 +13,7 @@ import * as fx from './fx.js';
 import * as gm from './gamify.js';
 import * as cloud from './cloud.js';
 import { runArena, runDuel } from './arena.js';
-import { initAmbient, bgOn, setBg, BG_NOTES } from './ambient.js';
+import { initAmbient, bgOn, setBg, BG_NOTES, stop as stopMusic, isPlaying as musicOn } from './ambient.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const view = $('#view');
@@ -25,6 +25,9 @@ const gradeShort = g => (g === 'K' ? 'K' : g === 'V' ? 'Tricks' : g);
 const pct = x => Math.round(x * 100);
 const plain = h => String(h).replace(/<[^>]+>/g, '').replace(/&[a-z]+;/g, ' ');
 const BRAND = 'Vedic Math';
+/* Videos and playlists play inside the page (privacy-enhanced YouTube embed); channels and websites open in a new tab */
+const embedOf = r => { if (r.yt) return { src: `https://www.youtube-nocookie.com/embed/${r.yt}?autoplay=1&rel=0&modestbranding=1&playsinline=1`, tall: r.type === 'short' }; const m = r.url.match(/[?&]list=([\w-]+)/); return m ? { src: `https://www.youtube-nocookie.com/embed/videoseries?list=${m[1]}&autoplay=1&rel=0&modestbranding=1&playsinline=1`, tall: false } : null; };
+const wa = r => ` href="${r.url}" target="_blank" rel="noopener noreferrer" data-watch data-ri="${RESOURCES.indexOf(r)}"`;
 let cleanup = null;
 
 const ring = (m, size = 44) => { const r = size / 2 - 4, c = 2 * Math.PI * r; return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" class="ring-bg"/><circle cx="${size / 2}" cy="${size / 2}" r="${r}" class="ring-fg" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - m)}" transform="rotate(-90 ${size / 2} ${size / 2})"/></svg>`; };
@@ -221,7 +224,7 @@ function videosFor(s, trick) {
   const keys = ['square', 'nikhilam', 'crosswise', 'multipl', 'times', '11', 'count', 'fraction', 'algebra', 'calculus', 'geometry', 'vedic', 'subtract', 'add'];
   const hits = RESOURCES.filter(r => r.type !== 'channel' && keys.some(k => words.includes(k) && (r.tags.join(' ') + ' ' + r.title).toLowerCase().includes(k))).slice(0, 3);
   if (!hits.length) return '';
-  return `<h2 class="mq-h3">Watch it explained</h2><div class="rel-links">${hits.map(r => `<a href="${r.url}" target="_blank" rel="noopener noreferrer" data-watch>${icon(r.type === 'website' || r.type === 'game' ? 'link' : 'play')}<span>${esc(r.title)}</span></a>`).join('')}</div>`;
+  return `<h2 class="mq-h3">Watch it explained</h2><div class="rel-links">${hits.map(r => `<a${wa(r)}>${icon(embedOf(r) ? 'play' : 'link')}<span>${esc(r.title)}</span>${embedOf(r) ? '' : '<small class="rel-ext">opens site</small>'}</a>`).join('')}</div>`;
 }
 
 function showExample(s) {
@@ -366,7 +369,7 @@ function sutrasView() {
     <p class="md-lede">Each sutra is a short word formula that packs a whole method into a phrase. Flip a card to read it, master a linked trick to keep it for good. You have collected <b>${got} of ${all.length}</b>.</p>
     <div class="mq-bar mq-bar--big sutra-bar"><i style="width:${pct(got / all.length)}%"></i></div>
     <div class="md-card history"><h2 class="mq-h3">Where Vedic math comes from</h2>${HISTORY.map(h => `<p>${h}</p>`).join('')}
-      <p class="mq-small">Read more: ${RESOURCES.filter(r => r.vedic && r.tags.includes('history')).map(r => `<a href="${r.url}" target="_blank" rel="noopener noreferrer" data-watch>${esc(r.title)}</a>`).join(' · ')}</p></div>
+      <p class="mq-small">Read more: ${RESOURCES.filter(r => r.vedic && r.tags.includes('history')).map(r => `<a${wa(r)}>${esc(r.title)}</a>`).join(' · ')}</p></div>
     <div class="md-card history roots"><h2 class="mq-h3">Older roots: what you see in the background</h2><p>The 1965 sutras stand on a much older tradition of Indian mathematics. The moving background draws real pieces of it.</p><ul>${BG_NOTES.map(([h, b]) => `<li><b>${h}.</b> ${b}</li>`).join('')}</ul></div>
     <h2 class="mq-strand">The 16 sutras</h2><div class="sutra-grid">${SUTRAS.map(c => card(c, false)).join('')}</div>
     <h2 class="mq-strand">The 13 sub-sutras</h2><div class="sutra-grid">${SUBSUTRAS.map(c => card(c, true)).join('')}</div>
@@ -516,16 +519,42 @@ function watchView() {
       <h1 class="md-heading">The best math trick videos and sites</h1>
       <p class="md-lede">${RESOURCES.length} free picks from around the web, every link checked: songs for early counters, trick channels, Vedic math lessons, and deep visual math for teens and adults.</p>
       <div class="g-optrow" role="group" aria-label="Filter">${FILTERS.map(([id, l]) => `<button class="md-chip" aria-pressed="${id === filter}" data-f="${id}">${l}</button>`).join('')}</div>
-      <p class="mq-note">Links open YouTube and other sites in a new tab. Grown-ups: YouTube suggests more videos after each one, so younger learners do best with you nearby.</p>
-      <div class="watch-grid">${list.map(r => `<a class="watch-card" href="${r.url}" target="_blank" rel="noopener noreferrer" data-watch>
-        <span class="watch-th${r.yt ? '' : ' watch-th--' + r.type}">${r.yt ? `<img src="https://i.ytimg.com/vi/${r.yt}/mqdefault.jpg" alt="" loading="lazy" width="320" height="180">` : icon(r.type === 'website' || r.type === 'game' ? 'link' : 'play')}<span class="watch-type">${{ channel: 'Channel', playlist: 'Playlist', video: 'Video', short: 'Short', website: 'Site', game: 'Game' }[r.type]}</span></span>
+      <p class="mq-note">Videos and playlists play right here. Channels and websites open in a new tab. Grown-ups: videos use YouTube's privacy-enhanced mode, and younger learners still do best with you nearby.</p>
+      <div class="watch-grid">${list.map(r => `<a class="watch-card${embedOf(r) ? ' plays' : ''}"${wa(r)}>
+        <span class="watch-th${r.yt ? '' : ' watch-th--' + r.type}">${r.yt ? `<img src="https://i.ytimg.com/vi/${r.yt}/mqdefault.jpg" alt="" loading="lazy" width="320" height="180">` : icon(r.type === 'website' || r.type === 'game' ? 'link' : 'play')}<span class="watch-type">${{ channel: 'Channel', playlist: 'Playlist', video: 'Video', short: 'Short', website: 'Site', game: 'Game' }[r.type]}</span>${embedOf(r) ? `<span class="watch-play" aria-hidden="true">${icon('play')}</span>` : '<span class="watch-ext">Opens in a new tab</span>'}</span>
         <b>${esc(r.title)}</b><small>${esc(r.desc)}</small><span class="watch-tags">${r.vedic ? '<span class="tagv">Vedic</span>' : ''}${r.tags.slice(0, 2).map(t => `<span>${esc(t)}</span>`).join('')}</span></a>`).join('')}</div>
     </div></section>`;
     view.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filter = b.dataset.f; fx.sfx('tap'); draw(); });
   };
   draw();
 }
-document.addEventListener('click', e => { const a = e.target.closest('a[data-watch]'); if (a) { store.bump('watched'); track('watch/' + a.hostname, 'Watch: ' + a.textContent.trim().slice(0, 60)); } });
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[data-watch]'); if (!a) return;
+  store.bump('watched'); track('watch/' + a.hostname, 'Watch: ' + a.textContent.trim().slice(0, 60));
+  const r = RESOURCES[+a.dataset.ri], em = r && embedOf(r);
+  if (em && !e.metaKey && !e.ctrlKey && !e.shiftKey) { e.preventDefault(); openPlayer(r, em, a); }
+});
+let playerDlg = null;
+function openPlayer(r, em, opener) {
+  if (musicOn()) stopMusic();
+  if (!playerDlg) {
+    playerDlg = document.createElement('dialog'); playerDlg.className = 'vm-player'; playerDlg.setAttribute('aria-labelledby', 'vpTitle');
+    playerDlg.innerHTML = `<div class="vp-head"><h2 id="vpTitle"></h2><button class="vp-x" aria-label="Close video">${'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'}</button></div><div class="vp-frame"></div><p class="vp-desc"></p><p class="vp-foot"><a class="vp-yt" target="_blank" rel="noopener noreferrer">Open on YouTube</a></p>`;
+    document.body.append(playerDlg);
+    const close = () => playerDlg.close();
+    playerDlg.querySelector('.vp-x').onclick = close;
+    playerDlg.addEventListener('click', ev => { if (ev.target === playerDlg) close(); });
+    playerDlg.addEventListener('close', () => { playerDlg.querySelector('.vp-frame').innerHTML = ''; if (playerDlg._opener) playerDlg._opener.focus({ preventScroll: true }); });
+  }
+  playerDlg._opener = opener;
+  playerDlg.querySelector('#vpTitle').textContent = r.title;
+  playerDlg.querySelector('.vp-desc').textContent = r.desc;
+  playerDlg.querySelector('.vp-yt').href = r.url;
+  playerDlg.classList.toggle('tall', em.tall);
+  playerDlg.querySelector('.vp-frame').innerHTML = `<iframe src="${em.src}" title="${esc(r.title)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+  playerDlg.showModal();
+  if (!store.seen('vid:' + r.url) && store.markSeen('vid:' + r.url)) store.addXP(5, 'video');
+}
 
 /* ---------- Me: profile, badges, players, settings ---------- */
 function meView() {

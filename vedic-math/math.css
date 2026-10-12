@@ -537,3 +537,23 @@ sup { font-size: .65em; }
 .vm-about { margin-top: 10px; font-size: 13.5px; } .vm-about summary { cursor: pointer; font-weight: 700; }
 .vm-about ul { margin: 8px 0 0; padding-left: 1.1em; display: grid; gap: 6px; max-height: 240px; overflow: auto; } .vm-about li { color: var(--ink-muted); line-height: 1.4; } .vm-about b { color: var(--ink); }
 .roots ul { margin: 8px 0 0; padding-left: 1.2em; display: grid; gap: 6px; } .roots li { font-size: 15px; line-height: 1.5; }
+
+/* In-page video player */
+.vm-player { width: min(920px, 94vw); max-height: 94dvh; padding: 0; border: 2px solid var(--edge); border-radius: var(--radius-xl); background: var(--card); color: var(--ink); box-shadow: 0 30px 80px -20px rgba(0,0,0,.5); overflow: auto; }
+.vm-player.tall { width: min(420px, 94vw); }
+.vm-player::backdrop { background: rgba(7,6,26,.62); backdrop-filter: blur(4px); }
+.vm-player[open] { animation: toastIn .3s cubic-bezier(.5,1.4,.5,1); }
+.vp-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px 10px; }
+.vp-head h2 { font: 600 1.15rem/1.25 var(--display); margin: 0; }
+.vp-x { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--edge); background: var(--card); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+.vp-frame { position: relative; aspect-ratio: 16 / 9; background: #000; }
+.vm-player.tall .vp-frame { aspect-ratio: 9 / 16; max-height: 74dvh; margin: 0 auto; }
+.vp-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.vp-desc { margin: 12px 16px 4px; color: var(--ink-muted); font-size: 14.5px; }
+.vp-foot { margin: 0 16px 14px; font-size: 14px; } .vp-foot a { color: var(--sky-strong); font-weight: 700; }
+.watch-play { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; }
+.watch-play svg { width: 58px; height: 58px; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); background: rgba(28,37,65,.55); border-radius: 50%; padding: 6px; }
+.watch-ext { position: absolute; right: 8px; bottom: 8px; background: var(--card); color: var(--ink-muted); font: 700 11px/1 var(--font-sans); padding: 4px 8px; border-radius: 99px; border: 1px solid var(--line); }
+.watch-card.plays:hover .watch-play svg { transform: scale(1.08); }
+.rel-ext { margin-left: auto; color: var(--ink-muted); font-size: 12px; font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .vm-player[open] { animation: none; } }
