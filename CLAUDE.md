@@ -6,6 +6,7 @@ Personal site on GitHub Pages (served at https://sbmadhav.com, www redirects to 
 
 - Every new page follows the design system in `design-system/`. Read `design-system/README.md` first.
 - Every page gets the site-wide Explore menu: a `<button id="exploreBtn" class="xp-btn">` in the header plus `<script src="/assets/explore.js" defer>` (the template already has both). When you add a page, add one entry to `PAGES` at the top of `assets/explore.js`. Pages in other repos served under sbmadhav.com (for example `/state-of-voice-agents/` from the `state-of-voice-agents` repo) load the same `/assets/explore.js`.
+- Every page also loads `<script src="/assets/analytics.js" defer>` (GoatCounter: free, cookieless). Record notable actions with `window.siteTrack('area/action', 'Readable title')`; never send personal data.
 - Start from `design-system/template.html`; link `/design-system/tokens.css` then `/design-system/components.css`.
 - Use tokens (`var(--coral)`, `var(--space-6)`, `var(--radius-lg)`), never raw hex. Text on accent fills uses `var(--on-accent)`, not white.
 - Support both color schemes (Daybreak light, Deep Space dark; system default with a saved override) and kid mode (`.pro` / `.kid` spans, `body.kidmode`).
@@ -17,4 +18,4 @@ Personal site on GitHub Pages (served at https://sbmadhav.com, www redirects to 
 - `index.html` holds the markup and critical CSS; the app logic is in `assets/app.js` (loaded with `defer`). Fonts are self-hosted in `assets/fonts/` (no Google Fonts requests).
 - `sw.js` caches the site for offline use and instant repeat visits; `manifest.webmanifest` makes it installable.
 - After editing `index.html`, `assets/app.js` or anything `sw.js` precaches, run `python3 site-build.py` so visitors get the new version (it stamps the app.js version and the service worker cache version).
-- Keep first load light: no new third-party requests, images as WebP with width/height, decorative motion starts after the page is ready.
+- Keep first load light: no new third-party requests before load (analytics loads after load and idle), images as WebP with width/height, decorative motion starts after the page is ready.

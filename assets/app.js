@@ -5,6 +5,7 @@
     set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
   };
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const track = (name, title) => { try { window.siteTrack && window.siteTrack(name, title); } catch (e) {} };
   let musicOn = false;
   $('#yr').textContent = new Date().getFullYear();
 
@@ -19,7 +20,7 @@
     if (typeof refreshMusic === 'function' && musicBtn) refreshMusic();
     if (announce) say(kid ? "Kid mode ON! Everything is explained in kid words now." : "Grown-up mode. Same robot, fancier words.");
   }
-  toggle.addEventListener('click', () => { setMode(!isKid(), true); if (isKid()) burst(40); });
+  toggle.addEventListener('click', () => { setMode(!isKid(), true); track(isKid() ? 'kid-mode/on' : 'kid-mode/off', 'Kid mode toggled'); if (isKid()) burst(40); });
 
   /* ---------- Bolt the robot ---------- */
   const bubble = $('#bubble');
@@ -44,6 +45,7 @@
   };
   let li = 0;
   $('#bot').addEventListener('click', () => {
+    track('bolt/chat', 'Chatted with Bolt');
     portraitEl.classList.add('chatted'); store.set('boltChatted', '1');
     const set = isKid() ? lines.kid : lines.pro;
     say(set[li++ % set.length]);
@@ -70,6 +72,7 @@
 
   /* ---------- Say my name ---------- */
   $('#sayName').addEventListener('click', () => {
+    track('say-name', 'Played name pronunciation');
     say("It's MAA-dhuv.");
     try {
       const u = new SpeechSynthesisUtterance('Maadhav');
@@ -134,6 +137,7 @@
   }
   async function run(item){
     const id = ++runId;
+    track('brain-lab/ask', 'Brain Lab question');
     const lanes = [...document.querySelectorAll('.lane')];
     lanes.forEach(l => l.classList.remove('pick'));
     $('#st2').classList.remove('on'); $('#answer').textContent = '...';
@@ -194,6 +198,7 @@
   }
   function start(){
     score = 0; $('#score').textContent = 0; playing = true; sfx('start'); gameMusic(true);
+    track('bug-hunt/start', 'Bug Hunt started');
     overlay.style.display = 'none';
     arena.querySelectorAll('.bug,.pop').forEach(n => n.remove());
     endAt = performance.now() + 20000;
@@ -211,6 +216,7 @@
     playing = false; clearTimeout(spawnT); cancelAnimationFrame(tickT); gameMusic(false); sfx('end');
     arena.querySelectorAll('.bug').forEach(n => n.remove());
     const newBest = score > best;
+    track('bug-hunt/finish-' + (score >= 25 ? '25+' : score >= 15 ? '15-24' : score >= 6 ? '6-14' : '0-5'), 'Bug Hunt finished');
     if (newBest){ best = score; store.set('bugBest', best); $('#best').textContent = best; }
     const kid = isKid();
     let msg;
@@ -588,10 +594,12 @@
   }
   musicBtn.addEventListener('click', () => {
     spaceWanted = !spaceWanted; refreshMusic();
+    if (spaceWanted) track('music/' + TRACKS[trackIdx].id, 'Music: ' + TRACKS[trackIdx].name);
     if (spaceWanted && !(gameActive && gamePref)) say(isKid() ? `Blast off! Now playing ${TRACKS[trackIdx].kid}.` : `Now playing ${TRACKS[trackIdx].name}. Generated live in your browser.`);
   });
   nextBtn.addEventListener('click', () => {
     trackIdx = (trackIdx + 1) % TRACKS.length; store.set('track', trackIdx);
+    track('music/' + TRACKS[trackIdx].id, 'Music: ' + TRACKS[trackIdx].name);
     spaceWanted = true; refreshMusic();
     if (!(gameActive && gamePref)) say(`Now playing: ${isKid() ? TRACKS[trackIdx].kid : TRACKS[trackIdx].name}`);
   });
@@ -717,6 +725,7 @@
   function win(used){
     running = false;
     const M = MAZES[mz], stars = used <= M.par ? 3 : used <= M.par + 2 ? 2 : 1;
+    track('robot-maze/level-' + (mz + 1), 'Robot Maze level solved');
     mazeBest[mz] = Math.max(mazeBest[mz] || 0, stars); store.set('mazeStars', JSON.stringify(mazeBest));
     if (mz === unlocked && unlocked < MAZES.length - 1){ unlocked++; store.set('mazeUnlocked', unlocked); }
     renderProg();
@@ -808,6 +817,7 @@
   }
   $('#sdLaunch').addEventListener('click', async () => {
     const S = SCEN[sc];
+    track('design-lab/' + S.id, 'Design Lab launch: ' + S.title);
     const m = { up:30, fast:30, safe:30, trust:40 }, notes = [];
     S.cards.filter(c => picks.has(c.id)).forEach(c => {
       Object.entries(c.fx).forEach(([k, v]) => m[k] += v);
@@ -850,6 +860,7 @@
   }
   themeBtn.addEventListener('click', () => {
     const next = effTheme() === 'dark' ? 'light' : 'dark';
+    track('theme/' + next, 'Color scheme switched');
     document.body.classList.add('theme-anim'); setTimeout(() => document.body.classList.remove('theme-anim'), 700);
     if (next === sysTheme()){ delete root.dataset.theme; store.set('theme',''); }   // back to matching system: follow system again
     else { root.dataset.theme = next; store.set('theme', next); }

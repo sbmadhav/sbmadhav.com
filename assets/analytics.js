@@ -1,0 +1,44 @@
+/* Site analytics: GoatCounter (free, open source, no cookies, no personal data).
+   Shared by every page on sbmadhav.com, including pages from other repos.
+
+   - Counts page views and a few named events (games played, music, kid mode, menu use, outbound links).
+   - Loads only after the page has finished loading and the browser is idle, so it never slows the first view.
+   - Respects Do Not Track and Global Privacy Control, and skips local development.
+
+   Pages call window.siteTrack('event-name', 'Readable title') for custom events; it is always safe to call. */
+(() => {
+  const CODE = 'sbmadhav';                                   // GoatCounter site code: https://sbmadhav.goatcounter.com
+  const ENDPOINT = `https://${CODE}.goatcounter.com/count`;
+  const SCRIPT = 'https://gc.zgo.at/count.js';
+
+  const optedOut = navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.globalPrivacyControl === true;
+  const local = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|.*\.local|.*\.test)$/.test(location.hostname);
+  const off = optedOut || local;
+
+  const queue = [];
+  const send = e => window.goatcounter.count(e);
+  window.siteTrack = (name, title) => {
+    if (off || !name) return;
+    const e = { path: String(name).slice(0, 120), title: (title || name).toString().slice(0, 120), event: true };
+    if (window.goatcounter && typeof window.goatcounter.count === 'function') send(e); else queue.push(e);
+  };
+  if (off) return;
+
+  // Outbound links (LinkedIn, GitHub, sources) counted as events
+  document.addEventListener('click', ev => {
+    const a = ev.target.closest && ev.target.closest('a[href]');
+    if (!a || a.host === location.host || !/^https?:/.test(a.protocol)) return;
+    window.siteTrack('out/' + a.host + a.pathname.replace(/\/$/, ''), 'Outbound: ' + (a.textContent || a.host).trim());
+  }, true);
+
+  function load() {
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = SCRIPT;
+    s.dataset.goatcounter = ENDPOINT;
+    s.onload = () => { const pending = queue.splice(0); setTimeout(() => pending.forEach(send), 300); };
+    document.head.appendChild(s);
+  }
+  const idle = fn => ('requestIdleCallback' in window) ? requestIdleCallback(fn, { timeout: 4000 }) : setTimeout(fn, 1500);
+  if (document.readyState === 'complete') idle(load); else addEventListener('load', () => idle(load), { once: true });
+})();

@@ -9,7 +9,7 @@
 import hashlib, pathlib, re
 
 root = pathlib.Path(__file__).parent
-SCRIPTS = ["assets/app.js", "assets/explore.js"]
+SCRIPTS = ["assets/app.js", "assets/explore.js", "assets/analytics.js"]
 versions = {p: hashlib.sha256((root / p).read_bytes()).hexdigest()[:10] for p in SCRIPTS}
 app = b"".join((root / p).read_bytes() for p in SCRIPTS)
 appv = versions["assets/app.js"]

@@ -92,6 +92,8 @@ dialog.xpm :focus-visible{outline:3px solid var(--sky);outline-offset:3px}
     d.querySelector('.xp-x').addEventListener('click', close);
     d.addEventListener('click', e => {
       if (e.target === d) return close();
+      const any = e.target.closest('a[href]');
+      if (any && window.siteTrack) window.siteTrack('explore/go' + new URL(any.href, location.href).pathname.replace(/\/$/, '') + new URL(any.href, location.href).hash, 'Explore menu link');
       const a = e.target.closest('a[href^="#"]');
       if (!a) return;
       // Same-page section: close first, then scroll, so the closing dialog does not swallow the jump
@@ -111,6 +113,7 @@ dialog.xpm :focus-visible{outline:3px solid var(--sky);outline-offset:3px}
   if (!btn) return;
   btn.setAttribute('aria-haspopup', 'dialog');
   btn.addEventListener('click', () => {
+    if (window.siteTrack) window.siteTrack('explore/open', 'Explore menu opened');
     dlg = dlg || build();
     if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
   });
