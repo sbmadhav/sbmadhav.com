@@ -644,6 +644,7 @@ function meView() {
       <button class="md-btn md-btn--sm" id="meAdd">${icon('plus')} Add a player</button></div>
     <h2 class="mq-strand">Settings</h2>
     <div class="me-set"><label><input type="checkbox" id="setSound" ${fx.soundOn() ? 'checked' : ''}> Sound effects</label><label><input type="checkbox" id="setVoice" ${fx.voiceOn() ? 'checked' : ''}> Read questions aloud</label><label><input type="checkbox" id="setBg" ${bgOn() ? 'checked' : ''}> Moving background</label></div>
+    ${fx.voiceSettingsHTML()}
     <p class="mq-small">Calm music: use the note button at the top right of the menu bar (singing bowls, tanpura drone, Himalayan dawn, temple chimes).</p>
     <h2 class="mq-strand">Progress by level</h2>
     <div class="mq-prog">${GRADES.map(g => { const st = gradeStats(g.id); return `<a class="mq-prog-row" href="#/grade/${g.id}"><span class="mq-prog-g">${both(g.pro, g.kid)}</span><span class="mq-bar"><i style="width:${pct(st.avg)}%"></i></span><span class="mq-prog-n">${st.done}/${st.total}</span></a>`; }).join('')}</div>
@@ -661,7 +662,8 @@ function meView() {
   $('#meAdd').onclick = () => { store.addPlayer(); fx.applyMode(); location.hash = '#/'; render(); };
   $('#setSound').onchange = e => { fx.setSound(e.target.checked); fx.sfx('ok'); };
   $('#setBg').onchange = e => { setBg(e.target.checked); const t = document.getElementById('vmBg'); if (t) t.checked = e.target.checked; };
-  $('#setVoice').onchange = e => { fx.setVoice(e.target.checked); fx.speak('Read aloud is on.', e.target.checked); };
+  $('#setVoice').onchange = e => { fx.setVoice(e.target.checked); if (e.target.checked) fx.speak('Read aloud is on.', true); else fx.stopSpeaking(); };
+  fx.wireVoiceSettings(view);
   $('#pExport').onclick = async () => { const code = btoa(unescape(encodeURIComponent(store.exportData()))); try { await navigator.clipboard.writeText(code); msg('Backup code copied. Paste it somewhere safe.'); } catch (e) { prompt('Copy this backup code:', code); } };
   $('#pImport').onclick = () => { const code = prompt('Paste your backup code:'); if (!code) return; try { store.importData(decodeURIComponent(escape(atob(code.trim())))); msg('Progress restored.'); meView(); } catch (e) { msg('That code did not work. Check that it was copied in full.'); } };
   $('#pReset').onclick = () => { if (confirm('Reset all progress for this player?')) { store.reset(); meView(); msg('Progress reset.'); } };

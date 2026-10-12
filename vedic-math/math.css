@@ -616,3 +616,19 @@ sup { font-size: .65em; }
 .sc-eqline { font: 600 1.25rem/1.6 var(--display); padding: 8px 12px; border-radius: var(--radius-md); background: color-mix(in srgb, var(--ink) 4%, var(--card)); overflow-wrap: anywhere; }
 .sc-eqline.enter { animation: scIn .5s ease-out both; background: color-mix(in srgb, var(--sun) 18%, var(--card)); }
 @media (prefers-reduced-motion: reduce) { .sc-svg .enter, .sc-svg .enter .sc-line, .sc-eqline.enter { animation: none; stroke-dashoffset: 0; } .sutra-card { transition: none; } }
+
+/* ---------- Read-aloud voice settings, download pill and slow-device note (voice.js) ---------- */
+.vv-set { display: grid; gap: var(--space-3); margin-top: var(--space-4); }
+.vv-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); font-weight: 600; }
+.vv-check { display: inline-flex; align-items: center; gap: var(--space-2); }
+.vv-check input { width: 18px; height: 18px; accent-color: var(--teal-strong); }
+.vv-select { font: 600 14px/1.2 var(--font-sans); color: var(--ink); background: var(--card); border: 2px solid var(--edge); border-radius: var(--radius-sm); padding: 6px 10px; max-width: 100%; min-width: 0; }
+.vv-select:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.vv-status:empty { display: none; }
+.vv-pill { position: fixed; right: var(--space-4); bottom: var(--space-4); z-index: 111; display: grid; gap: 6px; padding: 8px 14px; border: 2px solid var(--edge); border-radius: var(--radius-pill); background: var(--card); color: var(--ink); box-shadow: var(--shadow-ledge); font-size: 13px; font-weight: 700; }
+.vv-bar { display: block; width: 140px; height: 6px; border-radius: var(--radius-pill); background: var(--line); overflow: hidden; }
+.vv-bar i { display: block; height: 100%; background: var(--teal); transition: width .3s; }
+.vv-note { position: fixed; left: 50%; bottom: var(--space-5); transform: translateX(-50%); z-index: 112; width: min(92vw, 440px); padding: var(--space-3) var(--space-4); border: 2px solid var(--edge); border-radius: var(--radius-lg); background: var(--card); color: var(--ink); box-shadow: var(--shadow-ledge); }
+.vv-note p { margin: 0 0 var(--space-2); font-size: 15px; }
+.vv-note div { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+@media (prefers-reduced-motion: reduce) { .vv-bar i { transition: none; } }

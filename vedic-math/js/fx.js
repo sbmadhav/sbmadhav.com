@@ -1,6 +1,7 @@
 /* The fun layer: play modes, sound effects, read-aloud, confetti and toasts.
    Sounds are generated in the browser and only follow a tap. Motion respects reduced-motion settings. */
 import * as store from './store.js';
+import * as voice from './voice.js';
 
 /* ---------- Play modes (by vibe, not by age label on screen) ---------- */
 export const MODES = {
@@ -56,10 +57,11 @@ export function sfx(kind) {
 
 /* ---------- Read-aloud (Explorer mode) ---------- */
 export function speak(text, force = false) {
-  if (!(force || voiceOn()) || !('speechSynthesis' in window)) return;
-  const clean = String(text).replace(/<sup>2<\/sup>/g, ' squared').replace(/<[^>]+>/g, ' ').replace(/&times;/g, ' times ').replace(/&minus;/g, ' minus ').replace(/&divide;/g, ' divided by ').replace(/&#9633;/g, ' blank ').replace(/&[a-z#0-9]+;/g, ' ').replace(/\?/g, ' ?').replace(/\s+/g, ' ').trim();
-  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(clean); u.rate = 0.92; u.pitch = 1.1; speechSynthesis.speak(u); } catch (e) {}
+  if (!(force || voiceOn()) || !voice.supported()) return;
+  try { voice.speak(text); } catch (e) {} // voice.js: math-aware wording, best built-in voice, or the opt-in natural voice
 }
+export const stopSpeaking = () => voice.stop();
+export { settingsHTML as voiceSettingsHTML, wireSettings as wireVoiceSettings } from './voice.js';
 
 /* ---------- Confetti ---------- */
 export function confetti(n = 70) {
