@@ -12,15 +12,24 @@
 <meta property="og:url" content="https://www.sbmadhav.com/">
 <meta name="theme-color" content="#FFF8EE">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='14' width='48' height='40' rx='14' fill='%231FA39A'/%3E%3Ccircle cx='24' cy='34' r='7' fill='white'/%3E%3Ccircle cx='40' cy='34' r='7' fill='white'/%3E%3Ccircle cx='25' cy='35' r='3' fill='%231C2541'/%3E%3Ccircle cx='41' cy='35' r='3' fill='%231C2541'/%3E%3Ccircle cx='32' cy='7' r='5' fill='%23FF6B5B'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fonts/fredoka-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/nunito-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/profile.webp" as="image" type="image/webp" fetchpriority="high">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Madhav">
 <script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}</script>
 <style>
+@font-face{font-family:Fredoka;font-style:normal;font-weight:600;font-display:swap;src:url(assets/fonts/fredoka-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:Fredoka;font-style:normal;font-weight:700;font-display:swap;src:url(assets/fonts/fredoka-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Nunito Sans";font-style:normal;font-weight:200 1000;font-display:swap;src:url(assets/fonts/nunito-sans-latin-wght-normal.woff2) format("woff2-variations")}
+@font-face{font-family:"Space Grotesk";font-style:normal;font-weight:300 700;font-display:swap;src:url(assets/fonts/space-grotesk-latin-wght-normal.woff2) format("woff2-variations")}
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:500;font-display:swap;src:url(assets/fonts/jetbrains-mono-latin-500-normal.woff2) format("woff2")}
 :root{
   --bg:#FFF8EE; --bg2:#FDF0DC; --card:#FFFFFF; --ink:#1C2541; --muted:#5B6479; --line:#EADFCC;
   --coral:#FF6B5B; --teal:#1FA39A; --sun:#FFC53D; --sky:#5B8DEF; --plum:#8E6BD8;
-  --edge:#1C2541; --ledge:#1C2541; --display:Fredoka,"Nunito Sans",sans-serif; --fo:.32;
+  --edge:#1C2541; --ledge:#1C2541; --on-accent:#1C2541; --display:Fredoka,"Nunito Sans",sans-serif; --fo:.32;
   --shadow:0 2px 0 rgba(28,37,65,.06), 0 12px 28px -12px rgba(28,37,65,.18);
   --page:radial-gradient(900px 500px at 90% -5%,rgba(255,197,61,.28),transparent 60%),radial-gradient(800px 600px at -10% 60%,rgba(91,141,239,.10),transparent 60%),linear-gradient(180deg,#FFF8EE,#FFF3E2);
   --radius:22px;
@@ -30,7 +39,7 @@
   :root:not([data-theme="light"]){
     --bg:#07061A; --bg2:#0D0B2A; --card:rgba(22,19,58,.82); --ink:#EEEAFF; --muted:#A7A2D8; --line:#2D2766;
     --coral:#FF4FD8; --teal:#22E6C8; --sun:#C8FF45; --sky:#48B6FF; --plum:#A47BFF;
-    --edge:#7F6BFF; --ledge:#FF4FD8; --display:"Space Grotesk","Nunito Sans",sans-serif; --fo:.62;
+    --edge:#7F6BFF; --ledge:#FF4FD8; --on-accent:#07061A; --display:"Space Grotesk","Nunito Sans",sans-serif; --fo:.62;
     --shadow:0 0 0 1px rgba(127,107,255,.18), 0 18px 40px -18px rgba(255,79,216,.35);
     --page:radial-gradient(1200px 700px at 85% -10%,rgba(164,123,255,.30),transparent 60%),radial-gradient(900px 600px at -10% 40%,rgba(34,230,200,.16),transparent 60%),radial-gradient(1000px 700px at 70% 110%,rgba(255,79,216,.20),transparent 60%),#07061A;
     color-scheme:dark;
@@ -39,7 +48,7 @@
 :root[data-theme="dark"]{
     --bg:#07061A; --bg2:#0D0B2A; --card:rgba(22,19,58,.82); --ink:#EEEAFF; --muted:#A7A2D8; --line:#2D2766;
     --coral:#FF4FD8; --teal:#22E6C8; --sun:#C8FF45; --sky:#48B6FF; --plum:#A47BFF;
-    --edge:#7F6BFF; --ledge:#FF4FD8; --display:"Space Grotesk","Nunito Sans",sans-serif; --fo:.62;
+    --edge:#7F6BFF; --ledge:#FF4FD8; --on-accent:#07061A; --display:"Space Grotesk","Nunito Sans",sans-serif; --fo:.62;
     --shadow:0 0 0 1px rgba(127,107,255,.18), 0 18px 40px -18px rgba(255,79,216,.35);
     --page:radial-gradient(1200px 700px at 85% -10%,rgba(164,123,255,.30),transparent 60%),radial-gradient(900px 600px at -10% 40%,rgba(34,230,200,.16),transparent 60%),radial-gradient(1000px 700px at 70% 110%,rgba(255,79,216,.20),transparent 60%),#07061A;
     color-scheme:dark;
@@ -101,8 +110,8 @@ body.theme-anim, body.theme-anim *{transition:background-color .5s,color .5s,bor
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .blob{background:conic-gradient(from 0deg,var(--coral),var(--plum),var(--teal),var(--sun),var(--coral));animation:morph 12s ease-in-out infinite,spin 18s linear infinite;filter:saturate(1.1)}}
 :root[data-theme="dark"] .hello{background:linear-gradient(135deg,#2B1A78,#0B3D63 60%,#3A0E5C);color:#fff;box-shadow:0 0 60px -20px rgba(255,79,216,.6)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hello{background:linear-gradient(135deg,#2B1A78,#0B3D63 60%,#3A0E5C);color:#fff;box-shadow:0 0 60px -20px rgba(255,79,216,.6)}}
-:root[data-theme="dark"] .hello .btn{border-color:#fff;box-shadow:0 3px 0 #fff;color:#fff}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hello .btn{border-color:#fff;box-shadow:0 3px 0 #fff;color:#fff}}
+:root[data-theme="dark"] .hello .btn:not(.primary){border-color:#fff;box-shadow:0 3px 0 #fff;color:#fff}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hello .btn:not(.primary){border-color:#fff;box-shadow:0 3px 0 #fff;color:#fff}}
 :root[data-theme="dark"] .card, :root[data-theme="dark"] .stat, :root[data-theme="dark"] .pipeline, :root[data-theme="dark"] .detail, :root[data-theme="dark"] .pu, :root[data-theme="dark"] .chip, :root[data-theme="dark"] .btn, :root[data-theme="dark"] .toggle, :root[data-theme="dark"] .music, :root[data-theme="dark"] .eyebrow, :root[data-theme="dark"] header.nav{backdrop-filter:blur(8px)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .card, :root:not([data-theme="light"]) .stat, :root:not([data-theme="light"]) .pipeline, :root:not([data-theme="light"]) .detail, :root:not([data-theme="light"]) .pu, :root:not([data-theme="light"]) .chip, :root:not([data-theme="light"]) .btn, :root:not([data-theme="light"]) .toggle, :root:not([data-theme="light"]) .music, :root:not([data-theme="light"]) .eyebrow, :root:not([data-theme="light"]) header.nav{backdrop-filter:blur(8px)}}
 :root[data-theme="dark"] .chip:hover{color:#07061A}
@@ -121,7 +130,8 @@ body.theme-anim, body.theme-anim *{transition:background-color .5s,color .5s,bor
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) h1, :root:not([data-theme="light"]) h2{letter-spacing:-.025em}}
 
 /* Space backdrop */
-#space{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#space{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;opacity:0;transition:opacity 1.2s}
+#space.on{opacity:1}
 #stars{position:absolute;inset:0;width:100%;height:100%}
 .floater{position:absolute;left:0;top:0;will-change:transform;opacity:var(--fo)}
 .floater svg{display:block;width:100%;height:auto}
@@ -156,7 +166,7 @@ body.kidmode .toggle .knob{transform:translateX(20px)}
 .btn{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--edge);background:var(--card);border-radius:999px;padding:9px 18px;font-weight:700;text-decoration:none;box-shadow:0 3px 0 var(--ledge);transition:transform .12s,box-shadow .12s}
 .btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--ledge)}
 .btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ledge)}
-.btn.primary{background:var(--coral);color:#fff;border-color:var(--edge)}
+.btn.primary{background:var(--coral);color:var(--on-accent);border-color:var(--edge)}
 .btn.sm{padding:5px 12px;font-size:.85rem}
 .btn svg{width:18px;height:18px}
 .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
@@ -221,7 +231,7 @@ section{padding:72px 0;scroll-margin-top:70px}
 .thought{margin-top:6px;background:var(--bg2);border-radius:10px;padding:8px 10px;min-height:2.3em;color:var(--muted)}
 .lanes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 2px 52px}
 .lane{border:2px solid var(--line);border-radius:12px;padding:8px;text-align:center;font-weight:700;font-size:.85rem;transition:.3s;color:var(--muted)}
-.lane.pick{border-color:var(--teal);background:var(--teal);color:#fff;transform:scale(1.05)}
+.lane.pick{border-color:var(--teal);background:var(--teal);color:var(--on-accent);transform:scale(1.05)}
 .answer{margin-top:6px;background:var(--ink);color:var(--bg);border-radius:16px 16px 16px 4px;padding:12px 14px;min-height:3em;font-weight:600}
 .caret::after{content:"";display:inline-block;width:8px;height:1em;background:currentColor;margin-left:2px;vertical-align:-2px;animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
@@ -296,7 +306,7 @@ section{padding:72px 0;scroll-margin-top:70px}
 .hello h2{font-size:clamp(1.8rem,4vw,2.6rem)}
 .hello p{opacity:.8;margin:8px 0 0;max-width:34em}
 .hello .btn{border-color:var(--bg);box-shadow:0 3px 0 var(--bg);background:transparent;color:var(--bg)}
-.hello .btn.primary{background:var(--coral);color:#fff}
+.hello .btn.primary{background:var(--coral);color:var(--on-accent)}
 @media (max-width:700px){.hello{grid-template-columns:1fr;padding:28px}}
 footer{padding:28px 0 40px;color:var(--muted);font-size:.88rem}
 footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -332,7 +342,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .palette button{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--edge);border-radius:14px;padding:10px 14px;font-weight:700;box-shadow:0 4px 0 var(--ledge);transition:transform .1s;color:#1C2541}
 .palette button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ledge)}
 .palette svg,.pblock svg{width:20px;height:20px}
-.pb-F{background:var(--sun)!important}.pb-L{background:var(--teal)!important;color:#fff!important}.pb-R{background:var(--sky)!important;color:#fff!important}
+.pb-F{background:var(--sun)!important}.pb-L{background:var(--teal)!important;color:var(--on-accent)!important}.pb-R{background:var(--sky)!important;color:var(--on-accent)!important}
 :root[data-theme="dark"] .pb-L,:root[data-theme="dark"] .pb-R{color:#07061A!important}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .pb-L,:root:not([data-theme="light"]) .pb-R{color:#07061A!important}}
 .prog-head{display:flex;justify-content:space-between;margin:18px 0 6px}
@@ -395,6 +405,24 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .pm li{padding:8px 10px 8px 12px;border-radius:10px;border-left:4px solid var(--teal);background:color-mix(in srgb,var(--teal) 9%,transparent)}
 .pm li.bad{border-left-color:var(--coral);background:color-mix(in srgb,var(--coral) 9%,transparent)}
 
+
+/* Splash: appears only if loading takes longer than ~150ms; JS adds html.ready to dismiss; CSS dismisses after 4s as a fail-safe */
+#splash{position:fixed;inset:0;z-index:300;display:grid;place-items:center;background:var(--page);background-color:var(--bg);opacity:0;animation:splashIn .25s .15s forwards,splashOut .4s 4s forwards;pointer-events:none}
+#splash .sp-in{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+#splash svg{width:88px;height:88px;animation:spBob 1.2s ease-in-out infinite}
+#splash .sp-name{font:600 2rem/1 var(--display);color:var(--ink)}
+#splash .sp-msg{font:600 .95rem/1.4 "Nunito Sans",system-ui,sans-serif;color:var(--muted);min-height:1.4em}
+#splash .sp-bar{width:180px;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+#splash .sp-bar i{display:block;height:100%;width:40%;border-radius:99px;background:linear-gradient(90deg,var(--coral),var(--sun),var(--teal));animation:spLoad 1.1s ease-in-out infinite}
+html.ready #splash{animation:splashOut .35s forwards}
+@keyframes splashIn{to{opacity:1;pointer-events:auto}}
+@keyframes splashOut{from{opacity:var(--sp-o,1)}to{opacity:0;visibility:hidden}}
+@keyframes spBob{50%{transform:translateY(-8px) rotate(-4deg)}}
+@keyframes spLoad{0%{transform:translateX(-110%)}100%{transform:translateX(260%)}}
+/* Hold decorative motion until the page is ready */
+html:not(.ready) .blob,html:not(.ready) .bot,html:not(.ready) .dot,html:not(.ready) .spark{animation-play-state:paused}
+@media (prefers-reduced-motion: reduce){#splash{display:none}}
+
 /* Confetti */
 .confetti{position:fixed;top:-12px;width:10px;height:14px;z-index:100;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
@@ -410,6 +438,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true"><div class="sp-in">
+<svg viewBox="0 0 64 64"><rect x="8" y="14" width="48" height="40" rx="14" fill="#1FA39A" stroke="#1C2541" stroke-width="3"/><circle cx="24" cy="34" r="7" fill="#fff"/><circle cx="40" cy="34" r="7" fill="#fff"/><circle cx="25" cy="35" r="3" fill="#1C2541"/><circle cx="41" cy="35" r="3" fill="#1C2541"/><path d="M32 14V9" stroke="#1C2541" stroke-width="3"/><circle cx="32" cy="7" r="5" fill="#FF6B5B" stroke="#1C2541" stroke-width="3"/></svg>
+<div class="sp-name">Madhav</div>
+<div class="sp-bar"><i></i></div>
+<div class="sp-msg" id="spMsg">Waking up Bolt...</div>
+</div></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -491,7 +525,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
       <div class="name-say">
         <span class="pro">Full name: Brameshmadhav Srinivasan. Most people just say Madhav.</span>
         <span class="kid">My full name is Brameshmadhav. That's a mouthful, so just call me Madhav!</span>
-        <button class="btn sm" id="sayName" aria-label="Hear how to say Madhav"><svg aria-hidden="true"><use href="#i-sound"/></svg> How to say it</button>
+        <button class="btn sm" id="sayName" aria-label="How to say it: hear Madhav pronounced"><svg aria-hidden="true"><use href="#i-sound"/></svg> How to say it</button>
       </div>
       <div class="cta">
         <a class="btn primary" href="#lab">
@@ -504,9 +538,9 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
     <div class="portrait">
       <div class="blob" aria-hidden="true"></div>
-      <img src="data:image/jpeg;base64,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" alt="Portrait of Madhav in a navy blazer, smiling on a tree-lined street" width="400" height="400">
-      <span class="spark" style="left:2%;bottom:18%;font-size:2rem;animation-delay:-1s" aria-hidden="true">+</span>
-      <span class="spark" style="right:6%;top:4%;font-size:1.5rem;color:var(--sky)" aria-hidden="true">{ }</span>
+      <img src="assets/profile.webp" fetchpriority="high" decoding="async" alt="Portrait of Madhav in a navy blazer, smiling on a tree-lined street" width="400" height="400">
+      <svg class="spark" style="left:2%;bottom:18%;width:22px;height:22px;animation-delay:-1s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18" stroke="var(--coral)" stroke-width="4" stroke-linecap="round"/></svg>
+      <svg class="spark" style="right:6%;top:4%;width:30px;height:24px" viewBox="0 0 30 24" aria-hidden="true"><path d="M9 3c-3 0-4 1.5-4 4v2.5c0 1.5-1 2.5-3 2.5 2 0 3 1 3 2.5V17c0 2.5 1 4 4 4M21 3c3 0 4 1.5 4 4v2.5c0 1.5 1 2.5 3 2.5-2 0-3 1-3 2.5V17c0 2.5-1 4-4 4" fill="none" stroke="var(--sky)" stroke-width="2.6" stroke-linecap="round"/></svg>
       <div class="bot-hint" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V12m0-1a1.5 1.5 0 0 1 3 0v4c0 3.3-2.2 6-5.5 6-2.3 0-3.7-1-5-3l-2.6-4.2a1.5 1.5 0 0 1 2.5-1.6L9 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="pro">Click Bolt to chat</span><span class="kid">Tap Bolt to say hi!</span></div>
       <div class="bubble" id="bubble" role="status" aria-live="polite"></div>
       <button class="bot" id="bot" aria-label="Talk to Bolt the robot">
@@ -575,7 +609,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
   <div class="wrap">
     <div class="sec-head reveal">
       <div>
-        <span class="tag" style="background:var(--sky);color:#fff">Brain Lab</span>
+        <span class="tag" style="background:var(--sky);color:var(--on-accent)">Brain Lab</span>
         <h2><span class="pro">Think first, then talk</span><span class="kid">Peek inside a robot brain</span></h2>
         <p class="pro">People don't say every thought out loud before answering, and agents shouldn't either. My "thinker-responder" pattern: a fast, cheap System-1 model makes the silent decision (which sub-agent, which tools), then a System-2 LLM writes the reply.</p>
         <p class="kid">Your brain has a speedy part that decides what to do, and a careful part that does the talking. My robot helpers work the same way. Pick a question and watch!</p>
@@ -607,7 +641,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
         <div class="lanes" id="lanes"></div>
         <div class="connector"></div>
         <div class="stage" id="st2">
-          <div class="num" style="background:var(--coral);color:#fff">2</div>
+          <div class="num" style="background:var(--coral);color:var(--on-accent)">2</div>
           <div style="flex:1">
             <h4><span class="pro">System-2 responder</span><span class="kid">The talking brain</span></h4>
             <div class="sub"><span class="pro">Writes the reply using the chosen specialist's context.</span><span class="kid">Uses the right helper to give a great answer.</span></div>
@@ -624,7 +658,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
   <div class="wrap">
     <div class="sec-head reveal">
       <div>
-        <span class="tag" style="background:var(--coral);color:#fff">Bug Hunt</span>
+        <span class="tag" style="background:var(--coral);color:var(--on-accent)">Bug Hunt</span>
         <h2><span class="pro">Every engineer's favorite pastime</span><span class="kid">Squash the bugs!</span></h2>
         <p class="pro">A 20-second break. Bugs are fastest right before a release, naturally.</p>
         <p class="kid">In computers, a "bug" is a mistake hiding in the code. Tap as many as you can in 20 seconds!</p>
@@ -665,7 +699,7 @@ export default helpCustomer;</div>
   <div class="wrap">
     <div class="sec-head reveal">
       <div>
-        <span class="tag" style="background:var(--plum);color:#fff"><span class="pro">Architect Mode</span><span class="kid">Code Quest</span></span>
+        <span class="tag" style="background:var(--plum);color:var(--on-accent)"><span class="pro">Architect Mode</span><span class="kid">Code Quest</span></span>
         <h2><span class="pro">System Designer</span><span class="kid">Robot Maze</span></h2>
         <p class="pro">No coding required: I wrote the simulator, you make the calls. Pick the building blocks for a real launch within budget, then see if your design survives contact with users.</p>
         <p class="kid">Coding means giving a computer step-by-step instructions. Build a program to get Bolt to the star. Plan first, then press Run!</p>
@@ -726,7 +760,7 @@ export default helpCustomer;</div>
   <div class="wrap">
     <div class="sec-head reveal">
       <div>
-        <span class="tag" style="background:var(--teal);color:#fff">The Journey</span>
+        <span class="tag" style="background:var(--teal);color:var(--on-accent)">The Journey</span>
         <h2><span class="pro">Career, one level at a time</span><span class="kid">My video game levels</span></h2>
         <p class="pro">Click a level for the details.</p>
         <p class="kid">Every job is a new level. Tap one to see what I learned there!</p>
@@ -797,865 +831,14 @@ export default helpCustomer;</div>
 </footer>
 
 <script>
-(() => {
-  const $ = (s, r = document) => r.querySelector(s);
-  const store = {
-    get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
-    set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
-  };
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let musicOn = false;
-  $('#yr').textContent = new Date().getFullYear();
-
-  /* ---------- Kid mode ---------- */
-  const toggle = $('#modeToggle');
-  const isKid = () => document.body.classList.contains('kidmode');
-  function setMode(kid, announce){
-    document.body.classList.toggle('kidmode', kid);
-    toggle.setAttribute('aria-checked', String(kid));
-    store.set('kidmode', kid ? '1' : '0');
-    renderChips(); resetLab(); renderLevel(current);
-    if (typeof refreshMusic === 'function' && musicBtn) refreshMusic();
-    if (announce) say(kid ? "Kid mode ON! Everything is explained in kid words now." : "Grown-up mode. Same robot, fancier words.");
-  }
-  toggle.addEventListener('click', () => { setMode(!isKid(), true); if (isKid()) burst(40); });
-
-  /* ---------- Bolt the robot ---------- */
-  const bubble = $('#bubble');
-  let bubbleTimer;
-  const portraitEl = document.querySelector('.portrait');
-  if (store.get('boltChatted') === '1') portraitEl.classList.add('chatted');
-  function say(text){
-    bubble.textContent = text; bubble.classList.add('show'); portraitEl.classList.add('talking');
-    clearTimeout(bubbleTimer); bubbleTimer = setTimeout(() => { bubble.classList.remove('show'); portraitEl.classList.remove('talking'); }, 4200);
-  }
-  const lines = {
-    pro: ["Hi, I'm Bolt. I route requests so the big model doesn't have to.",
-          "Fun fact: the cheapest token is the one you never generate.",
-          "Madhav's rule: guardrails are a feature, not a tax.",
-          "Try the Brain Lab below. I'm the fast part.",
-          "Flip the switch up top. I speak kid too."],
-    kid: ["Beep boop! I'm Bolt. Madhav built me to help!",
-          "Did you know? Computers only understand 1s and 0s. That's it!",
-          "My antenna lights up when I'm thinking really hard.",
-          "Can you beat Madhav's score in Bug Hunt?",
-          "Robots should always be kind and tell the truth. That's the rule!"]
-  };
-  let li = 0;
-  $('#bot').addEventListener('click', () => {
-    portraitEl.classList.add('chatted'); store.set('boltChatted', '1');
-    const set = isKid() ? lines.kid : lines.pro;
-    say(set[li++ % set.length]);
-    const m = $('#mouth'); m.setAttribute('d','M68 90 q12 14 24 0');
-    $('#antenna').setAttribute('fill','#FFC53D');
-    setTimeout(() => { m.setAttribute('d','M68 92 q12 9 24 0'); $('#antenna').setAttribute('fill','#FF6B5B'); }, 600);
-  });
-  // eyes follow pointer
-  const pupils = [...document.querySelectorAll('.pupil')];
-  const botEl = $('#bot');
-  window.addEventListener('pointermove', e => {
-    const r = botEl.getBoundingClientRect();
-    if (!r.width) return;
-    const scale = r.width / 160;
-    pupils.forEach(p => {
-      const bx = +p.getAttribute('cx') === 62 ? 62 : 98;
-      const ex = r.left + bx * scale, ey = r.top + 72 * scale;
-      const a = Math.atan2(e.clientY - ey, e.clientX - ex);
-      const d = Math.min(5, Math.hypot(e.clientX - ex, e.clientY - ey) / 30);
-      p.setAttribute('transform', `translate(${Math.cos(a)*d} ${Math.sin(a)*d})`);
-    });
-  }, { passive:true });
-  setTimeout(() => say(isKid() ? "Hi friend! Tap me!" : "Hi there. Click me, I have opinions."), 1200);
-
-  /* ---------- Say my name ---------- */
-  $('#sayName').addEventListener('click', () => {
-    say("It's MAA-dhuv.");
-    try {
-      const u = new SpeechSynthesisUtterance('Maadhav');
-      u.rate = .8; u.lang = 'en-IN';
-      speechSynthesis.cancel(); speechSynthesis.speak(u);
-    } catch(e){}
-  });
-
-  /* ---------- Brain Lab ---------- */
-  const LAB = {
-    pro: {
-      lanes: [{id:'billing',label:'Billing agent'},{id:'complaint',label:'Care agent'},{id:'account',label:'Account agent'}],
-      qs: [
-        {q:"I was charged twice for my order", route:'billing', tools:['payments.lookup','refunds.create'], a:"Sorry about that. I found the duplicate charge from yesterday and started a refund. You'll see it back on your card in 3 to 5 business days."},
-        {q:"What's my current balance?", route:'account', tools:['accounts.read'], a:"Your available balance is shown in the app under Accounts. I can also text it to the number on file if that's easier."},
-        {q:"I want to file a complaint", route:'complaint', tools:['cases.create','sentiment'], a:"I'm sorry it came to this. I've opened a case and flagged it for a specialist who will follow up within one business day. Want to tell me what happened?"},
-        {q:"Why was my card declined?", route:'billing', tools:['auth.decisions','fraud.signals'], a:"It looks like a security check paused that purchase. If it was you, confirm in the app and you can retry right away."}
-      ],
-      rules: [[/charg|refund|pay|bill|declin|fee|card/i,'billing'],[/complain|angry|upset|unhappy|bad|terrible/i,'complaint']],
-      fallback: {route:'account', tools:['accounts.read'], a:"Happy to help with that. Let me pull up your account details first so I get it right."}
-    },
-    kid: {
-      lanes: [{id:'joke',label:'Joke helper'},{id:'math',label:'Math helper'},{id:'science',label:'Science helper'}],
-      qs: [
-        {q:"Tell me a joke!", route:'joke', tools:['joke-book'], a:"Why did the robot go on vacation? To recharge its batteries!"},
-        {q:"What is 8 + 5?", route:'math', tools:['calculator'], a:"8 + 5 = 13. Count 5 more after 8: nine, ten, eleven, twelve, thirteen!"},
-        {q:"Why is the sky blue?", route:'science', tools:['science-book'], a:"Sunlight has every color in it. Air bounces blue light around the most, so blue fills the whole sky!"},
-        {q:"How do robots think?", route:'science', tools:['robot-facts'], a:"Robots follow instructions called code. A speedy part decides what to do, and a careful part does the talking, just like me!"}
-      ],
-      rules: [[/joke|funny|laugh|silly/i,'joke'],[/\d|plus|minus|math|count|times|add/i,'math']],
-      fallback: {route:'science', tools:['science-book'], a:"Ooh, great question! I'd look that up in my science book. Keep asking questions, that's how scientists start!"}
-    }
-  };
-  const cfg = () => LAB[isKid() ? 'kid' : 'pro'];
-  let runId = 0;
-  function renderChips(){
-    const c = $('#chips'); c.innerHTML = '';
-    cfg().qs.forEach((item, i) => {
-      const b = document.createElement('button');
-      b.className = 'chip'; b.textContent = item.q; b.setAttribute('aria-pressed','false');
-      b.addEventListener('click', () => {
-        c.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed','false'));
-        b.setAttribute('aria-pressed','true'); run(item);
-      });
-      c.appendChild(b);
-    });
-    const lanes = $('#lanes'); lanes.innerHTML = '';
-    cfg().lanes.forEach(l => { const d = document.createElement('div'); d.className='lane'; d.dataset.id=l.id; d.textContent=l.label; lanes.appendChild(d); });
-  }
-  function resetLab(){
-    runId++;
-    $('#thought').textContent = isKid() ? 'waiting for a question...' : 'idle: awaiting input';
-    $('#answer').textContent = '...'; $('#answer').classList.remove('caret');
-    $('#st1').classList.remove('on'); $('#st2').classList.remove('on');
-  }
-  const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
-  async function typeInto(el, text, id, speed=22){
-    el.textContent = ''; el.classList.add('caret');
-    if (reduce) { el.textContent = text; el.classList.remove('caret'); return; }
-    for (const ch of text){ if (id !== runId) return; el.textContent += ch; await wait(speed); }
-    el.classList.remove('caret');
-  }
-  async function run(item){
-    const id = ++runId;
-    const lanes = [...document.querySelectorAll('.lane')];
-    lanes.forEach(l => l.classList.remove('pick'));
-    $('#st2').classList.remove('on'); $('#answer').textContent = '...';
-    $('#st1').classList.add('on');
-    const th = $('#thought');
-    await typeInto(th, isKid() ? 'hmm... thinking quietly...' : 'classifying intent...', id, 28);
-    await wait(350); if (id !== runId) return;
-    lanes.forEach(l => l.classList.toggle('pick', l.dataset.id === item.route));
-    const conf = (0.86 + Math.random()*0.12).toFixed(2);
-    await typeInto(th, `{ route: "${item.route}", tools: [${item.tools.map(t=>`"${t}"`).join(', ')}], confidence: ${conf} }`, id, 12);
-    await wait(400); if (id !== runId) return;
-    $('#st1').classList.remove('on'); $('#st2').classList.add('on');
-    await typeInto($('#answer'), item.a, id, 18);
-  }
-  $('#askForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const q = $('#askInput').value.trim(); if (!q) return;
-    const c = cfg();
-    let route = null;
-    for (const [re, r] of c.rules) if (re.test(q)) { route = r; break; }
-    const hit = route && c.qs.find(x => x.route === route);
-    const item = hit ? {...hit} : {...c.fallback};
-    if (route && isKid() && route === 'math'){
-      const m = q.match(/(\d+)\s*([+\-x*])\s*(\d+)/);
-      if (m){ const a=+m[1], b=+m[3]; const v = m[2]==='+'?a+b:m[2]==='-'?a-b:a*b; item.a = `${a} ${m[2]} ${b} = ${v}. You're a math whiz!`; }
-    }
-    document.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed','false'));
-    run(item); $('#askInput').value='';
-  });
-
-  /* ---------- Bug Hunt ---------- */
-  const arena = $('#arena'), overlay = $('#overlay');
-  let score = 0, playing = false, spawnT, tickT, endAt;
-  let best = +(store.get('bugBest') || 0); $('#best').textContent = best;
-  function spawn(){
-    if (!playing) return;
-    const live = arena.querySelectorAll('.bug:not(.squash)').length;
-    if (live < 5){
-      const b = document.createElement('button');
-      b.className = 'bug'; b.setAttribute('aria-label','Squash bug');
-      b.innerHTML = '<svg aria-hidden="true"><use href="#i-bug"/></svg>';
-      const W = arena.clientWidth - 56, H = arena.clientHeight - 56;
-      const place = () => { b.style.left = Math.random()*W + 'px'; b.style.top = Math.random()*H + 'px'; b.style.transform = `rotate(${Math.random()*360}deg)`; };
-      place(); arena.appendChild(b);
-      const mv = setInterval(() => b.isConnected ? place() : clearInterval(mv), 1300 - Math.min(700, score*30));
-      const ttl = setTimeout(() => { clearInterval(mv); b.remove(); }, 4200);
-      b.addEventListener('pointerdown', e => {
-        if (!playing || b.classList.contains('squash')) return;
-        e.preventDefault(); clearInterval(mv); clearTimeout(ttl);
-        b.classList.add('squash'); score++; $('#score').textContent = score; sfx('squash');
-        const p = document.createElement('span'); p.className='pop'; p.textContent = isKid() ? 'Squish! +1' : 'fixed +1';
-        p.style.left = b.style.left; p.style.top = b.style.top; arena.appendChild(p);
-        setTimeout(() => { b.remove(); p.remove(); }, 800);
-      });
-      b.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' '){ b.dispatchEvent(new PointerEvent('pointerdown')); }});
-    }
-    spawnT = setTimeout(spawn, Math.max(350, 900 - score*25));
-  }
-  function start(){
-    score = 0; $('#score').textContent = 0; playing = true; sfx('start'); gameMusic(true);
-    overlay.style.display = 'none';
-    arena.querySelectorAll('.bug,.pop').forEach(n => n.remove());
-    endAt = performance.now() + 20000;
-    const bar = $('#timerBar');
-    const tick = () => {
-      const left = Math.max(0, endAt - performance.now());
-      $('#time').textContent = Math.ceil(left/1000) + 's';
-      bar.style.transform = `scaleX(${left/20000})`;
-      if (left <= 0) return end();
-      tickT = requestAnimationFrame(tick);
-    };
-    tick(); spawn();
-  }
-  function end(){
-    playing = false; clearTimeout(spawnT); cancelAnimationFrame(tickT); gameMusic(false); sfx('end');
-    arena.querySelectorAll('.bug').forEach(n => n.remove());
-    const newBest = score > best;
-    if (newBest){ best = score; store.set('bugBest', best); $('#best').textContent = best; }
-    const kid = isKid();
-    let msg;
-    if (score >= 25) msg = kid ? "WOW! You're a super bug hunter!" : "Zero-defect release. Principal engineer energy.";
-    else if (score >= 15) msg = kid ? "Amazing job! Those bugs didn't stand a chance." : "Clean build. Ship it.";
-    else if (score >= 6) msg = kid ? "Nice squishing! Want to try again?" : "Solid. A few made it to prod, as they do.";
-    else msg = kid ? "Bugs are sneaky! Try again, you've got this." : "The bugs won this sprint. Retro time.";
-    $('#ovTitle').textContent = `${score} bug${score===1?'':'s'} fixed${newBest ? ' (new best!)' : ''}`;
-    $('#ovText').textContent = msg;
-    $('#startBtn').textContent = 'Play again';
-    overlay.style.display = '';
-    if (newBest && score > 0) burst(70);
-  }
-  $('#startBtn').addEventListener('click', start);
-
-  /* ---------- Journey ---------- */
-  const LEVELS = [
-    { icon:'i-case', lv:'Level 1', name:{pro:'Consulting',kid:'Problem Solvers'},
-      role:{pro:'Cognizant & Publicis Sapient · 2009 to 2021 · Chennai, Bengaluru, Chicago, Charlotte',kid:'Solved computer puzzles for lots of companies'},
-      pro:['Cognizant (2009 to 2014): Java trainee to Associate, Projects; built the very first Comerica Portal for a banking client','Publicis Sapient (2014 to 2021): Senior Engineer to Architect, Experience Technology; frontend architecture, micro frontends, and performance on React and Node.js','Conference speaker and mentor; R&D with WebVR, Leap Motion, Raspberry Pi, and Google Cardboard'],
-      kid:['Learned to code in a big class with 30 friends','Built my first real app, for a bank!','Played with virtual reality goggles and tiny Raspberry Pi computers'] },
-    { icon:'i-tools', lv:'Level 2', name:{pro:"Lowe's",kid:'Hardware Store'},
-      role:{pro:'Lead Software Engineer · 2019 to 2022 · Charlotte',kid:'Helped people find hammers, nails, and paint'},
-      pro:['Led modernization of Lowes.com search and product listing platforms','Migrated large consumer apps from on-premise to Google Cloud','Scaled the team from 3 to 21 developers while keeping quality high'],
-      kid:['Made the search box on a giant hardware store website work better','Moved the website from old computers to the cloud','Grew my team from 3 people to 21!'] },
-    { icon:'i-sneaker', lv:'Level 3', name:{pro:'Nike',kid:'Sneaker World'},
-      role:{pro:'Global Director of Engineering · 2022 to 2023',kid:'Leader of sneaker teams around the world'},
-      pro:['Led global teams building experimentation and personalization platforms for launches and high-traffic events','Directed 10+ scrum teams on capabilities projected at $70M+ in incremental annual revenue','Built ML-based marketing automation with GDPR and regional privacy compliance'],
-      kid:['Helped the website show each person the sneakers they might love','Led more than 10 teams in different countries','Made sure everyone\'s information stayed private'] },
-    { icon:'i-heart', lv:'Level 4', name:{pro:'Ascension',kid:'Hospital Kingdom'},
-      role:{pro:'Senior Director of Engineering · 2023 to 2026',kid:'Builder of a talking helper named GRACE'},
-      pro:['Built GRACE, a 0-to-1 HIPAA-compliant agentic AI voice agent for appointment scheduling with safe escalation and human handoffs','Scaled the agentic AI squad from 2 staff engineers to 25 across voice and chat pods','Set up AI safety: golden datasets, rubrics, red-teaming, and production tracing; patient NPS up 25%'],
-      kid:['Built GRACE, a robot voice that helps people book doctor visits','Grew the robot team from 2 people to 25','Taught the robot to ask a real person for help when it isn\'t sure'] },
-    { icon:'i-bank', lv:'Level 5', name:{pro:'Capital One',kid:'Bank Castle'},
-      role:{pro:'Director of Software Engineering, Risk Tech · April 2026 to now · New York',kid:'Current level!'},
-      pro:['Leading Risk Tech engineering','Bringing agentic AI into engineering with governance built in','Also an Expert advisor to Primary Venture Partners founders (2024 to 2026)'],
-      kid:['Builds computer helpers that keep a giant bank safe','Makes sure the helpers follow the rules','Still squashing bugs every day'], current:true },
-    { icon:'i-q', lv:'Level 6', name:{pro:"What's next",kid:'Secret level'},
-      role:{pro:'Loading...',kid:'Not unlocked yet!'},
-      pro:['Voice agents that think before they talk','Privately trained models for regulated industries','Answering the question: if machines write the code, what are we all doing on this Zoom call?'],
-      kid:['Smarter talking robots','Robots that help even more people','Maybe you can help build them someday!'] }
-  ];
-  let current = 4;
-  const levelsEl = $('#levels');
-  LEVELS.forEach((L, i) => {
-    const b = document.createElement('button');
-    b.className = 'level'; b.setAttribute('role','tab'); b.dataset.i = i;
-    b.innerHTML = `<span class="node"><svg aria-hidden="true"><use href="#${L.icon}"/></svg>${L.current ? '<svg class="star" aria-hidden="true"><use href="#i-star"/></svg>' : ''}</span>
-      <span><span class="lv">${L.lv}</span><br><span class="nm"></span></span>`;
-    b.addEventListener('click', () => { current = i; renderLevel(i); });
-    levelsEl.appendChild(b);
-  });
-  function renderLevel(i){
-    const L = LEVELS[i], k = isKid() ? 'kid' : 'pro';
-    levelsEl.querySelectorAll('.level').forEach((b, j) => {
-      b.setAttribute('aria-selected', String(j === i));
-      b.querySelector('.nm').textContent = LEVELS[j].name[k];
-    });
-    const xp = Math.round(((i+1) / LEVELS.length) * 100);
-    $('#detail').innerHTML = `<div class="badge"><svg aria-hidden="true"><use href="#${L.icon}"/></svg></div>
-      <div><span class="lv mono" style="color:var(--muted)">${L.lv}</span>
-      <h3>${L.name[k]}</h3><div class="role">${L.role[k]}</div>
-      <ul>${L[k].map(x => `<li>${x}</li>`).join('')}</ul>
-      <div class="xp">XP <span class="bar"><i style="width:${xp}%"></i></span> ${xp}%</div></div>`;
-  }
-
-  /* ---------- Confetti + easter egg ---------- */
-  function burst(n){
-    if (reduce) return;
-    const colors = ['#FF6B5B','#1FA39A','#FFC53D','#5B8DEF','#8E6BD8'];
-    for (let i=0;i<n;i++){
-      const c = document.createElement('i'); c.className='confetti';
-      c.style.left = Math.random()*100+'vw'; c.style.background = colors[i%colors.length];
-      c.style.animationDuration = (1.8+Math.random()*1.8)+'s'; c.style.animationDelay = (Math.random()*.4)+'s';
-      c.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
-      document.body.appendChild(c); setTimeout(() => c.remove(), 4200);
-    }
-  }
-  let clicks = 0, clickT;
-  $('#logo').addEventListener('click', () => {
-    clearTimeout(clickT); clickT = setTimeout(() => clicks = 0, 1200);
-    if (++clicks >= 5){ clicks = 0; burst(120); say(isKid() ? "You found the secret party button!" : "Easter egg unlocked. Ship the confetti."); }
-    else window.scrollTo({ top:0, behavior: reduce ? 'auto' : 'smooth' });
-  });
-
-  /* ---------- Reveal on scroll ---------- */
-  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold:.12 });
-  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-
-  /* ---------- Space backdrop ---------- */
-  const space = $('#space'), cv = $('#stars'), cx = cv.getContext('2d');
-  let stars = [], W = 0, H = 0, dpr = 1;
-  const darkQ = window.matchMedia('(prefers-color-scheme: dark)');
-  const isDark = () => document.documentElement.dataset.theme === 'dark' || (document.documentElement.dataset.theme !== 'light' && darkQ.matches);
-  function sizeStars(){
-    dpr = Math.min(2, window.devicePixelRatio || 1);
-    W = innerWidth; H = innerHeight;
-    cv.width = W*dpr; cv.height = H*dpr; cx.setTransform(dpr,0,0,dpr,0,0);
-    const n = Math.round(W*H/6500);
-    stars = Array.from({length:n}, () => ({x:Math.random()*W, y:Math.random()*H*1.6, r:Math.random()*1.5+.4, p:Math.random()*6.28, s:.4+Math.random()*1.2, z:.15+Math.random()*.5, c:Math.random()<.15}));
-  }
-  const PAL = ['#FF6B5B','#1FA39A','#FFC53D','#5B8DEF','#8E6BD8'];
-  const PAL_D = ['#FF4FD8','#22E6C8','#C8FF45','#48B6FF','#A47BFF'];
-  function drawStars(t){
-    cx.clearRect(0,0,W,H);
-    const dark = isDark(), sy = scrollY;
-    const boost = musicOn ? 1.8 : 1;
-    for (const st of stars){
-      const y = ((st.y - sy*st.z) % (H*1.6) + H*1.6) % (H*1.6) - H*.3;
-      if (y < -4 || y > H+4) continue;
-      const tw = .55 + .45*Math.sin(st.p + t/1000*st.s*boost);
-      cx.globalAlpha = (dark ? 1 : .3) * tw;
-      cx.fillStyle = (st.c || (dark && st.r > 1.4)) ? (dark ? PAL_D : PAL)[(st.r*10|0)%5] : (dark ? '#EEEAFF' : '#1C2541');
-      cx.beginPath();
-      if (st.r > 1.6){ // little sparkle
-        const r = st.r*1.6;
-        cx.moveTo(st.x, y-r); cx.lineTo(st.x+r*.3, y-r*.3); cx.lineTo(st.x+r, y); cx.lineTo(st.x+r*.3, y+r*.3);
-        cx.lineTo(st.x, y+r); cx.lineTo(st.x-r*.3, y+r*.3); cx.lineTo(st.x-r, y); cx.lineTo(st.x-r*.3, y-r*.3);
-      } else cx.arc(st.x, y, st.r, 0, 6.29);
-      cx.fill();
-    }
-    cx.globalAlpha = 1;
-  }
-  const SVGS = {
-    planet:'<svg viewBox="0 0 120 80"><ellipse cx="60" cy="44" rx="56" ry="14" fill="none" stroke="#8E6BD8" stroke-width="6" opacity=".5"/><circle cx="60" cy="40" r="26" fill="#FF6B5B" stroke="#1C2541" stroke-width="3"/><path d="M38 34c10 4 30 4 44-2M36 46c14 4 32 4 48-2" stroke="#1C2541" stroke-width="2.5" fill="none" opacity=".35"/><path d="M6 46c10 8 98 8 108 0" fill="none" stroke="#8E6BD8" stroke-width="6" stroke-linecap="round"/></svg>',
-    rocket:'<svg viewBox="0 0 80 120"><path d="M40 6c16 14 22 36 18 62H22C18 42 24 20 40 6z" fill="#F3F0E8" stroke="#1C2541" stroke-width="3"/><circle cx="40" cy="40" r="9" fill="#5B8DEF" stroke="#1C2541" stroke-width="3"/><path d="M22 58l-12 18 14-2M58 58l12 18-14-2" fill="#FF6B5B" stroke="#1C2541" stroke-width="3" stroke-linejoin="round"/><path d="M30 70c2 16 8 26 10 34 2-8 8-18 10-34z" fill="#FFC53D" stroke="#1C2541" stroke-width="2.5"/></svg>',
-    astro:'<svg viewBox="0 0 100 110"><rect x="26" y="52" width="48" height="42" rx="16" fill="#F3F0E8" stroke="#1C2541" stroke-width="3"/><rect x="10" y="58" width="18" height="12" rx="6" fill="#F3F0E8" stroke="#1C2541" stroke-width="3" transform="rotate(-30 19 64)"/><rect x="72" y="58" width="18" height="12" rx="6" fill="#F3F0E8" stroke="#1C2541" stroke-width="3" transform="rotate(30 81 64)"/><circle cx="50" cy="36" r="26" fill="#F3F0E8" stroke="#1C2541" stroke-width="3"/><rect x="32" y="24" width="36" height="24" rx="12" fill="#1FA39A" stroke="#1C2541" stroke-width="3"/><circle cx="43" cy="36" r="3.5" fill="#fff"/><circle cx="57" cy="36" r="3.5" fill="#fff"/><rect x="40" y="66" width="20" height="12" rx="3" fill="#FFC53D" stroke="#1C2541" stroke-width="2"/></svg>',
-    sat:'<svg viewBox="0 0 140 70"><rect x="4" y="22" width="40" height="26" rx="3" fill="#5B8DEF" stroke="#1C2541" stroke-width="3"/><path d="M17 22v26M30 22v26M4 35h40" stroke="#1C2541" stroke-width="1.8"/><rect x="96" y="22" width="40" height="26" rx="3" fill="#5B8DEF" stroke="#1C2541" stroke-width="3"/><path d="M109 22v26M122 22v26M96 35h40" stroke="#1C2541" stroke-width="1.8"/><path d="M44 35h10M86 35h10" stroke="#1C2541" stroke-width="3"/><rect x="54" y="20" width="32" height="30" rx="8" fill="#FFC53D" stroke="#1C2541" stroke-width="3"/><path d="M70 20V8" stroke="#1C2541" stroke-width="3"/><circle cx="70" cy="7" r="4" fill="#FF6B5B" stroke="#1C2541" stroke-width="2"/></svg>',
-    moon:'<svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="32" fill="#E8E1D2" stroke="#1C2541" stroke-width="3"/><circle cx="28" cy="30" r="7" fill="#CFC5B2"/><circle cx="50" cy="50" r="9" fill="#CFC5B2"/><circle cx="52" cy="24" r="4" fill="#CFC5B2"/></svg>',
-    ufo:'<svg viewBox="0 0 120 70"><path d="M40 30a20 18 0 0 1 40 0" fill="#9FE3DA" stroke="#1C2541" stroke-width="3"/><ellipse cx="60" cy="36" rx="52" ry="14" fill="#8E6BD8" stroke="#1C2541" stroke-width="3"/><circle cx="30" cy="38" r="4" fill="#FFC53D"/><circle cx="60" cy="42" r="4" fill="#FFC53D"/><circle cx="90" cy="38" r="4" fill="#FFC53D"/></svg>',
-    rock:'<svg viewBox="0 0 80 70"><path d="M14 30l12-18 26-4 18 16 2 24-18 16-28-2L8 46z" fill="#B8A98F" stroke="#1C2541" stroke-width="3" stroke-linejoin="round"/><circle cx="34" cy="30" r="6" fill="#9C8C72"/><circle cx="52" cy="46" r="4" fill="#9C8C72"/></svg>',
-    ring:'<svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="24" fill="#1FA39A" stroke="#1C2541" stroke-width="3"/><path d="M24 30c10-6 26-6 34 6" stroke="#fff" stroke-width="3" fill="none" opacity=".5" stroke-linecap="round"/></svg>'
-  };
-  const SPEC = [
-    {k:'planet', w:150, y:.14, d:95,  dir:1},
-    {k:'astro',  w:90,  y:.62, d:80,  dir:-1},
-    {k:'rocket', w:56,  y:.38, d:46,  dir:1, rocket:true},
-    {k:'sat',    w:130, y:.82, d:110, dir:-1},
-    {k:'moon',   w:70,  y:.28, d:130, dir:-1},
-    {k:'ufo',    w:100, y:.52, d:70,  dir:1},
-    {k:'rock',   w:50,  y:.72, d:60,  dir:1},
-    {k:'ring',   w:46,  y:.9,  d:120, dir:-1}
-  ];
-  const narrow = () => innerWidth < 700;
-  const floaters = SPEC.map((f, i) => {
-    const el = document.createElement('div'); el.className = 'floater'; el.innerHTML = SVGS[f.k];
-    space.appendChild(el);
-    return {...f, el, off: Math.random(), bob: Math.random()*6.28, spin: (Math.random()-.5)*30};
-  });
-  function sizeFloaters(){ floaters.forEach(f => { f.el.style.width = (narrow() ? f.w*.6 : f.w) + 'px'; f.el.style.display = (narrow() && f.w > 120 && f.k==='sat') ? 'none' : ''; }); }
-  function drawFloaters(t){
-    const s = t/1000;
-    for (const f of floaters){
-      const span = W + f.w*2;
-      let prog = (f.off + s / f.d * (musicOn ? 1.4 : 1)) % 1;
-      if (f.dir < 0) prog = 1 - prog;
-      const x = prog*span - f.w;
-      const y = f.y*H + Math.sin(s*.6 + f.bob)*18 - scrollY*.04*(f.w/100) % H;
-      const rot = f.rocket ? (f.dir > 0 ? 70 : -70) + Math.sin(s+f.bob)*6 : f.spin*Math.sin(s*.2 + f.bob);
-      f.el.style.transform = `translate3d(${x}px,${y}px,0) rotate(${rot}deg)`;
-    }
-  }
-  function shoot(){
-    if (document.hidden) return;
-    const el = document.createElement('div'); el.className = 'shoot';
-    el.style.left = (30 + Math.random()*70) + 'vw'; el.style.top = (Math.random()*50) + 'vh';
-    space.appendChild(el); setTimeout(() => el.remove(), 1500);
-  }
-  sizeStars(); sizeFloaters();
-  addEventListener('resize', () => { sizeStars(); sizeFloaters(); });
-  if (reduce){
-    drawStars(0); drawFloaters(20000);
-    addEventListener('scroll', () => drawStars(0), {passive:true});
-  } else {
-    const loop = t => { drawStars(t); drawFloaters(t); requestAnimationFrame(loop); };
-    requestAnimationFrame(loop);
-    setInterval(() => { if (Math.random() < (musicOn ? .7 : .35)) shoot(); }, 4000);
-  }
-
-  /* ---------- Music engine (all generated live with Web Audio, no audio files) ---------- */
-  const musicBtn = $('#musicBtn'), nextBtn = $('#nextTrack'), trackLbl = $('#trackName');
-  const TRACKS = [
-    { id:'nebula', name:'Nebula Drift', kid:'Sleepy Stars' },
-    { id:'rocket', name:'Rocket Pop',   kid:'Rocket Pop' },
-    { id:'moon',   name:'Moon Bounce',  kid:'Moon Bounce' }
-  ];
-  let actx, master, rev, noiseBuf, curTrack = null, spaceWanted = false, gameActive = false;
-  let trackIdx = (+(store.get('track') || 0)) % TRACKS.length;
-  let gamePref = store.get('gameMusic') !== '0';
-  const hz = m => 440 * Math.pow(2, (m - 69) / 12);
-
-  function ensureAudio(){
-    if (actx) return;
-    actx = new (window.AudioContext || window.webkitAudioContext)();
-    master = actx.createGain(); master.gain.value = .9; master.connect(actx.destination);
-    const len = actx.sampleRate * 4, buf = actx.createBuffer(2, len, actx.sampleRate);
-    for (let c = 0; c < 2; c++){ const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 2.6); }
-    rev = actx.createConvolver(); rev.buffer = buf;
-    const wet = actx.createGain(); wet.gain.value = .5; rev.connect(wet).connect(master);
-    noiseBuf = actx.createBuffer(1, actx.sampleRate, actx.sampleRate);
-    const nd = noiseBuf.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random()*2-1;
-  }
-
-  /* instruments */
-  function tone(dest, f, t, d, o = {}){
-    const osc = actx.createOscillator(), g = actx.createGain(), v = o.vol ?? .08;
-    osc.type = o.type || 'triangle';
-    osc.frequency.setValueAtTime(f, t);
-    if (o.slide) osc.frequency.exponentialRampToValueAtTime(o.slide, t + d);
-    if (o.detune) osc.detune.value = o.detune;
-    if (o.pluck){ g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d); }
-    else {
-      const a = o.a ?? .01, r = o.r ?? .08;
-      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + a);
-      g.gain.setValueAtTime(v, t + Math.max(a, d)); g.gain.linearRampToValueAtTime(0, t + d + r);
-    }
-    let node = osc.connect(g);
-    if (o.lp){ const fl = actx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = o.lp; node = node.connect(fl); }
-    node.connect(dest); osc.start(t); osc.stop(t + d + (o.r ?? .08) + .05);
-  }
-  function noise(dest, t, d, o = {}){
-    const src = actx.createBufferSource(), fl = actx.createBiquadFilter(), g = actx.createGain();
-    src.buffer = noiseBuf; fl.type = o.ft || 'highpass'; fl.frequency.value = o.f || 6000;
-    g.gain.setValueAtTime(o.vol || .05, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
-    src.connect(fl).connect(g).connect(dest); src.start(t, Math.random()*.5); src.stop(t + d + .02);
-  }
-  const kick  = (dst, t, v = .55) => tone(dst, 150, t, .22, { type:'sine', slide:42, vol:v, pluck:true });
-  const snare = (dst, t, v = .14) => { noise(dst, t, .14, { f:1800, vol:v }); tone(dst, 190, t, .08, { vol:v*.5, pluck:true }); };
-  const hat   = (dst, t, v = .035) => noise(dst, t, .035, { f:8000, vol:v });
-  const clap  = (dst, t, v = .1) => [0, .012, .024].forEach(o => noise(dst, t + o, .09, { f:1300, ft:'bandpass', vol:v }));
-
-  /* 16th-note scheduler */
-  function sequencer(bpm, swing, onStep){
-    const spb = 60 / bpm / 4; let step = 0, next = actx.currentTime + .08;
-    const timer = setInterval(() => {
-      while (next < actx.currentTime + .15){
-        onStep(step, next + (step % 2 ? swing * spb : 0), spb);
-        next += spb; step++;
-      }
-    }, 25);
-    return () => clearInterval(timer);
-  }
-  const melAt = (mel, s) => mel.filter(n => n[0] === s);
-
-  /* Track 1: Nebula Drift (soulful, ambient) */
-  function nebula(dest){
-    const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; lp.Q.value = .6;
-    const lfo = actx.createOscillator(), lfoG = actx.createGain(); lfo.frequency.value = .05; lfoG.gain.value = 500;
-    lfo.connect(lfoG).connect(lp.frequency); lfo.start();
-    const bus = actx.createGain(); bus.connect(lp); lp.connect(dest);
-    const CH = [[48,55,62,64,71],[45,52,59,60,67],[41,48,55,57,64],[43,50,57,59,62]];
-    const PENTA = [72,74,76,79,81,84,86,88];
-    let alive = true, ci = 0, t1, t2;
-    const chord = () => {
-      if (!alive) return;
-      const now = actx.currentTime, dur = 9;
-      CH[ci++ % CH.length].forEach((m, i) => [-6, 6].forEach(det => {
-        const o = actx.createOscillator(), g = actx.createGain(), v = i === 0 ? .07 : .028;
-        o.type = i === 0 ? 'sine' : 'triangle'; o.frequency.value = hz(m); o.detune.value = det;
-        g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(v, now + 3);
-        g.gain.setValueAtTime(v, now + dur - 2); g.gain.linearRampToValueAtTime(0, now + dur + 2.5);
-        o.connect(g).connect(bus); o.start(now); o.stop(now + dur + 3);
-      }));
-      t1 = setTimeout(chord, 9000);
-    };
-    const twinkle = () => {
-      if (!alive) return;
-      tone(dest, hz(PENTA[Math.random()*PENTA.length|0]), actx.currentTime, 2.6, { type:'sine', vol:.035, pluck:true });
-      t2 = setTimeout(twinkle, 700 + Math.random()*2200);
-    };
-    chord(); t2 = setTimeout(twinkle, 1500);
-    return () => { alive = false; clearTimeout(t1); clearTimeout(t2); try { lfo.stop(); } catch(e){} };
-  }
-
-  /* Track 2: Rocket Pop (peppy, C major, I-V-vi-IV) */
-  const ROCKET = {
-    ch:[[60,64,67],[55,59,62],[57,60,64],[53,57,60]], bass:[36,43,45,41],
-    mel:[[0,76,2],[2,79,2],[4,84,3],[8,81,2],[10,79,2],[12,76,4],
-         [16,74,2],[18,79,2],[20,83,3],[24,81,2],[26,79,2],[28,74,4],
-         [32,76,2],[34,81,2],[36,84,3],[40,83,2],[42,81,2],[44,76,4],
-         [48,77,2],[50,81,2],[52,84,2],[54,86,2],[56,84,4],[60,81,2],[62,79,2]]
-  };
-  function rocket(dest){
-    return sequencer(118, 0, (s, t, spb) => {
-      const st = s % 16, bar = (s >> 4) % 4, cyc = (s >> 6) % 4, ch = ROCKET.ch[bar];
-      if (st === 0 || st === 8 || (st === 10 && bar === 3)) kick(dest, t, .5);
-      if (st === 4 || st === 12) clap(dest, t, .09);
-      if (st % 2 === 0) hat(dest, t, st % 4 ? .025 : .04);
-      if (st % 2 === 0) tone(dest, hz(ROCKET.bass[bar] + (st % 4 ? 12 : 0)), t, spb*1.6, { type:'triangle', vol:.16, lp:900, r:.04 });
-      tone(dest, hz(ch[[0,1,2,1][st % 4]] + 12), t, spb*.9, { type:'square', vol:.018, lp:2400, pluck:true });
-      if (cyc !== 2) melAt(ROCKET.mel, s % 64).forEach(([, m, l]) => tone(dest, hz(m), t, spb*l*.95, { type:'triangle', vol:.075, r:.06 }));
-      if (cyc === 2 && st % 4 === 0) tone(dest, hz(ch[2] + 24), t, spb*3, { type:'sine', vol:.04, pluck:true });
-    });
-  }
-
-  /* Track 3: Moon Bounce (playful, swung marimba, F major) */
-  const MOON = {
-    ch:[[53,57,60],[50,53,57],[46,50,53],[48,52,55]], bass:[41,38,34,36],
-    mel:[[0,69],[3,72],[6,74],[8,77],[11,74],[14,72],
-         [16,69],[19,65],[22,67],[24,69],[28,62],
-         [32,65],[35,70],[38,74],[40,77],[43,74],[46,70],
-         [48,67],[51,72],[54,76],[56,79],[59,76],[62,72]]
-  };
-  function moon(dest){
-    return sequencer(104, .33, (s, t, spb) => {
-      const st = s % 16, bar = (s >> 4) % 4, cyc = (s >> 6) % 4, ch = MOON.ch[bar];
-      if (st === 0 || st === 8 || st === 11) kick(dest, t, .42);
-      if (st === 4 || st === 12) clap(dest, t, .08);
-      if (st % 2 === 1) hat(dest, t, .02);
-      if (st === 0 || st === 8) tone(dest, hz(MOON.bass[bar]), t, spb*3, { type:'sine', vol:.22, pluck:true });
-      if (st === 14 && bar === 3) tone(dest, 180, t, .35, { type:'sine', slide:520, vol:.08, pluck:true }); // boing
-      if (st % 4 === 2) ch.forEach(m => tone(dest, hz(m + 12), t, .18, { type:'triangle', vol:.025, pluck:true }));
-      if (cyc !== 3) melAt(MOON.mel, s % 64).forEach(([, m]) => {
-        tone(dest, hz(m), t, .45, { type:'sine', vol:.11, pluck:true });
-        tone(dest, hz(m + 12), t, .2, { type:'sine', vol:.03, pluck:true });
-      });
-    });
-  }
-
-  /* Game track: Bug Blitz (fast chiptune, A minor) */
-  const BLITZ = {
-    ch:[[57,60,64],[53,57,60],[55,59,62],[52,56,59]], bass:[33,29,31,28],
-    mel:[[0,69,2],[2,72,2],[4,76,2],[6,74,2],[8,72,2],[10,71,2],[12,69,4],
-         [16,69,2],[18,72,2],[20,77,2],[22,76,2],[24,74,2],[26,72,2],[28,72,4],
-         [32,71,2],[34,74,2],[36,79,2],[38,77,2],[40,76,2],[42,74,2],[44,71,4],
-         [48,68,2],[50,71,2],[52,76,2],[54,74,2],[56,71,2],[58,68,2],[60,64,4]]
-  };
-  function blitz(dest){
-    return sequencer(150, 0, (s, t, spb) => {
-      const st = s % 16, bar = (s >> 4) % 4, ch = BLITZ.ch[bar];
-      if (st % 4 === 0) kick(dest, t, .5);
-      if (st === 4 || st === 12) snare(dest, t, .12);
-      hat(dest, t, st % 2 ? .018 : .03);
-      if (st % 2 === 0) tone(dest, hz(BLITZ.bass[bar] + 12 + (st % 4 ? 12 : 0)), t, spb*1.5, { type:'square', vol:.05, lp:700, r:.03 });
-      tone(dest, hz(ch[st % 3] + 24), t, spb*.8, { type:'square', vol:.012, lp:3500, pluck:true });
-      melAt(BLITZ.mel, s % 64).forEach(([, m, l]) => tone(dest, hz(m + 12), t, spb*l*.9, { type:'square', vol:.035, lp:3000, r:.04 }));
-    });
-  }
-
-  const ENGINES = { nebula, rocket, moon, bugs: blitz };
-  function startTrack(id){
-    ensureAudio(); actx.resume();
-    const tg = actx.createGain(); tg.gain.value = 0; tg.connect(master);
-    const send = actx.createGain(); send.gain.value = id === 'nebula' ? .6 : .15; tg.connect(send); send.connect(rev);
-    const stopFn = ENGINES[id](tg);
-    tg.gain.setTargetAtTime(id === 'nebula' ? .9 : .7, actx.currentTime, id === 'nebula' ? 1 : .12);
-    return { id, stop(){
-      tg.gain.cancelScheduledValues(actx.currentTime);
-      tg.gain.setTargetAtTime(0, actx.currentTime, .15);
-      stopFn(); setTimeout(() => tg.disconnect(), 4000);
-    } };
-  }
-  const wanted = () => (gameActive && gamePref) ? 'bugs' : (spaceWanted ? TRACKS[trackIdx].id : null);
-  function refreshMusic(){
-    const want = wanted();
-    if ((curTrack && curTrack.id) !== want){
-      if (curTrack){ curTrack.stop(); curTrack = null; }
-      if (want){ try { curTrack = startTrack(want); } catch(e){ curTrack = null; } }
-    }
-    musicOn = !!curTrack;
-    const tr = TRACKS[trackIdx], overridden = spaceWanted && gameActive && gamePref;
-    musicBtn.setAttribute('aria-pressed', String(spaceWanted));
-    musicBtn.setAttribute('aria-label', spaceWanted ? `Stop music (now: ${tr.name})` : `Play music: ${tr.name}`);
-    trackLbl.textContent = overridden ? 'Paused for game' : (spaceWanted ? (isKid() ? tr.kid : tr.name) : 'Music');
-    const gb = $('#gameMusicBtn');
-    if (gb){ gb.setAttribute('aria-pressed', String(gamePref)); $('#gameMusicState').textContent = gamePref ? 'On' : 'Off'; }
-  }
-  musicBtn.addEventListener('click', () => {
-    spaceWanted = !spaceWanted; refreshMusic();
-    if (spaceWanted && !(gameActive && gamePref)) say(isKid() ? `Blast off! Now playing ${TRACKS[trackIdx].kid}.` : `Now playing ${TRACKS[trackIdx].name}. Generated live in your browser.`);
-  });
-  nextBtn.addEventListener('click', () => {
-    trackIdx = (trackIdx + 1) % TRACKS.length; store.set('track', trackIdx);
-    spaceWanted = true; refreshMusic();
-    if (!(gameActive && gamePref)) say(`Now playing: ${isKid() ? TRACKS[trackIdx].kid : TRACKS[trackIdx].name}`);
-  });
-  function sfx(kind){
-    if (!gamePref) return;
-    try {
-      ensureAudio(); actx.resume();
-      const t = actx.currentTime;
-      if (kind === 'squash') tone(master, 520, t, .09, { type:'square', slide:1400, vol:.05, pluck:true });
-      if (kind === 'start') [69,72,76,81].forEach((m, i) => tone(master, hz(m+12), t + i*.08, .1, { type:'square', vol:.04, lp:3000, pluck:true }));
-      if (kind === 'end')   [81,76,72,69,81].forEach((m, i) => tone(master, hz(m+12), t + i*.11, i === 4 ? .5 : .12, { type:'square', vol:.04, lp:3000, pluck:true }));
-    } catch(e){}
-  }
-  function gameMusic(active){ gameActive = active; refreshMusic(); }
-  $('#gameMusicBtn').addEventListener('click', () => { gamePref = !gamePref; store.set('gameMusic', gamePref ? '1' : '0'); refreshMusic(); });
-  document.addEventListener('visibilitychange', () => {
-    if (!actx) return;
-    if (document.hidden) actx.suspend(); else if (curTrack) actx.resume();
-  });
-  refreshMusic();
-
-  /* ---------- Robot Maze (kid mode coding challenge) ---------- */
-  const MAZES = [
-    { start:[0,2,0], goal:[4,2], par:4,  rocks:[], tip:"Bolt is facing right. How many Forward steps to reach the star?" },
-    { start:[0,4,0], goal:[3,1], par:8,  rocks:[[1,4],[2,4],[1,2],[2,2]], tip:"Rocks block the way! Turn Bolt first, then go Forward." },
-    { start:[0,0,1], goal:[3,0], par:9,  rocks:[[1,0],[1,1],[2,0],[2,1],[4,0],[4,1],[0,4]], tip:"Bolt starts facing down. Turning left or right depends on which way Bolt faces!" },
-    { start:[0,1,0], goal:[4,1], par:11, rocks:[[2,0],[2,1],[2,2],[4,0],[5,1]], tip:"Go around the wall. Plan the whole trip before you press Run." },
-    { start:[0,5,3], goal:[4,0], par:13, rocks:[[1,4],[1,3],[1,2],[0,1],[3,0],[3,1],[3,2],[5,1],[4,4],[5,3]], tip:"Final level! Trace the path with your finger first." }
-  ];
-  const DIRV = [[1,0],[0,1],[-1,0],[0,-1]], MAXBLOCKS = 16, N = 6;
-  const board = $('#mazeBoard'), progEl = $('#program'), mazeMsg = $('#mazeMsg');
-  let mz = 0, prog = [], running = false, botPos;
-  let unlocked = Math.min(MAZES.length - 1, +(store.get('mazeUnlocked') || 0));
-  const mazeBest = (() => { try { return JSON.parse(store.get('mazeStars') || '{}'); } catch(e){ return {}; } })();
-  const BLOCK = {
-    F:{ label:'Forward',    icon:'<path d="M12 19V5M6 11l6-6 6 6"/>' },
-    L:{ label:'Turn left',  icon:'<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-2"/>' },
-    R:{ label:'Turn right', icon:'<path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h2"/>' }
-  };
-  const blockSvg = k => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${BLOCK[k].icon}</svg>`;
-  function drawMaze(){
-    const M = MAZES[mz], rocks = new Set(M.rocks.map(r => r.join(',')));
-    let html = '';
-    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){
-      const k = x + ',' + y, goal = M.goal[0] === x && M.goal[1] === y;
-      html += `<div class="cell${rocks.has(k) ? ' rock' : ''}" data-xy="${k}">${rocks.has(k) ? '<svg viewBox="0 0 80 70"><path d="M14 30l12-18 26-4 18 16 2 24-18 16-28-2L8 46z" fill="#B8A98F" stroke="#1C2541" stroke-width="4" stroke-linejoin="round"/><circle cx="34" cy="30" r="6" fill="#9C8C72"/></svg>' : ''}${goal ? '<svg class="goal" viewBox="0 0 32 32"><use href="#i-star"/></svg>' : ''}</div>`;
-    }
-    html += `<div class="mbot" id="mbot"><div class="mbot-in"><svg viewBox="0 0 64 64"><rect x="10" y="14" width="44" height="38" rx="13" fill="#1FA39A" stroke="#1C2541" stroke-width="3"/><circle cx="25" cy="32" r="6" fill="#fff"/><circle cx="39" cy="32" r="6" fill="#fff"/><circle cx="27" cy="32" r="2.6" fill="#1C2541"/><circle cx="41" cy="32" r="2.6" fill="#1C2541"/><path d="M54 26l8 7-8 7z" fill="#FF6B5B" stroke="#1C2541" stroke-width="2.5" stroke-linejoin="round"/></svg></div></div>`;
-    board.innerHTML = html;
-    $('#mazeLevel').textContent = `Level ${mz + 1} of ${MAZES.length}`;
-    $('#mazeTip').textContent = M.tip;
-    $('#mazePar').textContent = `Best possible: ${M.par} blocks`;
-    const dots = $('#mazeDots'); dots.innerHTML = '';
-    MAZES.forEach((_, i) => {
-      const b = document.createElement('button');
-      b.className = 'mdot'; b.textContent = mazeBest[i] ? '★'.repeat(mazeBest[i]) : (i + 1);
-      b.disabled = i > unlocked; b.setAttribute('aria-label', `Level ${i + 1}${i > unlocked ? ' (locked)' : ''}`);
-      if (i === mz) b.setAttribute('aria-current', 'step');
-      b.addEventListener('click', () => { if (running) return; mz = i; prog = []; drawMaze(); renderProg(); setMazeMsg(''); });
-      dots.appendChild(b);
-    });
-    resetBot();
-  }
-  function placeBot(x, y, d){
-    const b = $('#mbot'); if (!b) return;
-    b.style.left = (x * 100 / N) + '%'; b.style.top = (y * 100 / N) + '%';
-    b.firstElementChild.style.transform = `rotate(${d * 90}deg)`;
-  }
-  function resetBot(){
-    const [x, y, d] = MAZES[mz].start; botPos = { x, y, d, turns: d };
-    board.querySelectorAll('.trail').forEach(c => c.classList.remove('trail'));
-    placeBot(x, y, d);
-  }
-  function renderProg(active = -1){
-    if (!prog.length){ progEl.innerHTML = '<span class="prog-empty">Tap the blocks above to build Bolt\'s program.</span>'; }
-    else progEl.innerHTML = prog.map((k, i) => `<button class="pblock pb-${k}${i === active ? ' active' : ''}" data-i="${i}" aria-label="Step ${i + 1}: ${BLOCK[k].label}. Tap to remove.">${blockSvg(k)}<span>${i + 1}</span></button>`).join('');
-    $('#blockCount').textContent = `${prog.length}/${MAXBLOCKS}`;
-    $('#runBtn').disabled = running || !prog.length;
-  }
-  progEl.addEventListener('click', e => {
-    const b = e.target.closest('.pblock'); if (!b || running) return;
-    prog.splice(+b.dataset.i, 1); renderProg();
-  });
-  document.querySelectorAll('.palette button').forEach(b => b.addEventListener('click', () => {
-    if (running) return;
-    if (prog.length >= MAXBLOCKS){ setMazeMsg(`Bolt can only remember ${MAXBLOCKS} blocks. Try a shorter path!`, 'warn'); return; }
-    prog.push(b.dataset.k); renderProg(); setMazeMsg('');
-    progEl.scrollLeft = progEl.scrollWidth;
-  }));
-  $('#undoBtn').addEventListener('click', () => { if (!running){ prog.pop(); renderProg(); } });
-  $('#clearBtn').addEventListener('click', () => { if (!running){ prog = []; renderProg(); resetBot(); setMazeMsg(''); } });
-  function setMazeMsg(t, kind = ''){ mazeMsg.textContent = t; mazeMsg.className = 'maze-msg ' + kind; }
-  const pause = ms => new Promise(r => setTimeout(r, reduce ? 60 : ms));
-  $('#runBtn').addEventListener('click', async () => {
-    if (running || !prog.length) return;
-    running = true; resetBot(); setMazeMsg('Running...'); renderProg();
-    const M = MAZES[mz], rocks = new Set(M.rocks.map(r => r.join(',')));
-    await pause(250);
-    for (let i = 0; i < prog.length; i++){
-      renderProg(i);
-      const k = prog[i];
-      if (k === 'L'){ botPos.d = (botPos.d + 3) % 4; botPos.turns -= 1; }
-      if (k === 'R'){ botPos.d = (botPos.d + 1) % 4; botPos.turns += 1; }
-      if (k === 'F'){
-        const nx = botPos.x + DIRV[botPos.d][0], ny = botPos.y + DIRV[botPos.d][1];
-        if (nx < 0 || ny < 0 || nx >= N || ny >= N || rocks.has(nx + ',' + ny)){
-          const b = $('#mbot'); b.classList.add('bump'); setTimeout(() => b.classList.remove('bump'), 500);
-          setMazeMsg(rocks.has(nx + ',' + ny) ? `Bonk! Block ${i + 1} walks Bolt into a rock. Fix that step and try again.` : `Whoops! Block ${i + 1} walks Bolt off the board.`, 'warn');
-          await pause(900); running = false; renderProg(i); return;
-        }
-        const cell = board.querySelector(`[data-xy="${botPos.x},${botPos.y}"]`); if (cell) cell.classList.add('trail');
-        botPos.x = nx; botPos.y = ny;
-      }
-      $('#mbot').firstElementChild.style.transform = `rotate(${botPos.turns * 90}deg)`;
-      placeBotXY();
-      await pause(430);
-      if (botPos.x === M.goal[0] && botPos.y === M.goal[1]) return win(i + 1);
-    }
-    running = false; renderProg();
-    setMazeMsg('So close! Bolt stopped before the star. Add more blocks and run again.', 'warn');
-  });
-  function placeBotXY(){ const b = $('#mbot'); b.style.left = (botPos.x * 100 / N) + '%'; b.style.top = (botPos.y * 100 / N) + '%'; }
-  function win(used){
-    running = false;
-    const M = MAZES[mz], stars = used <= M.par ? 3 : used <= M.par + 2 ? 2 : 1;
-    mazeBest[mz] = Math.max(mazeBest[mz] || 0, stars); store.set('mazeStars', JSON.stringify(mazeBest));
-    if (mz === unlocked && unlocked < MAZES.length - 1){ unlocked++; store.set('mazeUnlocked', unlocked); }
-    renderProg();
-    const last = mz === MAZES.length - 1;
-    setMazeMsg(`${'★'.repeat(stars)} You did it in ${used} blocks!${stars < 3 ? ` Can you do it in ${M.par}?` : ' Perfect program!'}${last ? ' You finished every level. You think like a real coder!' : ''}`, 'win');
-    burst(last ? 120 : 50); sfx('end');
-    drawDotsOnly();
-    if (!last){ const nb = $('#nextLevelBtn'); nb.hidden = false; nb.focus({ preventScroll:true }); }
-  }
-  function drawDotsOnly(){ const keep = { ...botPos }; drawMaze(); botPos = keep; placeBotXY(); $('#mbot').firstElementChild.style.transform = `rotate(${botPos.turns * 90}deg)`; }
-  $('#nextLevelBtn').addEventListener('click', () => { $('#nextLevelBtn').hidden = true; mz = Math.min(mz + 1, MAZES.length - 1); prog = []; drawMaze(); renderProg(); setMazeMsg(''); });
-  mz = unlocked; drawMaze(); renderProg();
-
-  /* ---------- System Designer (grown-up critical thinking) ---------- */
-  const METRICS = [ ['up','Stays up'], ['fast','Fast'], ['safe','Correct & safe'], ['trust','Fair & trusted'] ];
-  const SCEN = [
-    { id:'tickets', title:'The Ticket Drop', budget:10,
-      brief:'Concert tickets go on sale at 10:00. A million fans hit the site in the first minute. The artist will tweet about whatever goes wrong.',
-      goals:{ up:70, safe:70, trust:60 },
-      cards:[
-        { id:'queue', name:'Virtual waiting room', cost:2, desc:'Let fans in at a pace the system can handle.', fx:{up:35,trust:15}, note:'The waiting room absorbed the spike. Fans waited, but nobody saw an error page.', key:true, miss:'Without a waiting room, the spike hit your servers all at once.' },
-        { id:'locks', name:'Seat locks during checkout', cost:2, desc:'Hold a seat for one buyer while they pay.', fx:{safe:45}, note:'Seat locks meant zero double-booked seats.', key:true, miss:'No seat locks: some seats were sold twice. That is the story that trends.' },
-        { id:'bots', name:'Bot protection & rate limits', cost:2, desc:'Stop scalper bots from grabbing everything.', fx:{up:12,trust:30}, note:'Bots got throttled, so real fans actually got tickets.', key:true, miss:'Scalper bots bought the best seats in seconds.' },
-        { id:'cdn', name:'CDN for pages & images', cost:2, desc:'Serve static content from servers near each fan.', fx:{fast:30,up:10}, note:'The CDN served static pages, so the core servers only handled real work.' },
-        { id:'scale', name:'Autoscaling servers', cost:3, desc:'Add servers automatically when traffic rises.', fx:{up:18,fast:8}, note:'Autoscaling helped, but it takes minutes to kick in and the spike lasts seconds.' },
-        { id:'cache', name:'Cache the seat map', cost:1, desc:'Show available seats without asking the database each time.', fx:{fast:22,safe:-8}, note:'The seat map cache was fast but showed some seats that were already gone.', synergy:{ with:'locks', fx:{safe:8}, note:'Seat locks caught the stale cache entries before anyone paid.' } },
-        { id:'bigdb', name:'One giant database server', cost:4, desc:'Buy the biggest machine available.', fx:{up:10}, note:'The giant database bought a little headroom for a lot of budget.' },
-        { id:'redesign', name:'Launch the new site design same day', cost:2, desc:'Marketing wants a fresh look for the big day.', fx:{up:-15,trust:-5}, note:'Shipping a redesign on launch day added risk exactly when you could least afford it.' }
-      ] },
-    { id:'voice', title:'The Bank Voice Agent', budget:10,
-      brief:'Build a phone agent that answers card questions for a bank. It must never move money by mistake, and upset callers must reach a human fast.',
-      goals:{ safe:75, trust:70, fast:50 },
-      cards:[
-        { id:'confirm', name:'Confirm before any money moves', cost:2, desc:'Read back the action and get a clear yes.', fx:{safe:40}, note:'Read-back confirmations stopped every accidental transfer.', key:true, miss:'Without confirmations, a misheard "fifteen" became "fifty".' },
-        { id:'handoff', name:'Human handoff when unsure or upset', cost:2, desc:'Route low-confidence or frustrated callers to people.', fx:{trust:35,safe:10}, note:'Hard calls went to humans with a summary, so callers never repeated themselves.', key:true, miss:'Upset callers got stuck in a loop with the bot.' },
-        { id:'router', name:'Fast router picks the specialist', cost:2, desc:'A small, quick model decides who handles the call.', fx:{fast:30,safe:5}, note:'The fast router kept replies snappy and cheap. Think first, then talk.', key:true, miss:'Every call went through the slowest path, so callers heard long pauses.' },
-        { id:'evals', name:'Test set & red-teaming before launch', cost:2, desc:'Try to break it on purpose before customers do.', fx:{safe:20,trust:10}, note:'Red-teaming found the prompt-injection trick before a customer did.' },
-        { id:'scoped', name:'Least-privilege data access', cost:2, desc:'The agent can read only what each call needs.', fx:{safe:15,trust:10}, note:'Scoped access meant a confused agent could not see what it did not need.' },
-        { id:'voice', name:'Natural, low-latency voice', cost:2, desc:'Stream speech so replies start instantly.', fx:{fast:25,trust:10}, note:'Streaming voice made the agent feel like a conversation, not a menu.' },
-        { id:'onebig', name:'One giant model does everything', cost:3, desc:'Skip the routing and specialists.', fx:{fast:-15,safe:-5}, note:'One giant model was slower and harder to test than focused specialists.' },
-        { id:'keepall', name:'Keep every recording forever', cost:1, desc:'Just in case it is useful someday.', fx:{trust:-25}, note:'Keeping recordings forever created privacy risk with no clear purpose.' }
-      ] },
-    { id:'photos', title:'The App Went Viral', budget:9,
-      brief:'Your photo-sharing app got featured. Sign-ups are 50x overnight. Uploads must keep working, the feed must stay quick, and nothing awful should get posted.',
-      goals:{ up:70, fast:60, safe:60 },
-      cards:[
-        { id:'queue', name:'Process uploads in the background', cost:2, desc:'Accept the photo now, resize it a moment later.', fx:{up:32,fast:10}, note:'Background processing kept uploads instant even while resizing piled up.', key:true, miss:'Every upload waited on image resizing, so uploads timed out.' },
-        { id:'storage', name:'Object storage + CDN for photos', cost:2, desc:'Store and serve images from cheap, global infrastructure.', fx:{fast:30,up:10}, note:'Photos loaded from a CDN close to each user.', key:true, miss:'Photos were served from your own servers and clogged them.' },
-        { id:'monitor', name:'Monitoring, alerts & on-call', cost:1, desc:'Know something is wrong before users tell you.', fx:{up:15}, note:'Alerts caught the disk filling up at 3am before anyone noticed.', key:true, miss:'You learned about outages from angry posts.' },
-        { id:'mod', name:'Automatic content moderation', cost:2, desc:'Screen uploads before they reach the feed.', fx:{safe:40,trust:10}, note:'Moderation kept the feed safe as strangers flooded in.', key:true, miss:'Without moderation, the feed filled with spam within hours.' },
-        { id:'feedcache', name:'Cache the home feed', cost:2, desc:'Build feeds ahead of time instead of on every visit.', fx:{fast:25}, note:'Precomputed feeds stayed fast under load.' },
-        { id:'replicas', name:'Database read replicas', cost:2, desc:'Copies of the database to share the reading load.', fx:{up:12,fast:10}, note:'Read replicas spread the load across machines.' },
-        { id:'rewrite', name:'Rewrite the backend this week', cost:4, desc:'A new language would be faster, right?', fx:{up:-25,fast:5}, note:'A rewrite during a growth spike swapped known problems for unknown ones.' },
-        { id:'pause', name:'Pause new sign-ups', cost:1, desc:'Stop the bleeding by closing the doors.', fx:{up:10,trust:-30}, note:'Pausing sign-ups turned a viral moment into a closed sign.' }
-      ] }
-  ];
-  let sc = 0; const picks = new Set();
-  const sdTabs = $('#sdTabs'), sdCards = $('#sdCards'), sdResult = $('#sdResult');
-  SCEN.forEach((S, i) => {
-    const b = document.createElement('button'); b.className = 'chip'; b.textContent = S.title;
-    b.addEventListener('click', () => { sc = i; picks.clear(); drawScenario(); });
-    sdTabs.appendChild(b);
-  });
-  function spent(){ return [...picks].reduce((a, id) => a + SCEN[sc].cards.find(c => c.id === id).cost, 0); }
-  function drawScenario(){
-    const S = SCEN[sc];
-    sdTabs.querySelectorAll('.chip').forEach((b, i) => b.setAttribute('aria-pressed', String(i === sc)));
-    $('#sdTitle').textContent = S.title; $('#sdBrief').textContent = S.brief;
-    $('#sdGoals').innerHTML = Object.entries(S.goals).map(([k, v]) => `<li><b>${METRICS.find(m => m[0] === k)[1]}</b> at least ${v}</li>`).join('');
-    drawCards(); idleResult();
-  }
-  function drawCards(){
-    const S = SCEN[sc], used = spent();
-    $('#sdSpent').textContent = used; $('#sdBudget').textContent = S.budget;
-    $('#sdBar').style.width = Math.min(100, used / S.budget * 100) + '%';
-    sdCards.innerHTML = S.cards.map(c => {
-      const on = picks.has(c.id), over = !on && used + c.cost > S.budget;
-      return `<button class="sdc${on ? ' on' : ''}" data-id="${c.id}" aria-pressed="${on}" ${over ? 'disabled' : ''}><span class="sdc-top"><b>${c.name}</b><span class="cost">${c.cost} cr</span></span><span class="sdc-desc">${c.desc}</span>${over ? '<span class="sdc-over">Over budget</span>' : ''}</button>`;
-    }).join('');
-    $('#sdLaunch').disabled = !picks.size;
-  }
-  sdCards.addEventListener('click', e => {
-    const b = e.target.closest('.sdc'); if (!b || b.disabled) return;
-    const id = b.dataset.id; picks.has(id) ? picks.delete(id) : picks.add(id); drawCards();
-  });
-  $('#sdReset').addEventListener('click', () => { picks.clear(); drawCards(); idleResult(); });
-  function idleResult(){
-    sdResult.innerHTML = `<div class="sd-idle"><svg viewBox="0 0 32 32" aria-hidden="true"><use href="#i-agent"/></svg><p>Pick your building blocks, stay within budget, then hit <b>Launch it</b>. The simulator throws real-world traffic at your design and writes the post-mortem.</p><p class="mono">No coding needed. Just judgment.</p></div>`;
-  }
-  $('#sdLaunch').addEventListener('click', async () => {
-    const S = SCEN[sc];
-    const m = { up:30, fast:30, safe:30, trust:40 }, notes = [];
-    S.cards.filter(c => picks.has(c.id)).forEach(c => {
-      Object.entries(c.fx).forEach(([k, v]) => m[k] += v);
-      notes.push({ good: Object.values(c.fx).reduce((a, b) => a + b, 0) > 0, text: c.note });
-      if (c.synergy && picks.has(c.synergy.with)){ Object.entries(c.synergy.fx).forEach(([k, v]) => m[k] += v); notes.push({ good:true, text:c.synergy.note }); }
-    });
-    S.cards.filter(c => c.key && !picks.has(c.id)).forEach(c => notes.push({ good:false, miss:true, text:c.miss }));
-    Object.keys(m).forEach(k => m[k] = Math.max(0, Math.min(100, m[k])));
-    const left = S.budget - spent();
-    const goalsMet = Object.entries(S.goals).filter(([k, v]) => m[k] >= v).length, goalsAll = Object.keys(S.goals).length;
-    const score = Math.round(METRICS.reduce((a, [k]) => a + m[k], 0) / 4 + left * 2 + (goalsMet === goalsAll ? 10 : 0));
-    // simulate
-    $('#sdLaunch').disabled = true;
-    const logs = ['T+0s   traffic ramping...', 'T+10s  50x normal load', 'T+30s  checking for failures', 'T+60s  writing post-mortem'];
-    sdResult.innerHTML = `<div class="sd-sim"><div class="sim-bar"><i></i></div><pre class="mono" id="simLog"></pre></div>`;
-    for (const l of logs){ $('#simLog').textContent += l + '\n'; await pause(380); }
-    const verdict = goalsMet === goalsAll ? (score >= 85 ? ['Flawless launch', 'Staff-engineer judgment. Every goal met with budget to spare.'] : ['Launch survived', 'All goals met. A few dollars or a few milliseconds left on the table.'])
-                  : goalsMet >= goalsAll - 1 ? ['Rough launch', 'Mostly fine, but one goal missed and somebody is writing an apology post.'] : ['Incident declared', 'The launch went sideways. Read the post-mortem and try again.'];
-    sdResult.innerHTML = `
-      <div class="sd-head"><div><div class="k">Result</div><h3>${verdict[0]}</h3><p>${verdict[1]}</p></div><div class="sd-score"><span>${Math.min(score, 100)}</span><small>/100</small></div></div>
-      <div class="sd-metrics">${METRICS.map(([k, label]) => { const g = S.goals[k]; const ok = g == null || m[k] >= g; return `<div class="sdm"><div class="sdm-top"><span>${label}</span><b class="${g == null ? '' : ok ? 'ok' : 'bad'}">${m[k]}${g != null ? (ok ? ' ✓' : ' ✗') : ''}</b></div><div class="sdm-bar"><i style="width:${m[k]}%"></i>${g != null ? `<em style="left:${g}%" title="Goal ${g}"></em>` : ''}</div></div>`; }).join('')}</div>
-      <div class="k" style="margin-top:14px">Post-mortem</div>
-      <ul class="pm">${notes.map(n => `<li class="${n.good ? 'good' : 'bad'}">${n.miss ? '<b>Missed:</b> ' : ''}${n.text}</li>`).join('')}${left > 0 ? `<li class="good">You kept ${left} credit${left > 1 ? 's' : ''} in reserve for surprises.</li>` : ''}</ul>`;
-    $('#sdLaunch').disabled = false;
-    if (goalsMet === goalsAll){ burst(score >= 85 ? 90 : 40); }
-  });
-  drawScenario();
-
-
-  /* ---------- Color scheme toggle (system by default) ---------- */
-  const root = document.documentElement, themeBtn = $('#themeBtn'), metaTheme = document.querySelector('meta[name="theme-color"]');
-  const sysMQ = window.matchMedia('(prefers-color-scheme: dark)');
-  const sysTheme = () => sysMQ.matches ? 'dark' : 'light';
-  const effTheme = () => root.dataset.theme || sysTheme();
-  function syncTheme(){
-    const t = effTheme();
-    metaTheme.setAttribute('content', t === 'dark' ? '#07061A' : '#FFF8EE');
-    themeBtn.setAttribute('aria-label', t === 'dark' ? 'Switch to Daybreak (light) scheme' : 'Switch to Deep Space (dark) scheme');
-    themeBtn.title = themeBtn.getAttribute('aria-label') + (root.dataset.theme ? '' : ' (following your system)');
-  }
-  themeBtn.addEventListener('click', () => {
-    const next = effTheme() === 'dark' ? 'light' : 'dark';
-    document.body.classList.add('theme-anim'); setTimeout(() => document.body.classList.remove('theme-anim'), 700);
-    if (next === sysTheme()){ delete root.dataset.theme; store.set('theme',''); }   // back to matching system: follow system again
-    else { root.dataset.theme = next; store.set('theme', next); }
-    syncTheme();
-    say(next === 'dark' ? (isKid() ? 'Whoa! We just blasted into deep space!' : 'Deep Space scheme. Same content, new orbit.') : (isKid() ? 'Good morning, sunshine!' : 'Daybreak scheme. Back on solid ground.'));
-  });
-  sysMQ.addEventListener ? sysMQ.addEventListener('change', syncTheme) : sysMQ.addListener(syncTheme);
-  syncTheme();
-
-  /* ---------- Init ---------- */
-  const params = new URLSearchParams(location.search);
-  const startKid = params.has('kid') || store.get('kidmode') === '1';
-  setMode(startKid, false);
-})();
+(function(){var r=document.documentElement,m=document.getElementById('spMsg'),msgs=['Waking up Bolt...','Polishing the planets...','Tuning the space music...','Almost there...'],k=0,
+t=setInterval(function(){if(m)m.textContent=msgs[++k%msgs.length]},700);
+function done(){if(r.classList.contains('ready'))return;clearInterval(t);r.classList.add('ready');setTimeout(function(){var s=document.getElementById('splash');s&&s.remove()},500)}
+var img=document.querySelector('.portrait img'),p=[];
+if(document.fonts&&document.fonts.ready)p.push(document.fonts.ready);
+if(img&&img.decode)p.push(img.decode().catch(function(){}));
+Promise.all(p).then(done,done);setTimeout(done,2500)})();
 </script>
+<script src="assets/app.js?v=2e146bd9f1" defer></script>
 </body>
 </html>
