@@ -201,18 +201,141 @@ export const TRICKS = [
     answer: () => 0 }
 ];
 
+
+/* Deeper sutras: proportional bases, observation (roots), osculation, duplex squaring and simultaneous equations */
+TRICKS.push(
+  { id: 'times5', sutra: 'Ānurūpyeṇa', meaning: 'Proportionately', title: 'Multiply by 5, 25, 50 and 125', kid: 'Halve the tens', grade: 3,
+    when: 'Multiplying by 5, 25, 50 or 125.',
+    idea: '5 is 10 ÷ 2, 25 is 100 ÷ 4, 50 is 100 ÷ 2 and 125 is 1000 ÷ 8. Multiply by the easy power of ten, then divide.',
+    inputs: [{ label: 'Number', min: 2, max: 9999 }, { label: 'Times (5, 25, 50 or 125)', min: 5, max: 125 }], random: () => { const m = pick([5, 25, 50, 125]); return [m === 125 ? 8 * ri(2, 40) : m === 25 ? 4 * ri(3, 60) : 2 * ri(6, 99), m]; },
+    valid: ([, m]) => ([5, 25, 50, 125].includes(m) ? null : 'Use 5, 25, 50 or 125.'),
+    steps([n, m]) { const p = { 5: [10, 2], 25: [100, 4], 50: [100, 2], 125: [1000, 8] }[m];
+      return [
+        { say: `${m} is ${p[0]} ÷ ${p[1]}.`, show: `${H(m)} = ${H(p[0], 'teal')} ÷ ${H(p[1], 'sky')}` },
+        { say: `${n} × ${p[0]} = ${n * p[0]}.`, show: `${H(n * p[0], 'teal')}` },
+        { say: `${n * p[0]} ÷ ${p[1]} = ${n * m}.`, show: `<b>${n * m}</b>` }
+      ]; },
+    answer: ([n, m]) => n * m, q: v => `${v[0]} &times; ${v[1]} = ?` },
+
+  { id: 'sub-base', sutra: 'Ānurūpyeṇa', meaning: 'Proportionately', title: 'Multiply with a working base like 50', kid: 'Secret base', grade: 6,
+    when: 'Both numbers sit near 20, 30, 40, 50 ... like 46 × 43 or 52 × 48.',
+    idea: 'Use a working base such as 50 = 5 × 10. Do the near-base trick from 10, then multiply the left part by 5.',
+    inputs: [{ label: 'First number', min: 11, max: 99 }, { label: 'Second number', min: 11, max: 99 }], random: () => { const k = ri(3, 9), b = 10 * k; return [b + ri(-5, 5), b + ri(-5, 5)]; },
+    valid: ([a, b]) => { const k = Math.round((a + b) / 20); return k >= 2 && k <= 9 && Math.abs(a - 10 * k) <= 9 && Math.abs(b - 10 * k) <= 9 ? null : 'Pick two numbers near the same 20, 30, 40, ... 90.'; },
+    steps([a, b]) { const k = Math.round((a + b) / 20), W = 10 * k, da = a - W, db = b - W, cross = a + db, left = cross * k, right = da * db, sg = d => (d < 0 ? '&minus;' + -d : '+' + d);
+      return [
+        { say: `Working base ${W} = ${k} × 10. ${a} is ${sg(da)} and ${b} is ${sg(db)} from it.`, show: `${a} ${H(sg(da))}<br>${b} ${H(sg(db), 'teal')}` },
+        { say: `Cross: ${a} ${db < 0 ? '−' : '+'} ${Math.abs(db)} = ${cross}. Scale by ${k}: ${cross} × ${k} = ${left}.`, show: `${H(left, 'sky')} | ` },
+        { say: `Right part: ${sg(da)} × ${sg(db)} = ${right}. Combine: ${left} × 10 ${right < 0 ? '−' : '+'} ${Math.abs(right)} = ${a * b}.`, show: `${H(left, 'sky')} | ${H(right, 'sun')} → <b>${a * b}</b>` }
+      ]; },
+    answer: ([a, b]) => a * b, q: v => `${v[0]} &times; ${v[1]} = ?` },
+
+  { id: 'duplex', sutra: 'Ūrdhva Tiryagbhyām (duplex)', meaning: 'Vertically and crosswise, used for squares', title: 'Square any two-digit number', kid: 'Square in one line', grade: 6,
+    when: 'Squaring any two-digit number, like 47² or 83².',
+    idea: 'For ab²: write a², then 2 × a × b in the middle, then b², and carry from right to left.',
+    inputs: [{ label: 'Two-digit number', min: 10, max: 99 }], random: () => [ri(13, 99)],
+    valid: ([n]) => (n < 10 || n > 99 ? 'Pick a two-digit number.' : null),
+    steps([n]) { const a = Math.floor(n / 10), b = n % 10;
+      return [
+        { say: `Digits ${a} and ${b}. Left: ${a}² = ${a * a}. Middle: 2 × ${a} × ${b} = ${2 * a * b}. Right: ${b}² = ${b * b}.`, show: `${H(a * a)} | ${H(2 * a * b, 'teal')} | ${H(b * b, 'sky')}` },
+        { say: 'Keep one digit in each of the middle and right spots and carry the rest leftwards.', show: `${H(a * a)} | ${H(2 * a * b, 'teal')} | ${H(b * b, 'sky')}` },
+        { say: `So ${n}² = ${n * n}.`, show: `<b>${n * n}</b>` }
+      ]; },
+    answer: ([n]) => n * n, q: v => `${v[0]}<sup>2</sup> = ?` },
+
+  { id: 'sqroot', sutra: 'Vilokanam', meaning: 'By mere observation', title: 'Square roots by looking', kid: 'Root detective', grade: 7,
+    when: 'Square roots of perfect squares up to 9801.',
+    idea: 'The last digit narrows the answer to two choices. The front digits give the tens. One comparison with a square ending in 5 picks the winner.',
+    inputs: [{ label: 'Perfect square', min: 121, max: 9801 }], random: () => { let r; do { r = ri(11, 99); } while (r % 10 === 0); return [r * r]; },
+    valid: ([n]) => { const r = Math.round(Math.sqrt(n)); return r * r !== n || r < 11 || r > 99 || r % 10 === 0 ? 'Pick a perfect square of 11 to 99 (not ending in 0).' : null; },
+    steps([n]) { const r = Math.round(Math.sqrt(n)), last = n % 10, map = { 1: [1, 9], 4: [2, 8], 9: [3, 7], 6: [4, 6], 5: [5, 5] }[last], front = Math.floor(n / 100), t = Math.floor(Math.sqrt(front)), mid = (10 * t + 5) ** 2;
+      return [
+        { say: `It ends in ${last}, so the root ends in ${map[0]}${map[1] !== map[0] ? ' or ' + map[1] : ''}.`, show: `…${H(last)} → ${H(map[0], 'teal')}${map[1] !== map[0] ? ' / ' + H(map[1], 'teal') : ''}` },
+        { say: `Front part ${front}: the biggest square below it is ${t}² = ${t * t}, so the tens digit is ${t}.`, show: `${H(front, 'sky')} → ${H(t, 'sky')}_` },
+        { say: `${t}5² = ${mid}. ${n} is ${n > mid ? 'bigger' : 'smaller'}, so pick the ${n > mid ? 'bigger' : 'smaller'} choice: ${r}.`, show: `<b>√${n} = ${r}</b>` }
+      ]; },
+    answer: ([n]) => Math.round(Math.sqrt(n)), q: v => `&radic;${v[0]} = ?` },
+
+  { id: 'cuberoot', sutra: 'Vilokanam', meaning: 'By mere observation', title: 'Cube roots in two seconds', kid: 'Cube root magic', grade: 8,
+    when: 'Cube roots of perfect cubes up to 970299 (roots up to 99).',
+    idea: 'Each last digit of a cube comes from exactly one last digit of the root. The thousands part tells the tens digit.',
+    inputs: [{ label: 'Perfect cube', min: 1000, max: 970299 }], random: () => [ri(11, 99) ** 3],
+    valid: ([n]) => { const r = Math.round(Math.cbrt(n)); return r ** 3 !== n || r < 10 || r > 99 ? 'Pick a perfect cube of a number from 10 to 99.' : null; },
+    steps([n]) { const r = Math.round(Math.cbrt(n)), last = n % 10, map = { 0: 0, 1: 1, 2: 8, 3: 7, 4: 4, 5: 5, 6: 6, 7: 3, 8: 2, 9: 9 }, front = Math.floor(n / 1000), t = Math.floor(Math.cbrt(front + 0.5));
+      return [
+        { say: `Last digit ${last} → root ends in ${map[last]} (2 and 8 swap, 3 and 7 swap, the rest stay).`, show: `…${H(last)} → ${H(map[last], 'teal')}` },
+        { say: `Drop the last three digits: ${front}. Biggest cube not above it: ${t}³ = ${t ** 3}. Tens digit ${t}.`, show: `${H(front, 'sky')} → ${H(t, 'sky')}` },
+        { say: `So the cube root of ${n.toLocaleString('en-US')} is ${r}.`, show: `<b>∛${n.toLocaleString('en-US')} = ${r}</b>` }
+      ]; },
+    answer: ([n]) => Math.round(Math.cbrt(n)), q: v => `<sup>3</sup>&radic;${v[0].toLocaleString('en-US')} = ?` },
+
+  { id: 'osculator', sutra: 'Veṣṭanam (with Ekādhika)', meaning: 'By osculation', title: 'Divisibility by 7, 13, 19 and 29', kid: 'Divisible or not?', grade: 7,
+    when: 'Testing if a big number divides by 7, 13, 19 or 29.',
+    idea: 'Each divisor has a magic multiplier (7 → 5, 13 → 4, 19 → 2, 29 → 3). Chop off the last digit, multiply it by the magic number and add it to the rest. Repeat until small.',
+    inputs: [{ label: 'Number', min: 20, max: 999999 }, { label: 'Divisor (7, 13, 19, 29)', min: 7, max: 29 }], random: () => { const d = pick([7, 13, 19, 29]); return [Math.random() < .6 ? d * ri(20, 9000) : ri(200, 99999), d]; },
+    valid: ([, d]) => ([7, 13, 19, 29].includes(d) ? null : 'Use 7, 13, 19 or 29.'),
+    steps([n, d]) { const k = { 7: 5, 13: 4, 19: 2, 29: 3 }[d], st = [{ say: `The magic multiplier for ${d} is ${k}${d === 7 ? ' (because 7 × 7 = 49 and one more than 4 is 5)' : ''}.`, show: `${d} → ${H(k)}` }]; let x = n, guard = 0;
+      while (x > 4 * d && guard++ < 8) { const last = x % 10, rest = Math.floor(x / 10), nx = rest + last * k; st.push({ say: `${x}: ${rest} + ${last} × ${k} = ${nx}.`, show: `${H(rest, 'sky')} + ${H(last, 'teal')} × ${k} = ${H(nx, 'sun')}` }); x = nx; }
+      st.push({ say: `${x} ${x % d === 0 ? 'is' : 'is not'} a multiple of ${d}, so ${n} ${n % d === 0 ? 'is' : 'is not'} divisible by ${d}.`, show: `<b>${n % d === 0 ? 'Yes' : 'No'}</b>` });
+      return st; },
+    answer: ([n, d]) => (n % d === 0 ? 'Yes' : 'No'), q: v => `Is ${v[0]} divisible by ${v[1]}?`, choice: ['Yes', 'No'] },
+
+  { id: 'add-sub', sutra: 'Saṅkalana-Vyavakalanābhyām', meaning: 'By adding and by subtracting', title: 'Solve swapped equations instantly', kid: 'Mirror equations', grade: 9,
+    when: 'Two equations with swapped coefficients, like 5x + 3y = 13 and 3x + 5y = 11.',
+    idea: 'Add them to get x + y, subtract them to get x − y. Then add and halve.',
+    inputs: [{ label: 'a', min: 1, max: 20 }, { label: 'b', min: 1, max: 20 }, { label: 'c', min: -200, max: 200 }, { label: 'd', min: -200, max: 200 }], random: () => { let a, b; do { a = ri(2, 9); b = ri(1, 9); } while (a === b); const x = ri(-6, 9), y = ri(-6, 9); return [a, b, a * x + b * y, b * x + a * y]; },
+    valid: ([a, b, c, d]) => (a === b ? 'a and b must differ.' : (c + d) % (a + b) || (c - d) % (a - b) || ((c + d) / (a + b) + (c - d) / (a - b)) % 2 ? 'Those numbers do not give whole-number answers. Try New numbers.' : null),
+    steps([a, b, c, d]) { const s = (c + d) / (a + b), t = (c - d) / (a - b), x = (s + t) / 2, y = (s - t) / 2;
+      return [
+        { say: `${a}x + ${b}y = ${c} and ${b}x + ${a}y = ${d}. The numbers are swapped.`, show: `${H(a)}x + ${H(b, 'teal')}y = ${c}<br>${H(b, 'teal')}x + ${H(a)}y = ${d}` },
+        { say: `Add: ${a + b}(x + y) = ${c + d}, so x + y = ${s}. Subtract: ${a - b}(x − y) = ${c - d}, so x − y = ${t}.`, show: `x + y = ${H(s, 'sky')}<br>x − y = ${H(t, 'sun')}` },
+        { say: `x = (${s} + ${t}) ÷ 2 = ${x}, y = (${s} − ${t}) ÷ 2 = ${y}.`, show: `<b>x = ${x}, y = ${y}</b>` }
+      ]; },
+    answer: ([a, b, c, d]) => ((c + d) / (a + b) + (c - d) / (a - b)) / 2,
+    q: v => `Solve:<br>${v[0]}<i>x</i> + ${v[1]}<i>y</i> = ${v[2]}<br>${v[1]}<i>x</i> + ${v[0]}<i>y</i> = ${v[3]}`,
+    fields: v => { const s = (v[2] + v[3]) / (v[0] + v[1]), t = (v[2] - v[3]) / (v[0] - v[1]); return [{ label: 'x', answer: (s + t) / 2 }, { label: 'y', answer: (s - t) / 2 }]; } },
+
+  { id: 'ratio-zero', sutra: '(Ānurūpye) Śūnyamanyat', meaning: 'If one is in ratio, the other is zero', title: 'Spot the zero in two equations', kid: 'Zero spy', grade: 9,
+    when: 'Two equations where one letter\'s numbers are in the same ratio as the answers.',
+    idea: 'If the y numbers are in the same ratio as the right-hand sides, x must be zero (and the other way round). Then y is one division away.',
+    inputs: [{ label: 'a (x in eq 1)', min: 1, max: 30 }, { label: 'b (y in eq 1)', min: 1, max: 30 }, { label: 'c (answer 1)', min: 1, max: 200 }, { label: 'k (scale for eq 2)', min: 2, max: 9 }], random: () => { const b = ri(2, 9), y = ri(1, 9); return [ri(2, 20), b, b * y, ri(2, 5)]; },
+    valid: ([, b, c]) => (c % b ? 'Pick c as a multiple of b so y is a whole number.' : null),
+    steps([a, b, c, k]) { const a2 = a * k + 1;
+      return [
+        { say: `${a}x + ${b}y = ${c} and ${a2}x + ${b * k}y = ${c * k}.`, show: `${a}x + ${H(b)}y = ${H(c, 'teal')}<br>${a2}x + ${H(b * k)}y = ${H(c * k, 'teal')}` },
+        { say: `y numbers ${b} : ${b * k} are in the same ratio as ${c} : ${c * k}. So x = 0.`, show: `${H('x = 0', 'sky')}` },
+        { say: `Then ${b}y = ${c}, so y = ${c / b}.`, show: `<b>x = 0, y = ${c / b}</b>` }
+      ]; },
+    answer: ([, b, c]) => c / b,
+    q: v => `Solve:<br>${v[0]}<i>x</i> + ${v[1]}<i>y</i> = ${v[2]}<br>${v[0] * v[3] + 1}<i>x</i> + ${v[1] * v[3]}<i>y</i> = ${v[2] * v[3]}`,
+    fields: v => [{ label: 'x', answer: 0 }, { label: 'y', answer: v[2] / v[1] }] }
+);
+
+/* Dojo belts: the order tricks are learned in, from first steps to black belt */
+export const BELTS = [
+  { id: 'white', name: 'White belt', color: 'var(--card)', tricks: ['from9', 'by11', 'times5'] },
+  { id: 'yellow', name: 'Yellow belt', color: 'var(--sun)', tricks: ['sq5', 'by9s', 'ends10'] },
+  { id: 'orange', name: 'Orange belt', color: 'var(--coral)', tricks: ['near-base', 'square-near', 'check9'] },
+  { id: 'green', name: 'Green belt', color: 'var(--teal)', tricks: ['crosswise', 'duplex', 'sub-base'] },
+  { id: 'blue', name: 'Blue belt', color: 'var(--sky)', tricks: ['div9', 'osculator', 'recip'] },
+  { id: 'purple', name: 'Purple belt', color: 'var(--plum)', tricks: ['sqroot', 'cuberoot', 'transpose'] },
+  { id: 'black', name: 'Black belt', color: 'var(--ink)', tricks: ['add-sub', 'ratio-zero', 'zero-sum'] }
+];
+
 /* Practice problems for each trick, so tricks run through the same mastery engine as skills */
 export const TRICK_SKILLS = TRICKS.map(t => ({
   id: 'v-' + t.id, grade: 'V', strand: 'tricks', title: t.title, kid: t.kid, idea: t.idea, method: [t.when, ...t.steps(t.random()).map(s => s.say).slice(0, 2)], trick: t.id,
   gen() {
     let vals; do { vals = t.random(); } while (t.valid(vals));
     const steps = t.steps(vals).map(s => s.say);
-    const q = {
+    const q = t.q ? t.q(vals) : {
       sq5: `${vals[0]}<sup>2</sup> = ?`, 'near-base': `${vals[0]} &times; ${vals[1]} = ?`, crosswise: `${vals[0]} &times; ${vals[1]} = ?`, from9: `${(10 ** String(vals[0]).length).toLocaleString('en-US')} &minus; ${vals[0]} = ?`,
       by9s: `${vals[0]} &times; ${vals[1]} = ?`, ends10: `${vals[0]} &times; ${vals[1]} = ?`, 'square-near': `${vals[0]}<sup>2</sup> = ?`, by11: `${vals[0]} &times; 11 = ?`,
       div9: `${vals[0]} &divide; 9 = ? remainder ?`, check9: `Casting out nines (answer 0 to 8), what is the digit sum of ${vals[0]} &times; ${vals[1]}?`, recip: `What is the first decimal digit of 1/${vals[0]} that is not 0?`,
       transpose: `Solve: ${vals[0]}<i>x</i> ${vals[1] < 0 ? '&minus;' : '+'} ${Math.abs(vals[1])} = ${vals[2]}<i>x</i> ${vals[3] < 0 ? '&minus;' : '+'} ${Math.abs(vals[3])}`, 'zero-sum': `Solve: (<i>x</i> + ${vals[0]})(<i>x</i> + ${vals[1]}) = (<i>x</i> + ${vals[2]})(<i>x</i> + ${vals[3]})`
     }[t.id];
+    if (t.fields) return { q, kind: 'fields', fields: t.fields(vals), hints: [steps[0]], steps };
+    if (t.choice) return { q, kind: 'choice', choices: t.choice, answer: t.answer(vals), hints: [steps[0]], steps };
     if (t.id === 'div9') return { q, kind: 'fields', fields: [{ label: 'Quotient', answer: Math.floor(vals[0] / 9) }, { label: 'Remainder', answer: vals[0] % 9 }], hints: [steps[0]], steps };
     if (t.id === 'recip') { const first = String(1 / vals[0]).replace(/^0\.0*/, '')[0]; return { q, kind: 'num', answer: +first, hints: [steps[0]], steps }; }
     return { q, kind: 'num', answer: t.answer(vals), hints: [steps[0], steps[1]], steps };

@@ -5,7 +5,7 @@
   const PAGES = [
     { href: '/', icon: 'home', pro: ['Home', 'Who I am, what I build, and the games'], kid: ['Home', 'Meet Madhav and Bolt'] },
     { href: '/state-of-voice-agents/', icon: 'voice', pro: ['Voice agents at the front door', 'State of conversational voice AI in healthcare and banking, October 2026'], kid: ['Talking robots', 'How robot phone helpers learn to listen and help'] },
-    { href: '/math/', icon: 'math', pro: ['Math Quest', 'K to 12 math with visual lessons, Vedic speed tricks and games'], kid: ['Math Quest', 'Learn math from counting dots to rocket science'] },
+    { href: '/math/', icon: 'math', pro: ['Vedic Math for Everyone', 'Speed tricks, counting to calculus, games and leaderboards'], kid: ['Vedic Math', 'Speed tricks, games, belts and races'] },
     { href: '/design-system/', icon: 'palette', pro: ['Design system', 'Colors, type and components behind this site'], kid: ['Paint box', 'All the colors and shapes I use'] }
   ];
   const SECTIONS = [

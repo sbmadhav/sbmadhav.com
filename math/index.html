@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Math Quest: K to 12 math · Madhav</title>
-<meta name="description" content="Math from counting to calculus: K to 12 lessons with visual models, endless adaptive practice, Vedic speed tricks and strategy games.">
+<title>Vedic Math for Everyone · Madhav</title>
+<meta name="description" content="Vedic Math for Everyone: speed tricks from the sutras, a counting-to-calculus skill map, games, daily quests, an Arena with leaderboards and duels. Three play modes for every age.">
 <!-- Apply the saved color scheme before paint so there is no flash -->
 <script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}</script>
 <meta name="theme-color" content="#FFF8EE">
@@ -34,12 +34,17 @@
     </div>
     <button class="md-switch" id="kidBtn" role="switch" aria-checked="false"><span>Kid mode</span><span class="md-track"><span class="md-knob"></span></span></button>
   </div>
-  <nav class="mq-nav" aria-label="Math Quest">
+  <nav class="mq-nav" aria-label="Vedic Math">
     <div class="md-wrap">
-      <a href="#/" data-match="^#?/?$|^#/(grade|skill|mix)/"><span class="pro">Learn</span><span class="kid">Learn</span></a>
-      <a href="#/tricks"><span class="pro">Speed tricks</span><span class="kid">Tricks</span></a>
-      <a href="#/games" data-match="^#/games?"><span class="pro">Games</span><span class="kid">Games</span></a>
-      <a href="#/progress"><span class="pro">Progress</span><span class="kid">My stars</span></a>
+      <a href="#/" data-match="^#?/?$">Home</a>
+      <a href="#/learn" data-match="^#/(learn|grade|skill|mix)">Learn</a>
+      <a href="#/dojo" class="hide-explorer" data-match="^#/(dojo|tricks)$">Dojo</a>
+      <a href="#/arena" data-match="^#/(arena|duel)$">Arena</a>
+      <a href="#/games" data-match="^#/games?">Games</a>
+      <a href="#/sutras" class="hide-explorer">Sutras</a>
+      <a href="#/watch">Watch</a>
+      <span class="mq-nav-sp"></span>
+      <span id="mqChip"></span>
     </div>
   </nav>
 </header>
@@ -50,7 +55,7 @@
 
 <footer class="mq-foot">
   <div class="md-wrap">
-    <p><span class="pro">Built by Madhav as a free learning tool. Speed tricks follow the traditional Vedic mathematics sutras; lessons, problems and visuals are original. Progress is stored only in this browser.</span><span class="kid">Made by Madhav. Your progress stays on this device.</span></p>
+    <p>Vedic Math for Everyone, built by Madhav as a free learning space. Speed tricks follow the traditional Vedic mathematics sutras; lessons, problems and visuals are original. Progress stays in this browser, and leaderboards only see a made-up nickname.</p>
   </div>
 </footer>
 

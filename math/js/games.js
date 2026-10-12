@@ -4,6 +4,7 @@ import { ri, pick, shuffle, gcd } from './lib.js';
 import { evalNum } from './check.js';
 import { factStrategy } from './skills/middle.js';
 import * as V from './viz.js';
+import { sfx as tapSfx, speak as speakIt } from './fx.js';
 
 const el = (tag, attrs = {}, html = '') => { const e = document.createElement(tag); Object.entries(attrs).forEach(([k, v]) => (k === 'class' ? (e.className = v) : e.setAttribute(k, v))); if (html) e.innerHTML = html; return e; };
 
@@ -14,10 +15,31 @@ function timer(root, secs, onEnd) {
   raf = requestAnimationFrame(tick);
   return () => { stopped = true; cancelAnimationFrame(raf); };
 }
-const flash = (node, ok) => { node.classList.remove('g-ok', 'g-no'); void node.offsetWidth; node.classList.add(ok ? 'g-ok' : 'g-no'); };
+const flash = (node, ok) => { tapSfx(ok ? 'ok' : 'no'); node.classList.remove('g-ok', 'g-no'); void node.offsetWidth; node.classList.add(ok ? 'g-ok' : 'g-no'); };
 
 export const GAMES = [
-  { id: 'make-ten', title: 'Make the target', kid: 'Make ten!', color: 'coral', grades: 'K to 3',
+  { id: 'balloons', title: 'Balloon pop', kid: 'Balloon pop', color: 'coral', grades: 'Explorer', modes: ['explorer'],
+    desc: 'Pop exactly the number of balloons Bolt asks for, then press Done. Counting one by one, out loud, is the skill.',
+    run(area, { end, say }) {
+      let round = 0, score = 0, popped = 0, want = 0; const ask = el('p', { class: 'g-q g-q-sm', 'aria-live': 'polite' }), sky = el('div', { class: 'g-sky', role: 'group', 'aria-label': 'Balloons' }), done = el('button', { class: 'md-btn md-btn--primary' }, 'Done'); area.append(ask, sky, el('div', { class: 'g-tools' }));
+      area.lastChild.append(done);
+      const cols = ['coral', 'teal', 'sun', 'sky', 'plum'];
+      const next = () => { if (round === 8) return end(score); round++; popped = 0; want = ri(1, round < 4 ? 5 : 10); const total = Math.min(14, want + ri(2, 5));
+        ask.innerHTML = `Pop <b>${want}</b> balloon${want > 1 ? 's' : ''}!`; speakIt(`Pop ${want} balloon${want > 1 ? 's' : ''}`);
+        sky.innerHTML = ''; for (let i = 0; i < total; i++) { const b = el('button', { class: 'g-balloon', 'aria-label': 'Balloon', style: `--c: var(--${cols[i % 5]}); --d:${(i % 5) * 0.2}s` }, '<span></span>'); b.onclick = () => { if (b.disabled) return; b.disabled = true; b.classList.add('popped'); popped++; tapSfx('pop'); say(String(popped)); speakIt(String(popped)); }; sky.append(b); } };
+      done.onclick = () => { const ok = popped === want; if (ok) score++; say(ok ? `Yes! ${want}!` : `You popped ${popped}. We needed ${want}.`); flash(sky, ok); setTimeout(next, 900); };
+      next();
+    } },
+  { id: 'more-less', title: 'Which has more?', kid: 'More or less', color: 'sun', grades: 'Explorer', modes: ['explorer'],
+    desc: 'Tap the side with more dots. Then try it with numbers. Comparing amounts is the start of number sense.',
+    run(area, { end, say }) {
+      let round = 0, score = 0; const row = el('div', { class: 'g-duel', role: 'group', 'aria-label': 'Pick the side with more' }); area.append(row);
+      const next = () => { if (round === 10) return end(score); round++; let a = ri(1, 10), b = ri(1, 10); while (a === b) b = ri(1, 10); const nums = round > 5;
+        row.innerHTML = ''; [a, b].forEach(v => { const btn = el('button', { class: 'g-frac g-more' }, nums ? `<span class="g-big">${v}</span>` : V.dots(v, v <= 6 ? 'dice' : 'line')); btn.onclick = () => { const ok = v === Math.max(a, b); if (ok) score++; say(ok ? `Yes, ${v} is more!` : `${Math.max(a, b)} is more than ${Math.min(a, b)}.`); flash(row, ok); setTimeout(next, 700); }; row.append(btn); });
+        speakIt('Which has more?'); };
+      next();
+    } },
+  { id: 'make-ten', modes: ['explorer', 'challenger'], title: 'Make the target', kid: 'Make ten!', color: 'coral', grades: 'K to 3',
     desc: 'Tap two numbers that add up to the target. Partners of 10 are the base of almost every mental math strategy.',
     options: [{ label: 'Make 10', value: 10 }, { label: 'Make 20', value: 20 }, { label: 'Make 100', value: 100 }],
     run(area, { end, option, say }) {
@@ -35,7 +57,7 @@ export const GAMES = [
       draw();
       return timer(area, 60, () => end(score));
     } },
-  { id: 'quick-look', title: 'Quick look', kid: 'Flash dots', color: 'sun', grades: 'K to 2',
+  { id: 'quick-look', modes: ['explorer'], title: 'Quick look', kid: 'Flash dots', color: 'sun', grades: 'K to 2',
     desc: 'Dots flash for a moment. Say how many without counting one by one. Seeing groups (five and some more) is the skill.',
     run(area, { end, say }) {
       let round = 0, score = 0; const stage = el('div', { class: 'g-stage' }), opts = el('div', { class: 'g-opts', role: 'group', 'aria-label': 'How many dots?' }); area.append(stage, opts);
@@ -51,7 +73,7 @@ export const GAMES = [
       next();
       return () => clearTimeout(hideT);
     } },
-  { id: 'bonds', title: 'Number bonds', kid: 'Bond builder', color: 'teal', grades: '1 to 3',
+  { id: 'bonds', modes: ['explorer', 'challenger'], title: 'Number bonds', kid: 'Bond builder', color: 'teal', grades: '1 to 3',
     desc: 'The whole is on top and one part is shown. Find the missing part fast. This is subtraction as "think addition".',
     options: [{ label: 'Wholes to 10', value: 10 }, { label: 'Wholes to 20', value: 20 }, { label: 'Wholes to 100', value: 100 }],
     run(area, { end, option, say }) {
@@ -66,7 +88,7 @@ export const GAMES = [
       next();
       return timer(area, 60, () => end(score));
     } },
-  { id: 'times-sprint', title: 'Times sprint', kid: 'Times rocket', color: 'sky', grades: '3 to 5',
+  { id: 'times-sprint', modes: ['challenger', 'pro'], title: 'Times sprint', kid: 'Times rocket', color: 'sky', grades: '3 to 5',
     desc: 'Sixty seconds of multiplication facts. Miss one and you see the strategy that builds it from facts you know.',
     options: [{ label: 'Easy (2, 5, 10)', value: 'easy' }, { label: 'All to 10', value: 10 }, { label: 'All to 12', value: 12 }],
     run(area, { end, option, say }) {
@@ -77,7 +99,7 @@ export const GAMES = [
       next();
       return timer(area, 60, () => end(score));
     } },
-  { id: 'target', title: 'Hit the target', kid: 'Number detective', color: 'plum', grades: '4 to 8',
+  { id: 'target', modes: ['challenger', 'pro'], title: 'Hit the target', kid: 'Number detective', color: 'plum', grades: '4 to 8',
     desc: 'Use all four numbers once each with + − × ÷ and brackets to make the target. Every puzzle has at least one answer.',
     run(area, { end, say }) {
       let solved = 0, rounds = 0, puzzle;
@@ -104,7 +126,7 @@ export const GAMES = [
       nextB.onclick = fresh; fin.onclick = () => end(solved);
       fresh();
     } },
-  { id: 'frac-faceoff', title: 'Fraction face-off', kid: 'Bigger slice', color: 'plum', grades: '3 to 6',
+  { id: 'frac-faceoff', modes: ['challenger', 'pro'], title: 'Fraction face-off', kid: 'Bigger slice', color: 'plum', grades: '3 to 6',
     desc: 'Tap the bigger fraction. Use benchmarks: is each one more or less than a half? How far is each from a whole?',
     run(area, { end, say }) {
       let score = 0; const row = el('div', { class: 'g-duel', role: 'group', 'aria-label': 'Pick the bigger fraction' }), fig = el('div', { class: 'g-fig' }); area.append(row, fig);
@@ -113,7 +135,7 @@ export const GAMES = [
       next();
       return timer(area, 60, () => end(score));
     } },
-  { id: 'line-snipe', title: 'Number line sniper', kid: 'Number line', color: 'sky', grades: '1 to 7',
+  { id: 'line-snipe', modes: ['explorer', 'challenger', 'pro'], title: 'Number line sniper', kid: 'Number line', color: 'sky', grades: '1 to 7',
     desc: 'Place the number on the line as accurately as you can. Ten rounds, up to 10 points each. Builds a feel for size.',
     options: [{ label: '0 to 100', value: 100 }, { label: '0 to 1,000', value: 1000 }, { label: '0 to 1 (fractions)', value: 1 }],
     run(area, { end, option, say }) {
