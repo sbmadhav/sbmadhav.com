@@ -20,3 +20,10 @@ Personal site on GitHub Pages (served at https://sbmadhav.com, www redirects to 
 - `sw.js` caches the site for offline use and instant repeat visits; `manifest.webmanifest` makes it installable.
 - After editing `index.html`, `assets/app.js` or anything `sw.js` precaches, run `python3 site-build.py` so visitors get the new version (it stamps the app.js version and the service worker cache version).
 - Keep first load light: no new third-party requests before load (analytics loads after load and idle), images as WebP with width/height, decorative motion starts after the page is ready.
+
+## Checks, hook and deploy
+
+- Pre-commit hook in `.githooks/pre-commit`. Enable it on a fresh clone with `git config core.hooksPath .githooks`. It runs both builds and fails if either changed a file (stage the regenerated files and commit again), then runs the token check and `node --test 'vedic-math/test/**/*.test.{js,mjs}'`.
+- `python3 scripts/check-tokens.py` compares the inline color variables in `index.html` (light and both dark blocks) with `design-system/tokens.json`. When a color changes, change both.
+- `.github/workflows/site.yml` runs the same checks on pushes and pull requests to `master`. Its `deploy` job publishes `_site/` through GitHub Actions only when the repository variable `PAGES_VIA_ACTIONS` is `true` (and Pages source is set to "GitHub Actions"); otherwise Pages keeps deploying the `master` branch with Jekyll.
+- Repo-only files are listed twice: `exclude` in `_config.yml` and the `rsync --exclude` list in the workflow. Keep them in sync when adding one.

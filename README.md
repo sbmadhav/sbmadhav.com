@@ -1,37 +1,54 @@
-## Welcome to GitHub Pages
+# sbmadhav.com
 
-You can use the [editor on GitHub](https://github.com/sbmadhav/sbmadhav.com/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+Personal site of Madhav Srinivasan, served by GitHub Pages at [sbmadhav.com](https://sbmadhav.com). Every page works for two audiences: a grown-up mode for recruiters and engineers, and a kid mode that says the same things in plainer words.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## Pages
 
-### Markdown
+| Path | What it is | Source |
+|---|---|---|
+| `/` | Home: work, Brain Lab, Bug Hunt, Design Lab, journey | `index.html`, `assets/app.js` |
+| `/vedic-math/` | Vedic Math for Everyone: lessons, Dojo, Arena, games, leaderboards | `vedic-math/` |
+| `/design-system/` | Tokens, type, components and guidelines behind every page | `design-system/` |
+| `/state-of-voice-agents/` | Report on conversational voice AI in healthcare and banking | the `state-of-voice-agents` repo, served under this domain |
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+`/math/` redirects to `/vedic-math/`. `/numo/` is an older experiment. `404.html` handles every unknown path.
 
-```markdown
-Syntax highlighted code block
+## How it is built
 
-# Header 1
-## Header 2
-### Header 3
+Static HTML, CSS and JavaScript. No framework, no bundler, no `package.json` for the site itself.
 
-- Bulleted
-- List
+- **Design system.** `design-system/tokens.json` is the source of truth for colors (light "Daybreak" and dark "Deep Space"), type, spacing and radii. `python3 design-system/build.py` generates `tokens.css` (including the `@font-face` rules for the self-hosted fonts in `assets/fonts/`) and the reference page `design-system/index.html`. It needs `pip install markdown`.
+- **Cache stamping.** `python3 site-build.py` stamps `?v=<hash>` on the home page's scripts and a new cache `VERSION` in `sw.js`.
+- **Offline.** `sw.js` precaches the site so repeat visits load instantly and work offline; `manifest.webmanifest` makes it installable.
+- **Shared chrome.** Every page loads `assets/explore.js` (the site-wide Explore menu; pages are listed in `PAGES` at its top) and `assets/analytics.js` (GoatCounter, cookieless, loaded after the page is idle).
+- **Leaderboards.** Vedic Math uses Firebase with Firestore security rules; setup and rules tests live in `vedic-math/cloud/`.
 
-1. Numbered
-2. List
+Repo-only files (this README, `CLAUDE.md`, build scripts, `scripts/`, `tokens.json`, `vedic-math/cloud/`, tests) are kept out of the published site by `exclude` in `_config.yml`.
 
-**Bold** and _Italic_ and `Code` text
+## Run locally
 
-[Link](url) and ![Image](src)
+```sh
+python3 -m http.server 8000
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+Then open http://localhost:8000. Pages use absolute paths (`/assets/...`), so serve from the repo root.
 
-### Jekyll Themes
+## Checks
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/sbmadhav/sbmadhav.com/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+| Check | Command |
+|---|---|
+| Generated files are current | `python3 site-build.py && python3 design-system/build.py && git diff --exit-code` |
+| Home page colors match `tokens.json` | `python3 scripts/check-tokens.py` |
+| Vedic Math unit tests | `node --test 'vedic-math/test/**/*.test.{js,mjs}'` |
 
-### Support or Contact
+A pre-commit hook in `.githooks/` runs all three (about 0.2 seconds before tests). Enable it once per clone:
 
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+```sh
+git config core.hooksPath .githooks
+```
+
+CI (`.github/workflows/site.yml`) runs the same checks on every push and pull request to `master`. Its `deploy` job publishes to GitHub Pages through Actions, but only once the repository variable `PAGES_VIA_ACTIONS` is `true`; until then Pages deploys from the `master` branch with Jekyll.
+
+## How it is maintained
+
+Most changes are made with AI coding agents working from `CLAUDE.md`, the project rules file, and the design system README. The token check, the hook and CI are there so those rules are enforced by tools rather than by memory.

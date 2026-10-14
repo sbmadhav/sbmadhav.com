@@ -7,7 +7,8 @@
 #   PROJECT_ID=my-project bash vedic-math/cloud/setup.sh
 #   bash vedic-math/cloud/setup.sh my-project
 #
-# Optional env: REGION (Firestore location, default nam5), BILLING_ACCOUNT (only used for a brand new project).
+# Optional env: REGION (Firestore location, default nam5), BILLING_ACCOUNT (only used for a brand new project),
+#               APP_CHECK=1 (also create a reCAPTCHA Enterprise key, register App Check and write the site key).
 # Needs: gcloud (Google Cloud CLI), Node.js with npx (for firebase-tools), curl, python3.
 
 set -euo pipefail
@@ -142,14 +143,55 @@ cfg = data.get("sdkConfig", data)
 keys = ["apiKey", "authDomain", "projectId", "storageBucket", "messagingSenderId", "appId"]
 cfg = {k: cfg[k] for k in keys if cfg.get(k)}
 src = open(path, encoding="utf-8").read()
-m = re.match(r"\s*/\*.*?\*/\s*", src, re.S)
-header = m.group(0).rstrip() + "\n" if m else ""
 body = ",\n".join(f"  {k}: {json.dumps(v)}" for k, v in cfg.items())
-open(path, "w", encoding="utf-8").write(f"{header}export const FIREBASE = {{\n{body}\n}};\n")
+# Replace only the FIREBASE export; keep the comments and the App Check settings below it.
+new, n = re.subn(r"export const FIREBASE = (?:null|\{.*?\});", lambda _: f"export const FIREBASE = {{\n{body}\n}};", src, count=1, flags=re.S)
+if n != 1: sys.exit("Could not find export const FIREBASE in " + path)
+open(path, "w", encoding="utf-8").write(new)
 ' "$CONFIG_JS"
 cat "$CONFIG_JS"
 
-# ---------- 8. Done ----------
+# ---------- 8. Automatic deletion (TTL) ----------
+say "Turning on automatic deletion of old leaderboard entries (TTL on the exp field)"
+if gcloud firestore fields ttls list --collection-group=scores --project "$PROJECT_ID" --format='value(name)' 2>/dev/null | grep -q '/fields/exp$'; then
+  info "TTL policy on scores.exp already exists."
+else
+  gcloud firestore fields ttls update exp --collection-group=scores --enable-ttl --async --project "$PROJECT_ID" \
+    || info "Could not set the TTL policy. Set it in the console: Firestore > Time-to-live > collection group scores, field exp."
+fi
+
+# ---------- 9. App Check (optional: APP_CHECK=1) ----------
+APP_CHECK_KEY=""
+if [ "${APP_CHECK:-}" = "1" ]; then
+  say "App Check with reCAPTCHA Enterprise"
+  gcloud services enable recaptchaenterprise.googleapis.com firebaseappcheck.googleapis.com --project "$PROJECT_ID"
+  KEY_NAME="$(gcloud recaptcha keys list --project "$PROJECT_ID" --filter="displayName='Vedic Math App Check'" --format='value(name)' 2>/dev/null | head -n1)"
+  if [ -z "$KEY_NAME" ]; then
+    info "Creating a reCAPTCHA Enterprise score key for sbmadhav.com."
+    KEY_NAME="$(gcloud recaptcha keys create --display-name="Vedic Math App Check" --web --integration-type=score \
+      --domains=sbmadhav.com,www.sbmadhav.com,localhost --project "$PROJECT_ID" --format='value(name)')"
+  fi
+  APP_CHECK_KEY="${KEY_NAME##*/}"
+  [ -n "$APP_CHECK_KEY" ] || die "Could not create or find the reCAPTCHA key."
+  info "Registering the web app with App Check (key $APP_CHECK_KEY)."
+  TOKEN="$(gcloud auth print-access-token)"
+  curl -sS -f -o /dev/null -X PATCH -H "Authorization: Bearer $TOKEN" -H "x-goog-user-project: $PROJECT_ID" -H "Content-Type: application/json" \
+    "https://firebaseappcheck.googleapis.com/v1/projects/$PROJECT_ID/apps/$APP_ID/recaptchaEnterpriseConfig?updateMask=siteKey" \
+    -d "{\"siteKey\":\"$APP_CHECK_KEY\"}" \
+    || die "Could not register App Check. Do it in https://console.firebase.google.com/project/$PROJECT_ID/appcheck"
+  python3 -c '
+import re, sys
+path, key = sys.argv[1], sys.argv[2]
+src = open(path, encoding="utf-8").read()
+src, n = re.subn(r"export const appCheckSiteKey = [^;]*;", f"export const appCheckSiteKey = \"{key}\";", src, count=1)
+src = re.sub(r"export const appCheckProvider = [^;]*;", "export const appCheckProvider = \"enterprise\";", src, count=1)
+if n != 1: sys.exit("Could not find appCheckSiteKey in " + path)
+open(path, "w", encoding="utf-8").write(src)
+' "$CONFIG_JS" "$APP_CHECK_KEY"
+  info "Wrote appCheckSiteKey to vedic-math/js/cloud-config.js. Enforcement stays OFF until you turn it on (see below)."
+fi
+
+# ---------- 10. Done ----------
 say "Done. Online leaderboards are configured for $PROJECT_ID."
 cat <<EOF
 
@@ -162,12 +204,11 @@ Next steps:
   3. Open https://sbmadhav.com/vedic-math/, play an Arena round, and check the leaderboard.
      Data appears in: https://console.firebase.google.com/project/$PROJECT_ID/firestore
 
-Optional hardening:
-  - App Check with reCAPTCHA Enterprise (blocks scripted writes from outside the site):
-      gcloud services enable recaptchaenterprise.googleapis.com firebaseappcheck.googleapis.com --project $PROJECT_ID
-      Then in https://console.firebase.google.com/project/$PROJECT_ID/appcheck register the web app
-      with a reCAPTCHA Enterprise site key for sbmadhav.com, add initializeAppCheck to cloud.js,
-      watch the metrics for a few days, then click Enforce for Cloud Firestore.
+Hardening:
+  - App Check (blocks scripted writes from outside the site). $( [ -n "$APP_CHECK_KEY" ] && echo "Registered with key $APP_CHECK_KEY." || echo "Not set up: re-run with APP_CHECK=1, or follow vedic-math/cloud/README.md (App Check).")
+      After publishing the key, watch https://console.firebase.google.com/project/$PROJECT_ID/appcheck
+      for a few days, then click Enforce for Cloud Firestore (and Authentication).
+      Local testing: open the site on localhost and add the debug token it prints under Manage debug tokens.
   - Billing budget alert (only matters if the project is on the Blaze plan):
       gcloud billing budgets create --billing-account=YOUR_BILLING_ACCOUNT_ID \\
         --display-name="Vedic Math budget" --budget-amount=5USD \\

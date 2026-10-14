@@ -9,8 +9,8 @@
     { href: '/design-system/', icon: 'palette', pro: ['Design system', 'Colors, type and components behind this site'], kid: ['Paint box', 'All the colors and shapes I use'] }
   ];
   const SECTIONS = [
-    { href: '/#work', icon: 'agent', pro: 'About', kid: 'My jobs' },
-    { href: '/#lab', icon: 'brain', pro: 'Brain Lab', kid: 'Robot brain' },
+    { href: '/#work', icon: 'agent', pro: 'What I do', kid: 'My jobs' },
+    { href: '/#lab', icon: 'brain', pro: 'Brain Lab', kid: 'Brain Lab' },
     { href: '/#bugs', icon: 'bug', pro: 'Bug Hunt', kid: 'Bug Hunt' },
     { href: '/#play', icon: 'maze', pro: 'Design Lab', kid: 'Robot Maze' },
     { href: '/#journey', icon: 'flag', pro: 'Journey', kid: 'Game levels' },

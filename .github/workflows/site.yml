@@ -1,0 +1,100 @@
+name: Site
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Install build dependencies
+        run: pip install markdown
+
+      - name: Run both builds
+        run: |
+          python3 site-build.py
+          python3 design-system/build.py
+
+      - name: Generated files are committed
+        run: |
+          git diff --exit-code || {
+            echo "::error::The builds changed the files above. Run python3 site-build.py and python3 design-system/build.py, then commit the results."
+            exit 1
+          }
+
+      - name: Home page colors match tokens.json
+        run: python3 scripts/check-tokens.py
+
+      - name: Vedic Math tests
+        run: |
+          if [ -d vedic-math/test ]; then
+            node --test 'vedic-math/test/**/*.test.{js,mjs}'
+          else
+            echo "No vedic-math/test directory; skipping."
+          fi
+
+  # Off until the owner sets Settings > Pages > Source to "GitHub Actions" and
+  # the repository variable PAGES_VIA_ACTIONS to true. Until then the branch
+  # deploy (Jekyll, _config.yml) keeps serving the site.
+  deploy:
+    needs: check
+    if: vars.PAGES_VIA_ACTIONS == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Assemble _site without repo-only files
+        # Same list as exclude: in _config.yml
+        run: |
+          rsync -a ./ _site/ \
+            --exclude '.*' \
+            --exclude '_site/' \
+            --exclude '_config.yml' \
+            --exclude 'CLAUDE.md' \
+            --exclude 'README.md' \
+            --exclude 'site-build.py' \
+            --exclude 'scripts/' \
+            --exclude 'design-system/README.md' \
+            --exclude 'design-system/build.py' \
+            --exclude 'design-system/tokens.json' \
+            --exclude 'vedic-math/cloud/' \
+            --exclude 'vedic-math/test/' \
+            --exclude 'council-*'
+          touch _site/.nojekyll
+          find _site -type f | sort
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

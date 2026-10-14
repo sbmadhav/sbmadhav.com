@@ -1,4 +1,14 @@
-theme: jekyll-theme-cayman
+# GitHub Pages builds this static site with Jekyll (branch deploy). No theme or layouts:
+# every page is hand-written HTML. Keep repo-only files out of the published site.
+# The Actions deploy in .github/workflows/site.yml removes the same list; keep them in sync.
 exclude:
   - CLAUDE.md
+  - README.md
   - site-build.py
+  - scripts/
+  - design-system/README.md
+  - design-system/build.py
+  - design-system/tokens.json
+  - vedic-math/cloud/
+  - vedic-math/test/
+  - "council-*"

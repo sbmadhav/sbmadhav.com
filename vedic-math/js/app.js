@@ -154,7 +154,7 @@ function home() {
       </div>`;
   } else {
     const collected = [...SUTRAS, ...SUBSUTRAS].filter(collectedCard).length;
-    body = `<div class="home-2"><div class="md-card"><span class="md-tag md-tag--coral">Arena</span><h2 class="mq-h3">Today's leaderboard</h2><div id="homeBoard" class="lb-wrap"><p class="mq-small">Loading…</p></div><a class="md-btn md-btn--primary" href="#/arena">Play today's round</a></div>${questsHTML()}</div>
+    body = `<div class="home-2"><div class="md-card"><span class="md-tag md-tag--coral">Arena</span><h2 class="mq-h3">Today's leaderboard</h2><div id="homeBoard" class="lb-wrap"><p class="mq-small">Loading…</p></div>${parentNote()}<a class="md-btn md-btn--primary" href="#/arena">Play today's round</a></div>${questsHTML()}</div>
       <div class="play-grid">
         ${tile('#/dojo', 'Vedic Dojo', `${gm.beltProgress().filter(b => b.earned).length} of ${BELTS.length} belts`, 'plum', 'belt')}
         ${tile('#/sutras', 'Sutra deep dive', `${collected} of ${SUTRAS.length + SUBSUTRAS.length} cards collected`, 'sun', 'cards')}
@@ -588,6 +588,16 @@ function closeSutra(instant = false) {
 }
 
 /* ---------- Arena ---------- */
+/* Note for parents wherever a child picks or sees a leaderboard nickname. Must match what cloud.js sends and cloud/firestore.rules allows. */
+function parentNote() {
+  const on = cloud.enabled();
+  const sum = fx.t({ explorer: 'For grown-ups: what the leaderboard keeps', challenger: 'For parents: what the leaderboard keeps', pro: 'Privacy: what the leaderboard stores' });
+  return `<details class="mq-small"><summary class="linkbtn">${sum}</summary>
+    ${on ? '' : '<p>Right now nothing is sent anywhere: scores stay in this browser. If world leaderboards are turned on, this is what they keep.</p>'}
+    <p>World leaderboards run on Google Firebase. Only a Daily challenge in the Arena sends a score, to two boards: today's and this week's for the league. Each entry holds exactly: the made-up nickname (picked from fixed word lists, never typed), an avatar color, the best score, the time it was saved, and the time it expires. It is filed under a random ID that Firebase gives this browser; Firebase keeps that ID with the dates it was created and last used. There is no account, sign-up or password.</p>
+    <p>No names, emails, ages, photos or typed text are ever collected. Progress, badges, practice rounds and the players on this device stay in this browser only.${on && cloud.appCheckOn() ? ' To stop cheating scripts, Google reCAPTCHA checks that scores come from this site.' : ''}</p>
+    <p>Leaderboard entries are deleted automatically about ${cloud.KEEP_DAYS} days after the last score. To have an entry removed sooner, message Madhav on <a href="https://www.linkedin.com/in/sbmadhav/" target="_blank" rel="noopener">LinkedIn</a> with the nickname, color and date.</p></details>`;
+}
 async function loadBoard(el, board, n = 10) {
   if (!el) return;
   const local = store.boardTop(board, n), me = store.player();
@@ -618,7 +628,7 @@ function arenaView() {
     shell.innerHTML = `${result}<div class="g-optrow" role="group" aria-label="Round type"><button class="md-chip" aria-pressed="${type === 'daily'}" data-t="daily">Daily challenge</button><button class="md-chip" aria-pressed="${type === 'practice'}" data-t="practice">Practice round</button></div>
       <p class="g-best">League: <b>${fx.MODES[fx.mode()].name}</b> · Your best today: <b>${store.best('arena-' + day)}</b></p>
       <button class="md-btn md-btn--primary ar-go" id="arGo">${icon('bolt')} Start</button>
-      <div class="lb-cols"><div><h2 class="mq-h3">Today</h2><div id="lbDay" class="lb-wrap"></div></div><div><h2 class="mq-h3">This week</h2><div id="lbWeek" class="lb-wrap"></div></div></div>`;
+      <div class="lb-cols"><div><h2 class="mq-h3">Today</h2><div id="lbDay" class="lb-wrap"></div></div><div><h2 class="mq-h3">This week</h2><div id="lbWeek" class="lb-wrap"></div></div></div>${parentNote()}`;
     shell.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { type = b.dataset.t; lobby(result); });
     $('#arGo', shell).onclick = countdown;
     loadBoard($('#lbDay', shell), `daily-${day}-${league}`); loadBoard($('#lbWeek', shell), `week-${wk}-${league}`);
@@ -786,7 +796,7 @@ function meView() {
   view.innerHTML = `<section class="md-section mq-tight"><div class="md-wrap">
     ${crumbs([null, 'Me'])}
     <div class="me-head md-card">${avatar(p, 84)}<div><h1 class="mq-h1">${esc(p.name)}</h1><p>Level ${L.lv} · ${gm.titleOf(L.lv)} · ${store.xp()} XP</p><span class="mq-xpbar mq-xpbar--big"><i style="width:${pct(L.pct)}%"></i></span><p class="mq-small">${L.need - L.into} XP to level ${L.lv + 1}</p>
-      <div class="me-acts"><button class="md-btn md-btn--sm" id="meName">New nickname</button>${store.AVATARS.map(c => `<button class="av-pick av av-${c}" data-c="${c}" aria-label="Color ${c}" aria-pressed="${c === p.avatar}"></button>`).join('')}</div></div></div>
+      <div class="me-acts"><button class="md-btn md-btn--sm" id="meName">New nickname</button>${store.AVATARS.map(c => `<button class="av-pick av av-${c}" data-c="${c}" aria-label="Color ${c}" aria-pressed="${c === p.avatar}"></button>`).join('')}</div>${parentNote()}</div></div>
     <div class="mq-stats me-stats"><div class="md-stat"><div class="md-kicker">Skills mastered</div><div class="md-value">${done}</div><p>of ${SKILLS.length}</p></div><div class="md-stat"><div class="md-kicker">Day streak</div><div class="md-value">${store.streakDays()}</div><p>days</p></div><div class="md-stat"><div class="md-kicker">Belts</div><div class="md-value">${gm.beltProgress().filter(b => b.earned).length}</div><p>of ${BELTS.length}</p></div></div>
     <h2 class="mq-strand">Badges <small class="mq-small">${Object.keys(got).length} of ${gm.BADGES.length}</small></h2>
     <div class="badge-grid">${gm.BADGES.map(b => `<div class="badge${got[b.id] ? ' got' : ''}"><span class="badge-medal" aria-hidden="true">${icon(got[b.id] ? 'star' : 'lock')}</span><b>${b.name}</b><small>${b.how}</small></div>`).join('')}</div>
