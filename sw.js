@@ -1,5 +1,8 @@
 /* sbmadhav.com service worker: makes the site work offline and load instantly on repeat visits.
-   VERSION is stamped by site-build.py; run the script whenever site files change.
+   VERSION stays 'dev' in git. The deploy (site-build.py --out _site, run by CI) stamps a hash of
+   the cached files into the published copy, and ?v= hashes into PRECACHE. An unstamped 'dev'
+   worker caches nothing and leaves every request to the network, so a copy served straight from
+   the source (or published by mistake without the build) never serves stale files.
 
    Scope: registered from the home page with scope "/". It leaves /state-of-voice-agents/ and
    /vedic-math/ alone (those paths are served from their own repos, so this file cannot version
@@ -14,15 +17,15 @@
    deployed for a few weeks so returning visitors pick it up, then sw.js can be deleted (and the
    register call in assets/app.js removed). */
 const KILL = false;
-const VERSION = 'c228f82322';
+const VERSION = 'dev';
 const CACHE = `madhav-${VERSION}`;
 const RUNTIME_MAX = 150; // entries kept beyond the precache list; the oldest go first
 const NETWORK_ONLY = ['/state-of-voice-agents/', '/vedic-math/'];
 const PRECACHE = [
   './',
   'index.html',
-  'assets/app.js?v=26402283f3',
-  'assets/explore.js?v=8787d10206',
+  'assets/app.js',
+  'assets/explore.js',
   'assets/profile.webp',
   'assets/fonts/fredoka-latin-600-normal.woff2',
   'assets/fonts/fredoka-latin-700-normal.woff2',
@@ -38,7 +41,11 @@ const PRECACHE = [
 ];
 const PRECACHED = new Set(PRECACHE.map(p => new URL(p, self.registration.scope).href));
 
-if (KILL) {
+if (VERSION === 'dev') {
+  // Unbuilt source: no caching. Take over at once so a stale stamped worker does not linger.
+  self.addEventListener('install', () => self.skipWaiting());
+  self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
+} else if (KILL) {
   self.addEventListener('install', () => self.skipWaiting());
   self.addEventListener('activate', event => {
     event.waitUntil((async () => {

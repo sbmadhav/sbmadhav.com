@@ -20,17 +20,6 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Run the build
-        run: |
-          python3 site-build.py
-
-      - name: Generated files are committed
-        run: |
-          git diff --exit-code || {
-            echo "::error::The builds changed the files above. Run python3 site-build.py, then commit the results."
-            exit 1
-          }
-
       - name: Home page colors match the pinned tokens
         run: python3 scripts/check-tokens.py
 
@@ -39,15 +28,41 @@ jobs:
         run: |
           python3 scripts/check-tokens.py --upstream || echo "::warning::index.html or scripts/design-tokens.json is behind sbmadhav/design-system. Run python3 scripts/check-tokens.py --refresh and fix index.html."
 
-  # Off until the owner sets Settings > Pages > Source to "GitHub Actions" and
-  # the repository variable PAGES_VIA_ACTIONS to true. Until then the branch
-  # deploy (Jekyll, _config.yml) keeps serving the site.
+      # Also fails if the source carries stamps (?v= on the scripts, or sw.js VERSION other than 'dev')
+      - name: Build _site with cache stamps
+        run: python3 site-build.py --out _site
+
+      - name: The build is stamped and has no repo-only files
+        run: |
+          set -e
+          err() { echo "::error::$1"; exit 1; }
+          for s in app explore analytics; do
+            grep -Eq "assets/$s\.js\?v=[0-9a-f]{10}\"" _site/index.html || err "_site/index.html loads assets/$s.js without a ?v= stamp"
+          done
+          grep -Eq "^const VERSION = '[0-9a-f]{10}';" _site/sw.js || err "_site/sw.js VERSION is not a stamped hash"
+          grep -q "^const VERSION = 'dev';" sw.js || err "sw.js in git must keep VERSION = 'dev'"
+          test -f _site/.nojekyll || err "_site/.nojekyll is missing"
+          for f in CLAUDE.md README.md site-build.py _config.yml scripts .github .githooks; do
+            test ! -e "_site/$f" || err "_site/$f is a repo-only file and must not be published"
+          done
+          find _site -type f | sort
+
+      # The exact files checked above are the ones deployed
+      - name: Upload _site for the deploy job
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  # Publishes _site (stamped) to GitHub Pages. Needs Settings > Pages > Source set to
+  # "GitHub Actions" AND the repository variable PAGES_VIA_ACTIONS set to true; until both
+  # are done, Pages deploys the master branch with Jekyll, which publishes the UNSTAMPED
+  # source (it still works, without cache busting). See "Deploy" in README.md.
   deploy:
     needs: check
     if: vars.PAGES_VIA_ACTIONS == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
-      contents: read
       pages: write
       id-token: write
     environment:
@@ -57,28 +72,5 @@ jobs:
       group: pages
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Assemble _site without repo-only files
-        # Same list as exclude: in _config.yml
-        run: |
-          rsync -a ./ _site/ \
-            --exclude '.*' \
-            --exclude '_site/' \
-            --exclude '_config.yml' \
-            --exclude 'CLAUDE.md' \
-            --exclude 'README.md' \
-            --exclude 'site-build.py' \
-            --exclude 'scripts/' \
-            --exclude 'council-*'
-          touch _site/.nojekyll
-          find _site -type f | sort
-
-      - uses: actions/configure-pages@v5
-
-      - uses: actions/upload-pages-artifact@v4
-        with:
-          path: _site
-
       - id: deployment
         uses: actions/deploy-pages@v4
