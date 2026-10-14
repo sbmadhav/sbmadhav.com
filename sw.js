@@ -10,7 +10,7 @@
    deployed for a few weeks so returning visitors pick it up, then sw.js can be deleted (and the
    register call in assets/app.js removed). */
 const KILL = false;
-const VERSION = '8246a7ff20';
+const VERSION = '8da06e0dc2';
 const CACHE = `madhav-${VERSION}`;
 const RUNTIME_MAX = 150; // entries kept beyond the precache list; the oldest go first
 const NETWORK_ONLY = ['/state-of-voice-agents/'];
@@ -18,7 +18,7 @@ const PRECACHE = [
   './',
   'index.html',
   'assets/app.js?v=26402283f3',
-  'assets/explore.js?v=72f9f7985a',
+  'assets/explore.js?v=140c0b4e82',
   'assets/profile.webp',
   'assets/fonts/fredoka-latin-600-normal.woff2',
   'assets/fonts/fredoka-latin-700-normal.woff2',
