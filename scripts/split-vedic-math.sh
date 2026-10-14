@@ -42,7 +42,12 @@ git cat-file -e "$REF:vedic-math/index.html" 2>/dev/null || die "$REF has no ved
 case "$TARGET" in "$MAIN_CHECKOUT"|"$MAIN_CHECKOUT"/*) die "target $TARGET is inside this repo";; esac
 
 say "Splitting vedic-math/ from $REF ($(git rev-parse --short "$REF"))"
-SPLIT="$(git subtree split --prefix=vedic-math "$REF" 2>/dev/null)"
+# git subtree needs the folder in the working tree, and this branch has removed it,
+# so split inside a temporary detached worktree of the source ref.
+TMP="$(mktemp -d "${TMPDIR:-/tmp}/split-vedic-math.XXXXXX")"
+trap 'git worktree remove --force "$TMP/wt" >/dev/null 2>&1 || true; rm -rf "$TMP"' EXIT
+git worktree add -q --detach "$TMP/wt" "$REF"
+SPLIT="$(git -C "$TMP/wt" subtree split --prefix=vedic-math HEAD)" || die "git subtree split failed"
 [ -n "$SPLIT" ] || die "git subtree split produced nothing"
 git update-ref refs/split/vedic-math "$SPLIT"
 echo "    split head $SPLIT ($(git rev-list --count "$SPLIT") commits)"
