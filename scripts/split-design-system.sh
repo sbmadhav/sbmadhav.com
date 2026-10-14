@@ -29,14 +29,18 @@ git -C "$SITE" cat-file -e "$FROM:design-system" 2>/dev/null || {
   exit 1
 }
 
-echo "Splitting design-system/ from $FROM ..."
-SHA=$(git -C "$SITE" subtree split -q --prefix=design-system "$FROM")
-echo "Split commit: $SHA"
-
-# A temporary ref so DEST can fetch the commit; removed on exit
+# git subtree split wants the folder in the working tree, which a checkout without
+# design-system/ lacks, so split inside a temporary detached worktree at FROM.
+# The temporary ref lets DEST fetch the commit. Both are removed on exit.
+TMP=$(mktemp -d)
 REF=refs/split/design-system
+trap 'git -C "$SITE" worktree remove --force "$TMP" 2>/dev/null; rm -rf "$TMP"; git -C "$SITE" update-ref -d "$REF" 2>/dev/null' EXIT
+git -C "$SITE" worktree add --quiet --detach "$TMP" "$FROM"
+
+echo "Splitting design-system/ from $FROM ..."
+SHA=$(git -C "$TMP" subtree split -q --prefix=design-system HEAD)
+echo "Split commit: $SHA"
 git -C "$SITE" update-ref "$REF" "$SHA"
-trap 'git -C "$SITE" update-ref -d "$REF"' EXIT
 
 if [ ! -d "$DEST/.git" ]; then
   mkdir -p "$DEST"
