@@ -20,10 +20,6 @@ jobs:
         with:
           python-version: "3.x"
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-
       - name: Install build dependencies
         run: pip install markdown
 
@@ -41,14 +37,6 @@ jobs:
 
       - name: Home page colors match tokens.json
         run: python3 scripts/check-tokens.py
-
-      - name: Vedic Math tests
-        run: |
-          if [ -d vedic-math/test ]; then
-            node --test 'vedic-math/test/**/*.test.{js,mjs}'
-          else
-            echo "No vedic-math/test directory; skipping."
-          fi
 
   # Off until the owner sets Settings > Pages > Source to "GitHub Actions" and
   # the repository variable PAGES_VIA_ACTIONS to true. Until then the branch
@@ -84,8 +72,6 @@ jobs:
             --exclude 'design-system/README.md' \
             --exclude 'design-system/build.py' \
             --exclude 'design-system/tokens.json' \
-            --exclude 'vedic-math/cloud/' \
-            --exclude 'vedic-math/test/' \
             --exclude 'council-*'
           touch _site/.nojekyll
           find _site -type f | sort

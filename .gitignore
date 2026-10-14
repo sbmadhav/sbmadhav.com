@@ -1,2 +1,4 @@
 _ds2/
 _ds_build/
+# Local symlink to a sibling checkout of sbmadhav/vedic-math (served at /vedic-math/ in production)
+/vedic-math

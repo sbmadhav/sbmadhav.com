@@ -6,7 +6,7 @@
 # 1. Regenerate stamped and generated files; fail if that changed anything,
 #    so the regenerated files get staged with the commit.
 # 2. Home page colors must match design-system/tokens.json.
-# 3. Vedic Math unit tests, when they exist.
+# Vedic Math has its own repo (sbmadhav/vedic-math) with its own hook.
 
 cd "$(git rev-parse --show-toplevel)" || exit 1
 
@@ -32,10 +32,5 @@ if [ "$before" != "$after" ]; then
 fi
 
 python3 scripts/check-tokens.py || fail "index.html colors disagree with design-system/tokens.json"
-
-if [ -d vedic-math/test ]; then
-  command -v node >/dev/null 2>&1 || fail "node is required to run vedic-math/test"
-  node --test --test-reporter=dot 'vedic-math/test/**/*.test.{js,mjs}' >&2 || fail "vedic-math tests failed"
-fi
 
 exit 0

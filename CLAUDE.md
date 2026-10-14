@@ -10,7 +10,7 @@ Personal site on GitHub Pages (served at https://sbmadhav.com, www redirects to 
 - Start from `design-system/template.html`; link `/design-system/tokens.css` then `/design-system/components.css`.
 - Use tokens (`var(--coral)`, `var(--space-6)`, `var(--radius-lg)`), never raw hex. Text on accent fills uses `var(--on-accent)`, not white.
 - Support both color schemes (Daybreak light, Deep Space dark; system default with a saved override) and kid mode (`.pro` / `.kid` spans, `body.kidmode`).
-- Exception: `/vedic-math/` has no kid mode switch in its header. Its play modes (Explorer, Challenger, Pro) set the wording, and it never writes the site-wide `kidmode` setting.
+- `/vedic-math/` is its own repo, `sbmadhav/vedic-math` (GitHub project Pages under this domain, like `/state-of-voice-agents/`). Its rules live in that repo's CLAUDE.md. It loads `/design-system/tokens.css`, `/design-system/components.css`, `/assets/explore.js`, `/assets/analytics.js`, `/assets/fonts/` and `/manifest.webmanifest` from this site by absolute URL, so do not rename or remove those. To rebuild that repo from a `vedic-math/` folder (only before the cutover), run `scripts/split-vedic-math.sh`.
 - Never use em dashes in copy.
 - If a token or the guidelines change, edit `design-system/tokens.json` or `design-system/README.md`, then run `python3 design-system/build.py` to regenerate `tokens.css` and the reference page `design-system/index.html`.
 
@@ -23,7 +23,7 @@ Personal site on GitHub Pages (served at https://sbmadhav.com, www redirects to 
 
 ## Checks, hook and deploy
 
-- Pre-commit hook in `.githooks/pre-commit`. Enable it on a fresh clone with `git config core.hooksPath .githooks`. It runs both builds and fails if either changed a file (stage the regenerated files and commit again), then runs the token check and `node --test 'vedic-math/test/**/*.test.{js,mjs}'`.
+- Pre-commit hook in `.githooks/pre-commit`. Enable it on a fresh clone with `git config core.hooksPath .githooks`. It runs both builds and fails if either changed a file (stage the regenerated files and commit again), then runs the token check.
 - `python3 scripts/check-tokens.py` compares the inline color variables in `index.html` (light and both dark blocks) with `design-system/tokens.json`. When a color changes, change both.
 - `.github/workflows/site.yml` runs the same checks on pushes and pull requests to `master`. Its `deploy` job publishes `_site/` through GitHub Actions only when the repository variable `PAGES_VIA_ACTIONS` is `true` (and Pages source is set to "GitHub Actions"); otherwise Pages keeps deploying the `master` branch with Jekyll.
 - Repo-only files are listed twice: `exclude` in `_config.yml` and the `rsync --exclude` list in the workflow. Keep them in sync when adding one.

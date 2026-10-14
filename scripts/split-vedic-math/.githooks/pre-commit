@@ -1,0 +1,31 @@
+#!/bin/sh
+# Pre-commit checks for Vedic Math. Enable once per clone:
+#   git config core.hooksPath .githooks
+# Skip in an emergency with: git commit --no-verify
+#
+# 1. Restamp the import map; fail if that changed anything, so the stamped
+#    index.html gets staged with the commit.
+# 2. Unit tests.
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+fail() {
+  printf '\npre-commit: %s\n' "$1" >&2
+  exit 1
+}
+
+# Fingerprint of unstaged changes before and after the build
+before=$(git diff --binary --no-ext-diff | git hash-object --stdin)
+
+python3 build.py >/dev/null || fail "build.py failed"
+
+after=$(git diff --binary --no-ext-diff | git hash-object --stdin)
+if [ "$before" != "$after" ]; then
+  git diff --stat >&2
+  fail "build.py restamped files (listed above). Review them, git add them, and commit again."
+fi
+
+command -v node >/dev/null 2>&1 || fail "node is required to run test/"
+node --test --test-reporter=dot 'test/**/*.test.{js,mjs}' >&2 || fail "tests failed"
+
+exit 0
