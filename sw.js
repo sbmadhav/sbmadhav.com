@@ -10,7 +10,7 @@
    deployed for a few weeks so returning visitors pick it up, then sw.js can be deleted (and the
    register call in assets/app.js removed). */
 const KILL = false;
-const VERSION = '39b1b86944';
+const VERSION = '8246a7ff20';
 const CACHE = `madhav-${VERSION}`;
 const RUNTIME_MAX = 150; // entries kept beyond the precache list; the oldest go first
 const NETWORK_ONLY = ['/state-of-voice-agents/'];
