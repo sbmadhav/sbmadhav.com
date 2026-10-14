@@ -68,6 +68,9 @@ jobs:
             --exclude '_config.yml' \
             --exclude 'CLAUDE.md' \
             --exclude 'README.md' \
+            --exclude 'CONTRIBUTING.md' \
+            --exclude 'SECURITY.md' \
+            --exclude 'LICENSE' \
             --exclude 'site-build.py' \
             --exclude 'scripts/' \
             --exclude 'council-*'

@@ -9,7 +9,7 @@ Personal site of Madhav Srinivasan, served by GitHub Pages at [sbmadhav.com](htt
 | `/` | Home: work, Brain Lab, Bug Hunt, Design Lab, journey | `index.html`, `assets/app.js` |
 | `/vedic-math/` | Vedic Math for Everyone: lessons, Dojo, Arena, games, leaderboards | the [`vedic-math`](https://github.com/sbmadhav/vedic-math) repo, served under this domain |
 | `/design-system/` | Tokens, type, components and guidelines behind every page | the [`design-system`](https://github.com/sbmadhav/design-system) repo, served under this domain |
-| `/state-of-voice-agents/` | Report on conversational voice AI in healthcare and banking | the `state-of-voice-agents` repo, served under this domain |
+| `/state-of-voice-agents/` | Report on conversational voice AI in healthcare and banking | the [`state-of-voice-agents`](https://github.com/sbmadhav/state-of-voice-agents) repo, served under this domain |
 
 `/math/` redirects to `/vedic-math/`. `404.html` handles every unknown path.
 
@@ -23,7 +23,7 @@ Static HTML, CSS and JavaScript. No framework, no bundler, no `package.json` for
 - **Shared chrome.** Every page loads `assets/explore.js` (the site-wide Explore menu; pages are listed in `PAGES` at its top) and `assets/analytics.js` (GoatCounter, cookieless, loaded after the page is idle).
 - **Other repos under this domain.** `/vedic-math/` and `/state-of-voice-agents/` are GitHub project Pages from their own repos. They load the shared files above (and Vedic Math the design-system CSS and fonts) by absolute URL, and the service worker leaves their paths to the network.
 
-Repo-only files (this README, `CLAUDE.md`, build scripts, `scripts/`, `tokens.json`) are kept out of the published site by `exclude` in `_config.yml`.
+Repo-only files (this README, `CLAUDE.md`, `CONTRIBUTING.md`, `SECURITY.md`, `LICENSE`, build scripts, `scripts/`) are kept out of the published site by `exclude` in `_config.yml` and by the matching `rsync --exclude` list in the workflow.
 
 ## Run locally
 
@@ -51,3 +51,19 @@ CI (`.github/workflows/site.yml`) runs the same checks on every push and pull re
 ## How it is maintained
 
 Most changes are made with AI coding agents working from `CLAUDE.md`, the project rules file, and the design system README. The token check, the hook and CI are there so those rules are enforced by tools rather than by memory.
+
+`master` is protected: every change from someone else arrives as a pull request, needs the owner's review and passing checks, and nothing merges without approval. `scripts/secure-repos.sh` applies the same protection and security settings to all four repos behind sbmadhav.com (run it after `gh auth login`; `--dry-run` shows what it would change).
+
+## Contributing
+
+Bug fixes and accessibility improvements are welcome. The home page copy is personal and not open to edits. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to propose a change, and [SECURITY.md](SECURITY.md) to report a security problem privately.
+
+## License
+
+The code in this repo is released under the [MIT License](LICENSE).
+
+The self-hosted fonts in `assets/fonts/` (Fredoka, Nunito Sans, Space Grotesk, JetBrains Mono) are not covered by it; they keep their own license, the SIL Open Font License 1.1.
+
+## Thank you, Claude
+
+Built with Claude: much of this site was designed and written together with Claude, Anthropic's AI assistant, through Claude Code. Thank you, Claude.
