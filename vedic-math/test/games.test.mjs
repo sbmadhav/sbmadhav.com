@@ -1,5 +1,5 @@
-/* Strategy game levels: 14 games x 72 levels = 1,008. The games draw their questions inside
-   run(), which needs the DOM, so only the level settings and goals are checked here. */
+/* Strategy game levels: 14 games x 72 levels = 1,008. Levels set where the adaptive dial starts and the
+   star goals in difficulty-weighted points. The question ladders are checked in adapt.test.mjs. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { GAMES, LEVELS, LEVELS_PER_GAME, levelStars } from '../js/games.js';
@@ -27,7 +27,8 @@ test('every level has settings and three rising goals', () => {
     assert.ok(lv.goal.every(v => Number.isInteger(v) && v > 0), `${name}: goal ${lv.goal}`);
     assert.ok(lv.goal[0] < lv.goal[1] && lv.goal[1] <= lv.goal[2], `${name}: goal ${lv.goal}`);
     for (const [k, v] of Object.entries(lv.cfg)) if (typeof v === 'number') assert.ok(Number.isFinite(v) && v > 0, `${name}: ${k}=${v}`);
-    if (lv.cfg.rounds) assert.ok(lv.goal[2] <= lv.cfg.rounds || id === 'line-snipe', `${name}: top goal ${lv.goal[2]} is above ${lv.cfg.rounds} rounds`);
+    assert.ok(lv.cfg.start >= 1 && lv.cfg.start <= 20 && lv.cfg.floor <= lv.cfg.start, `${name}: start ${lv.cfg.start}, floor ${lv.cfg.floor}`);
+    if (L > 1) assert.ok(lv.cfg.start >= fn(L - 1).cfg.start && lv.goal[2] >= fn(L - 1).goal[2], `${name}: easier than level ${L - 1}`);
     assert.deepEqual(fn(L), lv, `${name} is not deterministic`);
   }
   assert.equal(keys.size, 1008);

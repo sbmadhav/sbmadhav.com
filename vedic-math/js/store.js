@@ -3,7 +3,7 @@
    Nothing here leaves the device unless the player joins an online leaderboard (cloud.js). */
 const LEGACY = 'mathquest.v1', PKEY = 'vm.players', BOARD = 'vm.board';
 let S = null, P = null;
-const blank = () => ({ v: 2, skills: {}, xp: 0, days: {}, best: {}, last: null, grade: null, badges: {}, counts: {}, seen: {}, stars: {} });
+const blank = () => ({ v: 2, skills: {}, xp: 0, days: {}, best: {}, last: null, grade: null, badges: {}, counts: {}, seen: {}, stars: {}, ratings: {}, weekXp: {} });
 const get = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
 const put = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const listeners = new Set();
@@ -47,7 +47,17 @@ export const mastered = id => { const s = skill(id); return s.m >= 0.85 && s.n >
 export const started = id => skill(id).n > 0;
 export function level(id) { const s = skill(id); return s.m < 0.4 || s.n < 3 ? 1 : s.m < 0.75 ? 2 : 3; }
 
-export function addXP(n, why = '') { load(); const before = S.xp; S.xp += n; save(); emit('xp', { before, after: S.xp, n, why }); }
+export function addXP(n, why = '') { load(); const before = S.xp; S.xp += n; S.weekXp = S.weekXp || {}; const wk = isoWeek(); S.weekXp = { [wk]: (S.weekXp[wk] || 0) + n }; save(); emit('xp', { before, after: S.xp, n, why }); }
+/* ISO week id like 2026-W42, in local time (matches cloud.weekId) */
+export function isoWeek(d = new Date()) {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())), day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day);
+  const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)), wk = Math.ceil(((t - y0) / 864e5 + 1) / 7);
+  return `${t.getUTCFullYear()}-W${String(wk).padStart(2, '0')}`;
+}
+export const weekXP = () => (load(), (S.weekXp || {})[isoWeek()] || 0);
+/* Adaptive game ratings (difficulty 1 to 20), one per game */
+export const rating = k => (load(), (S.ratings || {})[k] || 0);
+export function setRating(k, v) { load(); S.ratings = S.ratings || {}; S.ratings[k] = v; save(); emit('rating', { k, v }); }
 export function bump(counter, n = 1) { load(); S.counts[counter] = (S.counts[counter] || 0) + n; save(); emit('count', { counter, value: S.counts[counter] }); return S.counts[counter]; }
 export const count = c => (load(), S.counts[c] || 0);
 export function markSeen(k) { load(); if (S.seen[k]) return false; S.seen[k] = Date.now(); save(); emit('seen', k); return true; }

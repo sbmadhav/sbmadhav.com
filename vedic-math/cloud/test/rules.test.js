@@ -216,3 +216,47 @@ test('top-20 query ordered by score desc works with no composite index', async (
   assert.equal(scores.length, 20);
   assert.deepEqual(scores, [...scores].sort((a, b) => b - a));
 });
+
+/* ---------- Ranked game boards and the weekly XP board ---------- */
+const GAME_IDS = ['balloons', 'more_less', 'make_ten', 'quick_look', 'bonds', 'times_sprint', 'target', 'frac_faceoff', 'line_snipe', 'pairs', 'check_it', 'rain', 'sequence', 'balance'];
+
+test('every game has writable daily and weekly boards in every league', async () => {
+  for (const g of GAME_IDS) for (const L of ['explorer', 'challenger', 'pro']) {
+    await assertSucceeds(setDoc(ref(ALICE, ALICE, `g_${g}-daily-${dayId(NOW)}-${L}`), ok({ score: 437 })), `${g} daily ${L}`);
+  }
+  await assertSucceeds(setDoc(ref(ALICE, ALICE, `g_times_sprint-week-${weekId(NOW)}-pro`), ok({ score: 4321 })));
+});
+
+test('game boards: odd scores allowed, cap 12000, unknown games and bad shapes rejected', async () => {
+  const b = `g_rain-daily-${dayId(NOW)}-challenger`;
+  for (const score of [9, 12001, 12.5, -10]) await assertFails(setDoc(ref(ALICE, ALICE, b), ok({ score })), `rain ${score}`);
+  await assertSucceeds(setDoc(ref(ALICE, ALICE, b), ok({ score: 12000 })));
+  for (const bad of [`g_chess-daily-${dayId(NOW)}-pro`, `g_make-ten-daily-${dayId(NOW)}-pro`, `g_-daily-${dayId(NOW)}-pro`, `g_rain-${dayId(NOW)}-pro`, `g_rain-monthly-2026-10-pro`, `x_rain-daily-${dayId(NOW)}-pro`]) {
+    await assertFails(setDoc(ref(ALICE, ALICE, bad), ok()), bad);
+  }
+});
+
+test('game and xp boards for other days and weeks are frozen', async () => {
+  for (const b of [`g_rain-daily-${dayId(NOW - 3 * DAY)}-pro`, `g_rain-daily-${dayId(NOW + 2 * DAY)}-pro`, `g_rain-week-${weekId(NOW - 14 * DAY)}-pro`, `xp-week-${weekId(NOW - 14 * DAY)}-pro`, `xp-week-${weekId(NOW + 14 * DAY)}-pro`]) {
+    await assertFails(setDoc(ref(ALICE, ALICE, b), ok()), b);
+  }
+});
+
+test('weekly XP board: week only, cap 60000', async () => {
+  const b = `xp-week-${weekId(NOW)}-explorer`;
+  await assertSucceeds(setDoc(ref(ALICE, ALICE, b), ok({ score: 1235 })));
+  await assertFails(setDoc(ref(BOB, BOB, b), ok({ score: 60001 })));
+  await assertSucceeds(setDoc(ref(BOB, BOB, b), ok({ score: 60000 })));
+  await assertFails(setDoc(ref(ALICE, ALICE, `xp-daily-${dayId(NOW)}-pro`), ok()));
+});
+
+test('game boards keep every other protection: own entry, higher score, rate limit, no deletes', async () => {
+  const b = `g_balance-daily-${dayId(NOW)}-pro`;
+  await assertFails(setDoc(ref(ALICE, BOB, b), ok()));
+  await seed(b, ALICE, old({ name: 'Brave Tiger 42', score: 500 }));
+  await assertFails(setDoc(ref(ALICE, ALICE, b), ok({ score: 400 })));
+  await assertSucceeds(setDoc(ref(ALICE, ALICE, b), ok({ score: 501 })));
+  await assertFails(setDoc(ref(ALICE, ALICE, b), ok({ score: 900 })), 'second update within 50 s');
+  await assertFails(deleteDoc(ref(ALICE, ALICE, b)));
+  await assertSucceeds(getDocs(query(collection(db(BOB), 'boards', b, 'scores'), orderBy('score', 'desc'), limit(20))));
+});

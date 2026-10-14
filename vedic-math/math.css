@@ -686,3 +686,16 @@ sup { font-size: .65em; }
 .g-drop.hit { background: var(--teal); } .g-drop.miss { background: var(--coral); }
 .g-balance { display: grid; place-items: center; margin: 10px 0 14px; }
 @media (prefers-reduced-motion: reduce) { .lv-node.next, .lv-big .lv-stars i.on { animation: none; } }
+
+/* ===== Adaptive games: difficulty dial, HUD, target zone ===== */
+.dial { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; }
+.dial-bar { width: 90px; height: 10px; border-radius: 99px; background: color-mix(in srgb, var(--ink) 12%, transparent); overflow: hidden; border: 1px solid var(--line); }
+.dial-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--teal), var(--sun), var(--coral)); transition: width .35s; }
+.g-hud { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.g-pts { font-size: 13.5px; color: var(--ink-muted); } .g-pts b { font: 700 1.2rem/1 var(--display); color: var(--ink); }
+.g-gain { font: 700 13px/1 var(--font-mono); color: var(--teal-strong); animation: scIn .5s ease-out both; }
+.g-trend { font-size: 12px; } .g-trend.up { color: var(--coral-strong); } .g-trend.down { color: var(--teal-strong); }
+.g-head { flex-wrap: wrap; }
+.g-big-auto { font-size: clamp(1.4rem, 5vw, 2.4rem); }
+.g-line-zone { position: absolute; top: -8px; height: 20px; background: color-mix(in srgb, var(--teal) 35%, transparent); border-radius: 4px; }
+.g-result .mq-small { margin-top: 8px; }

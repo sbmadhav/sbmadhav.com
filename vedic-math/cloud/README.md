@@ -84,3 +84,16 @@ Board ids in the tests are built from today's date, because past and future boar
 - Nothing is sent unless online leaderboards are turned on in `cloud-config.js`, and the Firebase SDK loads only when a leaderboard is opened or an Arena score is sent.
 - Entries are deleted by the TTL policy about 30 days after the last score (TTL usually runs within a day of the expiry). They cannot be deleted from the browser. To honor a removal request, find the entry by nickname and color in the Firebase console and delete it.
 - The site shows a note for parents next to the nickname (Me page) and the leaderboards (Arena, home). It is `parentNote()` in `js/app.js`; keep it in sync with this section.
+
+
+## Boards
+
+- **Arena daily race:** `daily-YYYY-MM-DD-<league>` and `week-YYYY-Www-<league>`.
+- **Ranked game boards:** `g_<game>-daily-...` and `g_<game>-week-...` for each of the 14 games (game ids use `_`, for example `g_times_sprint`). Scores are difficulty-weighted points, capped at 12000.
+- **Weekly XP:** `xp-week-YYYY-Www-<league>`, XP earned this week across everything, capped at 60000.
+
+After changing `firestore.rules`, deploy it with:
+
+```
+cd vedic-math/cloud && npx firebase-tools deploy --only firestore:rules --project sbmadhav-vedic-math
+```

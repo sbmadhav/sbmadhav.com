@@ -16,7 +16,8 @@ import * as gm from './gamify.js';
 import * as cloud from './cloud.js';
 import { runArena, runDuel, runChallenge } from './arena.js';
 import * as LV from './levels.js';
-import { LEVELS, LEVELS_PER_GAME, levelStars } from './games.js';
+import { LEVELS, LEVELS_PER_GAME, levelStars, boardGame } from './games.js';
+import * as AD from './adapt.js';
 import { initAmbient, bgOn, setBg, BG_NOTES, stop as stopMusic, isPlaying as musicOn } from './ambient.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -372,11 +373,11 @@ function dojoView() {
 
 /* ---------- Numbered levels: shared map ---------- */
 const starHTML = n => `<span class="lv-stars" aria-label="${n} of 3 stars">${[1, 2, 3].map(i => `<i class="${i <= n ? 'on' : ''}">&#9733;</i>`).join('')}</span>`;
-function levelMap(count, keyOf, hrefOf, { openAll = false, perRow = 0 } = {}) {
-  let unlocked = true;
+function levelMap(count, keyOf, hrefOf, { openAll = false, perRow = 0, isOpen = null, suggest = 0 } = {}) {
+  let unlocked = true, flagged = false;
   return `<div class="lv-map${perRow ? ' lv-map--rows' : ''}">${Array.from({ length: count }, (_, i) => {
-    const n = i + 1, st = store.stars(keyOf(n)), open = openAll || unlocked; unlocked = st > 0;
-    const next = open && !st;
+    const n = i + 1, st = store.stars(keyOf(n)), open = openAll || (isOpen ? isOpen(n) : unlocked); unlocked = st > 0;
+    const next = suggest ? n === suggest : open && !st && !flagged; if (next) flagged = true;
     return open ? `<a class="lv-node${st ? ' done' : ''}${next ? ' next' : ''}" href="${hrefOf(n)}" aria-label="Level ${n}${st ? `, ${st} stars` : ''}"><b>${n}</b>${starHTML(st)}</a>` : `<span class="lv-node locked" aria-label="Level ${n}, locked"><b>${n}</b>${icon('lock')}</span>`;
   }).join('')}</div>`;
 }
@@ -600,18 +601,37 @@ function parentNote() {
 }
 async function loadBoard(el, board, n = 10) {
   if (!el) return;
-  const local = store.boardTop(board, n), me = store.player();
-  const rows = (list, meTest) => list.length ? `<ol class="lb">${list.map((e, i) => `<li class="${meTest(e) ? 'me' : ''}"><span class="lb-rank r${i + 1}">${i + 1}</span>${avatar(e, 26)}<span class="lb-name">${esc(e.name)}</span><b>${e.score}</b></li>`).join('')}</ol>` : '<p class="mq-small">No scores yet. Be the first!</p>';
-  el.innerHTML = `<div class="lb-tabs" role="tablist"><button role="tab" aria-selected="true" data-src="device">This device</button><button role="tab" aria-selected="false" data-src="world">World</button></div><div class="lb-body">${rows(local, e => e.pid === me.id)}</div>`;
+  const me = store.player(), online = cloud.enabled();
+  const rows = (list, meTest) => list.length ? `<ol class="lb">${list.map((e, i) => `<li class="${meTest(e) ? 'me' : ''}"><span class="lb-rank r${i + 1}">${i + 1}</span>${avatar(e, 26)}<span class="lb-name">${esc(e.name)}</span><b>${e.score.toLocaleString('en-US')}</b></li>`).join('')}</ol>` : '<p class="mq-small">No scores yet. Be the first!</p>';
+  el.innerHTML = `<div class="lb-tabs" role="tablist"><button role="tab" aria-selected="${online}" data-src="world">World</button><button role="tab" aria-selected="${!online}" data-src="device">This device</button></div><div class="lb-body"></div>`;
   const body = $('.lb-body', el);
-  el.querySelectorAll('[data-src]').forEach(b => b.onclick = async () => {
-    el.querySelectorAll('[data-src]').forEach(x => x.setAttribute('aria-selected', String(x === b)));
-    if (b.dataset.src === 'device') { body.innerHTML = rows(store.boardTop(board, n), e => e.pid === me.id); return; }
-    if (!cloud.enabled()) { body.innerHTML = '<p class="mq-small">World leaderboards are coming soon. Until then, scores compete with everyone who plays on this device.</p>'; return; }
+  const show = async src => {
+    el.querySelectorAll('[data-src]').forEach(x => x.setAttribute('aria-selected', String(x.dataset.src === src)));
+    if (src === 'device') { body.innerHTML = rows(store.boardTop(board, n), e => e.pid === me.id); return; }
+    if (!online) { body.innerHTML = '<p class="mq-small">World leaderboards are not switched on yet. Scores compete with everyone who plays on this device.</p>'; return; }
     body.innerHTML = '<p class="mq-small">Loading world scores…</p>';
-    try { body.innerHTML = rows(await cloud.top(board, n), e => e.me); } catch (err) { body.innerHTML = '<p class="mq-small">World scores are not reachable right now.</p>'; }
-  });
+    try { body.innerHTML = rows(await cloud.top(board, n), e => e.me); } catch (err) { body.innerHTML = '<p class="mq-small">World scores are not reachable right now. Showing this device.</p>' + rows(store.boardTop(board, n), e => e.pid === me.id); }
+  };
+  el.querySelectorAll('[data-src]').forEach(b => b.onclick = () => show(b.dataset.src));
+  show(online ? 'world' : 'device');
 }
+/* Send a score to the world boards (and this device's), and say clearly if it could not be saved online */
+async function postScore(boards, score, label) {
+  boards.forEach(b => store.boardAdd(b, score));
+  if (!cloud.enabled() || score < 10) return;
+  const p = store.player();
+  try { const res = await Promise.all(boards.map(b => cloud.submit(b, { ...p, score }))); if (res.some(Boolean)) fx.toast(`<b>Posted to the world leaderboard</b> ${label}`, 'ok'); }
+  catch (err) { fx.toast(`Could not reach the world leaderboard${err && err.code ? ` (${esc(err.code)})` : ''}. Your score is saved on this device.`); }
+}
+/* Weekly XP board: everything you do earns XP, so this ranks all activity. Sent at most once a minute. */
+let xpTimer = 0, xpLast = 0;
+function queueXpPost() {
+  if (!cloud.enabled()) return;
+  clearTimeout(xpTimer);
+  const wait = Math.max(3000, 65000 - (Date.now() - xpLast));
+  xpTimer = setTimeout(() => { xpLast = Date.now(); const w = store.weekXP(), L = fx.MODES[fx.mode()]?.league; if (L && w >= 10) cloud.submit(`xp-week-${cloud.weekId()}-${L}`, { ...store.player(), score: Math.min(60000, w) }).catch(() => {}); }, wait);
+}
+store.on(type => { if (type === 'xp') queueXpPost(); });
 function arenaView() {
   document.title = `Arena: ${BRAND} · Madhav`;
   const league = fx.MODES[fx.mode()].league, day = cloud.dayId(), wk = cloud.weekId();
@@ -628,10 +648,11 @@ function arenaView() {
     shell.innerHTML = `${result}<div class="g-optrow" role="group" aria-label="Round type"><button class="md-chip" aria-pressed="${type === 'daily'}" data-t="daily">Daily challenge</button><button class="md-chip" aria-pressed="${type === 'practice'}" data-t="practice">Practice round</button></div>
       <p class="g-best">League: <b>${fx.MODES[fx.mode()].name}</b> · Your best today: <b>${store.best('arena-' + day)}</b></p>
       <button class="md-btn md-btn--primary ar-go" id="arGo">${icon('bolt')} Start</button>
-      <div class="lb-cols"><div><h2 class="mq-h3">Today</h2><div id="lbDay" class="lb-wrap"></div></div><div><h2 class="mq-h3">This week</h2><div id="lbWeek" class="lb-wrap"></div></div></div>${parentNote()}`;
+      <div class="lb-cols"><div><h2 class="mq-h3">Today</h2><div id="lbDay" class="lb-wrap"></div></div><div><h2 class="mq-h3">This week</h2><div id="lbWeek" class="lb-wrap"></div></div></div>
+      <h2 class="mq-h3">Most XP this week <small class="mq-small">everything you play counts</small></h2><div id="lbXp" class="lb-wrap"></div>${parentNote()}`;
     shell.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { type = b.dataset.t; lobby(result); });
     $('#arGo', shell).onclick = countdown;
-    loadBoard($('#lbDay', shell), `daily-${day}-${league}`); loadBoard($('#lbWeek', shell), `week-${wk}-${league}`);
+    loadBoard($('#lbDay', shell), `daily-${day}-${league}`); loadBoard($('#lbWeek', shell), `week-${wk}-${league}`); loadBoard($('#lbXp', shell), `xp-week-${wk}-${league}`);
   };
   const countdown = () => {
     let n = 3; shell.innerHTML = `<div class="ar-count" aria-live="assertive">${n}</div>`; fx.sfx('tick');
@@ -647,10 +668,9 @@ function arenaView() {
       let msg = '';
       if (type === 'daily') {
         const isBest = store.setBest('arena-' + day, r.score);
-        store.boardAdd(`daily-${day}-${league}`, r.score); store.boardAdd(`week-${wk}-${league}`, r.score);
         if (store.markSeen('daily:' + day)) store.bump('dailyDays');
         if (isBest) { fx.confetti(100); msg = 'New personal best for today!'; }
-        if (cloud.enabled()) { const p = store.player(); Promise.all([cloud.submit(`daily-${day}-${league}`, { ...p, score: r.score }), cloud.submit(`week-${wk}-${league}`, { ...p, score: r.score })]).catch(() => {}); }
+        postScore([`daily-${day}-${league}`, `week-${wk}-${league}`], r.score, `for today's ${fx.MODES[fx.mode()].name} race.`);
       }
       lobby(`<div class="ar-result"><div class="md-stat"><div class="md-kicker">Score</div><div class="md-value">${r.score}</div><p>${r.right} right · ${r.wrong} missed · best combo ${r.bestCombo}x</p></div><p class="ar-msg">${msg || (type === 'practice' ? 'Practice rounds do not count for the leaderboard.' : 'Play again to beat your best.')} <span class="fx-xp">+${xp} XP</span></p></div>`);
     } });
@@ -681,60 +701,74 @@ function duelView() {
 function gamesView() {
   document.title = `Games: ${BRAND} · Madhav`;
   const m = fx.mode(), mine = GAMES.filter(g => g.modes.includes(m)), rest = GAMES.filter(g => !g.modes.includes(m));
-  const card = g => `<a class="md-card mq-game" href="#/game/${g.id}"><div class="md-icon-tile" style="background:color-mix(in srgb,var(--${g.color}) 18%,transparent);color:var(--${g.color}-strong)">${icon('game')}</div><h3>${both(g.title, g.kid)}</h3><p>${g.desc.split('. ')[0]}.</p><small class="mq-game-f">${store.doneWhere(`g:${g.id}:`)}/${LEVELS_PER_GAME} levels · ${store.starsWhere(`g:${g.id}:`)} &#9733;</small></a>`;
+  const card = g => `<a class="md-card mq-game" href="#/game/${g.id}"><div class="md-icon-tile" style="background:color-mix(in srgb,var(--${g.color}) 18%,transparent);color:var(--${g.color}-strong)">${icon('game')}</div><h3>${both(g.title, g.kid)}</h3><p>${g.desc.split('. ')[0]}.</p><small class="mq-game-f">Skill ${Math.round(AD.rating(g.id, m))}/20 · ${store.doneWhere(`g:${g.id}:`)}/${LEVELS_PER_GAME} levels · ${store.starsWhere(`g:${g.id}:`)} &#9733; · leaderboard</small></a>`;
   view.innerHTML = `<section class="md-section mq-tight"><div class="md-wrap">
     ${crumbs([null, 'Games'])}
     <span class="md-tag md-tag--plum">Games</span>
     <h1 class="md-heading">Games that build number sense</h1>
-    <p class="md-lede">${GAMES.length} games with ${LEVELS_PER_GAME} levels each: ${(GAMES.length * LEVELS_PER_GAME).toLocaleString('en-US')} levels in all, plus free play and endless mode. Every game earns XP, and playing all of them unlocks a badge. Want a real race? Try the <a href="#/arena">Arena</a> or a <a href="#/duel">Duel</a>.</p>
+    <p class="md-lede">${GAMES.length} games, each with its own world leaderboard. Every game adapts to you: right answers make it harder, misses make it easier, and points are weighted by difficulty. ${LEVELS_PER_GAME} levels per game (${(GAMES.length * LEVELS_PER_GAME).toLocaleString('en-US')} in all) open up as your skill grows. Every game earns XP, and playing all of them unlocks a badge. Want a real race? Try the <a href="#/arena">Arena</a> or a <a href="#/duel">Duel</a>.</p>
     <h2 class="mq-strand">Picked for ${fx.MODES[m].name}</h2><div class="md-grid">${mine.map(card).join('')}</div>
     ${rest.length ? `<h2 class="mq-strand">More games</h2><div class="md-grid">${rest.map(card).join('')}</div>` : ''}
   </div></section>`;
 }
 function gameView(id, lvl = 0) {
   const g = GAMES.find(x => x.id === id); if (!g) return gamesView();
-  const gkey = n => `g:${g.id}:${n}`;
-  if (lvl && (lvl > LEVELS_PER_GAME || (lvl > 1 && !store.stars(gkey(lvl - 1))))) { location.replace(`#/game/${g.id}`); return; }
-  const L = lvl && LEVELS[g.id] ? LEVELS[g.id](lvl) : null;
+  const m = fx.mode(), league = fx.MODES[m].league, gkey = n => `g:${g.id}:${n}`, rate = AD.rating(g.id, m);
+  const ratedLevel = AD.levelForDifficulty(rate, LEVELS_PER_GAME);
+  const isOpen = n => n <= ratedLevel || n === 1 || store.stars(gkey(n - 1)) > 0;
+  if (lvl && (lvl > LEVELS_PER_GAME || !isOpen(lvl))) { location.replace(`#/game/${g.id}`); return; }
+  const L = lvl ? LEVELS[g.id](lvl) : null, bDay = `${boardGame(g.id)}-daily-${cloud.dayId()}-${league}`, bWeek = `${boardGame(g.id)}-week-${cloud.weekId()}-${league}`;
+  const lengthText = g.secs ? `${g.secs} seconds` : `${g.rounds} ${g.id === 'pairs' ? 'boards' : g.id === 'target' ? 'puzzles' : 'questions'}`;
   document.title = `${g.title}${lvl ? ` level ${lvl}` : ''}: ${BRAND} · Madhav`;
-  let option = L ? L.option ?? (g.options ? g.options[0].value : null) : g.options ? g.options[0].value : null, stop = null, endless = false, live = 0;
+  let mode = lvl ? 'level' : 'ranked', stop = null;
   view.innerHTML = `<section class="md-section mq-tight"><div class="md-wrap mq-narrow">
     ${crumbs(['#/games', 'Games'], lvl ? [`#/game/${g.id}`, both(g.title, g.kid)] : [null, both(g.title, g.kid)], ...(lvl ? [[null, `Level ${lvl}`]] : []))}
     <h1 class="md-heading">${both(g.title, g.kid)}${lvl ? ` <small class="kata-of">level ${lvl} of ${LEVELS_PER_GAME}</small>` : ''}</h1><p class="md-lede">${g.desc}</p>
-    ${lvl ? '' : `<h2 class="mq-strand">Levels <small class="mq-small">${store.doneWhere(`g:${g.id}:`)} of ${LEVELS_PER_GAME} cleared · ${store.starsWhere(`g:${g.id}:`)} &#9733;</small></h2>${levelMap(LEVELS_PER_GAME, gkey, n => `#/game/${g.id}/${n}`)}<h2 class="mq-strand">Free play</h2>`}
-    <div class="md-card g-shell" id="gShell"></div></div></section>`;
+    <div class="md-card g-shell" id="gShell"></div>
+    ${lvl ? '' : `<div class="lb-cols"><div><h2 class="mq-h3">Today's best</h2><div id="gbDay" class="lb-wrap"></div></div><div><h2 class="mq-h3">This week</h2><div id="gbWeek" class="lb-wrap"></div></div></div>
+    <h2 class="mq-strand">Levels <small class="mq-small">${store.doneWhere(`g:${g.id}:`)} of ${LEVELS_PER_GAME} cleared · ${store.starsWhere(`g:${g.id}:`)} &#9733; · levels up to ${ratedLevel} are open at your skill (level ${Math.round(rate)} of 20)</small></h2>${levelMap(LEVELS_PER_GAME, gkey, n => `#/game/${g.id}/${n}`, { isOpen, suggest: Math.max(ratedLevel, ...Array.from({ length: LEVELS_PER_GAME }, (_, i) => (store.stars(gkey(i + 1)) ? Math.min(LEVELS_PER_GAME, i + 2) : 0))) })}`}
+  </div></section>`;
   const shell = $('#gShell');
+  const dialMeter = d => `<span class="dial" aria-label="Difficulty ${d} of 20"><span class="dial-bar"><i style="width:${(d / 20) * 100}%"></i></span><b>Level ${d}</b></span>`;
   const lobby = (msg = '') => {
-    if (L) { shell.innerHTML = `${msg}<p class="lv-best">Goal: ${L.goal.map((t, i) => `${'&#9733;'.repeat(i + 1)} ${t}`).join(' · ')} ${g.id === 'pairs' ? 'points' : 'or more'}</p><p class="lv-best">Your best: ${starHTML(store.stars(gkey(lvl)))}</p><button class="md-btn md-btn--primary ar-go" id="gStart">${icon('play')} Play level ${lvl}</button>`; $('#gStart', shell).onclick = start; return; }
-    shell.innerHTML = `${msg}${g.options ? `<div class="g-optrow" role="group" aria-label="Level">${g.options.map(o => `<button class="md-chip" aria-pressed="${o.value === option}" data-o="${o.value}">${o.label}</button>`).join('')}</div>` : ''}<div class="g-optrow" role="group" aria-label="Length"><button class="md-chip" aria-pressed="${!endless}" data-e="0">Normal round</button><button class="md-chip" aria-pressed="${endless}" data-e="1">Endless: play as long as you like</button></div><p class="g-best">Your best: <b>${store.best(g.id + (option ?? '') + (endless ? '-endless' : ''))}</b></p><button class="md-btn md-btn--primary ar-go" id="gStart">${icon('play')} Play</button>`;
-    shell.querySelectorAll('[data-e]').forEach(b => b.onclick = () => { endless = b.dataset.e === '1'; lobby(msg); });
-    shell.querySelectorAll('[data-o]').forEach(b => b.onclick = () => { option = isNaN(+b.dataset.o) ? b.dataset.o : +b.dataset.o; lobby(msg); });
+    if (L) { shell.innerHTML = `${msg}<p class="lv-best">Starts at difficulty ${L.cfg.start} of 20 and adapts as you play. Goal: ${L.goal.map((t, i) => `${'&#9733;'.repeat(i + 1)} ${t.toLocaleString('en-US')}`).join(' · ')} points.</p><p class="lv-best">Your best: ${starHTML(store.stars(gkey(lvl)))}</p><button class="md-btn md-btn--primary ar-go" id="gStart">${icon('play')} Play level ${lvl}</button>`; $('#gStart', shell).onclick = start; return; }
+    shell.innerHTML = `${msg}<div class="g-optrow" role="group" aria-label="How to play"><button class="md-chip" aria-pressed="${mode === 'ranked'}" data-m="ranked">${icon('trophy')} Ranked round (${lengthText})</button><button class="md-chip" aria-pressed="${mode === 'endless'}" data-m="endless">Endless practice</button></div>
+      <p class="g-best">Your skill in this game: ${dialMeter(Math.round(AD.rating(g.id, m)))}<br><small>Every round adapts: right answers make it harder, misses make it easier. Points are worth more at higher difficulty, so the leaderboard is fair across levels.</small></p>
+      <button class="md-btn md-btn--primary ar-go" id="gStart">${icon('play')} ${mode === 'ranked' ? 'Play ranked' : 'Practice'}</button>`;
+    shell.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { mode = b.dataset.m; lobby(msg); });
     $('#gStart', shell).onclick = start;
   };
   const start = () => {
-    track('game/' + g.id, 'Game: ' + g.title); fx.sfx('tap');
-    shell.innerHTML = `<div class="g-head"><span class="g-sayline" id="gSay" role="status" aria-live="polite"></span><button class="md-btn md-btn--sm" id="gQuit">Stop</button></div><div class="g-area" id="gArea"></div>`;
-    const sayEl = $('#gSay', shell);
-    live = 0;
+    track('game/' + g.id + '/' + mode, 'Game: ' + g.title); fx.sfx('tap');
+    const startD = L ? L.cfg.start : AD.rating(g.id, m), dial = new AD.Dial(startD, { floor: L ? L.cfg.floor : 1 });
+    shell.innerHTML = `<div class="g-head"><span class="g-hud" id="gHud">${dialMeter(dial.lv)}<span class="g-pts"><b id="gPts">0</b> pts</span></span><span class="g-sayline" id="gSay" role="status" aria-live="polite"></span><button class="md-btn md-btn--sm" id="gQuit">${mode === 'endless' ? 'Finish' : 'Stop'}</button></div><div class="g-area" id="gArea"></div>`;
+    const sayEl = $('#gSay', shell), hudEl = $('#gHud', shell);
+    const hud = (d, pts, ok) => { hudEl.innerHTML = `${dialMeter(d.lv)}<span class="g-pts"><b id="gPts">${d.points.toLocaleString('en-US')}</b> pts</span>${ok && pts ? `<span class="g-gain">+${pts}</span>` : ''}${d.trend > 0 ? '<span class="g-trend up" aria-label="Getting harder">&#9650;</span>' : d.trend < 0 ? '<span class="g-trend down" aria-label="Getting easier">&#9660;</span>' : ''}`; };
+    let ended = false;
     const finish = score => {
-      if (stop) stop(); stop = null;
+      if (ended) return; ended = true; if (stop) stop(); stop = null;
       store.markSeen('game:' + g.id); store.bump('gamesPlayed'); store.touchDay();
+      const before = AD.rating(g.id, m), after = AD.saveRating(g.id, dial), moved = Math.round((after - before) * 10) / 10;
+      const skillLine = `Difficulty: started at ${Math.round(startD)}, reached ${Math.round(dial.peak)}, settled at ${Math.round(dial.settled())} of 20. ${dial.right} of ${dial.n} right.`;
+      const skillMove = dial.n >= 4 ? (moved > 0 ? ` Your skill rose to ${Math.round(after)}.` : moved < 0 ? ` Your skill is now ${Math.round(after)}.` : '') : '';
       if (L) {
-        const stars = levelStars(L.goal, score), improved = store.setStars(gkey(lvl), stars), xp = 10 + stars * 10 + Math.min(score, 50); store.addXP(xp, 'game');
+        const stars = levelStars(L.goal, score), improved = store.setStars(gkey(lvl), stars), xp = 10 + stars * 10 + Math.min(60, Math.round(score / 40)); store.addXP(xp, 'game');
         if (stars === 3) fx.confetti(100); else if (stars) fx.confetti(40);
-        shell.innerHTML = resultHTML(stars, [`Score ${score}. Goals: ${L.goal.join(', ')}.`, `<span class="fx-xp">+${xp} XP</span>${improved ? ' New best.' : ''}`], lvl < LEVELS_PER_GAME ? `#/game/${g.id}/${lvl + 1}` : null, `#/game/${g.id}/${lvl}`, `#/game/${g.id}`, 'Level map');
+        shell.innerHTML = resultHTML(stars, [`${score.toLocaleString('en-US')} points. Goals: ${L.goal.map(v => v.toLocaleString('en-US')).join(', ')}.`, skillLine + skillMove, `<span class="fx-xp">+${xp} XP</span>${improved ? ' New best.' : ''}`], lvl < LEVELS_PER_GAME ? `#/game/${g.id}/${lvl + 1}` : null, `#/game/${g.id}/${lvl}`, `#/game/${g.id}`, 'Game home');
         const rt = shell.querySelector('[data-retry]'); if (rt) rt.onclick = e => { e.preventDefault(); gameView(g.id, lvl); };
         return;
       }
-      const isBest = store.setBest(g.id + (option ?? '') + (endless ? '-endless' : ''), score), xp = 10 + Math.min(score, 100) * 2; store.addXP(xp, 'game');
-      if (isBest && score) fx.confetti(80);
-      lobby(`<div class="g-result"><div class="md-stat"><div class="md-kicker">Score</div><div class="md-value">${score}</div><p>${isBest && score ? 'New best score!' : 'Play again to beat your best.'} <span class="fx-xp">+${xp} XP</span></p></div></div>`);
+      const xp = 10 + Math.min(80, Math.round(score / 30)); store.addXP(xp, 'game');
+      let note = '';
+      if (mode === 'ranked') { const isBest = store.setBest(`${g.id}-ranked-${cloud.dayId()}`, score); if (isBest && score) fx.confetti(80); note = isBest && score ? 'Your best today!' : `Today's best: ${store.best(`${g.id}-ranked-${cloud.dayId()}`).toLocaleString('en-US')}.`; postScore([bDay, bWeek], score, `for ${g.title}.`); }
+      lobby(`<div class="g-result"><div class="md-stat"><div class="md-kicker">${mode === 'ranked' ? 'Ranked score' : 'Practice score'}</div><div class="md-value">${score.toLocaleString('en-US')}</div><p>${note} <span class="fx-xp">+${xp} XP</span></p></div><p class="mq-small">${skillLine}${skillMove}</p></div>`);
+      if (mode === 'ranked') setTimeout(() => { loadBoard($('#gbDay'), bDay); loadBoard($('#gbWeek'), bWeek); }, 1500);
     };
-    stop = g.run($('#gArea', shell), { option, endless, cfg: L ? L.cfg : {}, progress: v => (live = v), say: m => (sayEl.innerHTML = m), end: finish });
-    $('#gQuit', shell).innerHTML = endless ? 'Finish' : 'Stop';
-    $('#gQuit', shell).onclick = () => { if (endless) return finish(live); if (stop) stop(); stop = null; lobby(); };
+    stop = g.run($('#gArea', shell), { dial, hud, endless: mode === 'endless', secs: g.secs, say: m2 => (sayEl.innerHTML = m2), end: finish });
+    $('#gQuit', shell).onclick = () => { if (mode === 'endless') return finish(dial.points); if (stop) stop(); stop = null; ended = true; lobby(); };
   };
   lobby();
+  if (!lvl) { loadBoard($('#gbDay'), bDay); loadBoard($('#gbWeek'), bWeek); }
   cleanup = () => { if (stop) stop(); };
 }
 

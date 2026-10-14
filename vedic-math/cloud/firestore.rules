@@ -1,19 +1,25 @@
 rules_version = '2';
 // Vedic Math for Everyone: leaderboards.
-// The only writer is the Arena daily round (vedic-math/js/app.js -> cloud.submit), once per round, to two boards:
-//   boards/daily-YYYY-MM-DD-<league>/scores/<uid> and boards/week-YYYY-Www-<league>/scores/<uid>.
+// Three kinds of board, all written by vedic-math/js/app.js through cloud.submit:
+//   Arena daily round:   boards/daily-YYYY-MM-DD-<league>/scores/<uid> and boards/week-YYYY-Www-<league>/scores/<uid>
+//   Ranked game rounds:  boards/g_<game>-daily-YYYY-MM-DD-<league>/... and boards/g_<game>-week-YYYY-Www-<league>/...
+//                        (<game> is the game id with _ for -, from the list in validBoard)
+//   Weekly XP:           boards/xp-week-YYYY-Www-<league>/... (XP earned this week across everything)
 // Each signed-in (anonymous) player owns one entry per board. Allowed fields, nothing else:
 //   name   a generated nickname from the fixed word lists in vedic-math/js/store.js (never typed)
 //   avatar one of five colors
-//   score  an even integer from 10 to the league cap (see maxScore)
+//   score  an integer from 10 to the board's cap (see maxScore); Arena scores are also even
 //   ts     the server time of the write
 //   exp    when the entry deletes itself (Firestore TTL policy on `exp`), 1 to 60 days ahead
 service cloud.firestore {
   match /databases/{database}/documents {
     match /boards/{board}/scores/{uid} {
       function validBoard() {
-        return board.matches('^(daily-20[0-9]{2}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])|week-20[0-9]{2}-W(0[1-9]|[1-4][0-9]|5[0-3]))-(explorer|challenger|pro)$');
+        return board.matches('^((g_(balloons|more_less|make_ten|quick_look|bonds|times_sprint|target|frac_faceoff|line_snipe|pairs|check_it|rain|sequence|balance)-)?(daily-20[0-9]{2}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])|week-20[0-9]{2}-W(0[1-9]|[1-4][0-9]|5[0-3]))|xp-week-20[0-9]{2}-W(0[1-9]|[1-4][0-9]|5[0-3]))-(explorer|challenger|pro)$');
       }
+      // 'arena', 'game' or 'xp'; game and xp ids carry one extra leading part before daily-/week-.
+      function kind() { return board.matches('^g_.*') ? 'game' : board.matches('^xp-.*') ? 'xp' : 'arena'; }
+      function parts() { let p = board.split('-'); return kind() == 'arena' ? p : p[1:p.size()]; }
       function signedInAs() {
         return request.auth != null && request.auth.uid == uid;
       }
@@ -21,7 +27,7 @@ service cloud.firestore {
       // Boards are named after the player's local date, so a board is writable only while that date or ISO week
       // is current somewhere on Earth (UTC-12 to UTC+14), plus one hour of slack. Old and future boards are frozen.
       function boardStart() {
-        let p = board.split('-');
+        let p = parts();
         return p[0] == 'daily' ? timestamp.date(num(p[1]), num(p[2]), num(p[3])) : weekStart(num(p[1]), num(p[2].replace('W', '')));
       }
       function num(s) { return int(s.replace('^0', '')); } // '08' -> 8
@@ -34,7 +40,7 @@ service cloud.firestore {
       }
       function boardOpen() {
         let start = boardStart();
-        let days = board.split('-')[0] == 'daily' ? 1 : 7;
+        let days = parts()[0] == 'daily' ? 1 : 7;
         return request.time > start - duration.value(15, 'h')
           && request.time < start + duration.value(days * 24 + 13, 'h');
       }
@@ -45,8 +51,11 @@ service cloud.firestore {
       //   explorer   2000 = 70 right in a row, one tap every 0.86 s (four big choices, simple counting and sums)
       //   challenger 1600 = 57 right in a row, one typed answer every 1.05 s (times tables, 2 to 4 digit answers)
       //   pro        1200 = 44 right in a row, one typed answer every 1.36 s (squares, roots, percents, logs, algebra)
+      // Ranked game rounds score 10 to 143 points per right answer, weighted by how hard the question was
+      // (vedic-math/js/adapt.js); 12000 is about 85 hardest answers in one round. Weekly XP is capped at 60000.
       function maxScore() {
-        return { 'explorer': 2000, 'challenger': 1600, 'pro': 1200 }[board.split('-')[board.split('-').size() - 1]];
+        return kind() == 'game' ? 12000 : kind() == 'xp' ? 60000
+          : { 'explorer': 2000, 'challenger': 1600, 'pro': 1200 }[board.split('-')[board.split('-').size() - 1]];
       }
       function validEntry() {
         let d = request.resource.data;
@@ -58,7 +67,7 @@ service cloud.firestore {
           && w[0] in ['Swift', 'Clever', 'Mighty', 'Cosmic', 'Brave', 'Lucky', 'Sunny', 'Zippy', 'Witty', 'Bold', 'Jolly', 'Turbo', 'Nimble', 'Sparky', 'Quiet', 'Rapid']
           && w[1] in ['Tiger', 'Falcon', 'Otter', 'Panda', 'Comet', 'Rocket', 'Koala', 'Dolphin', 'Phoenix', 'Lynx', 'Gecko', 'Orca', 'Yak', 'Robin', 'Badger', 'Narwhal']
           && d.avatar in ['coral', 'teal', 'sun', 'sky', 'plum']
-          && d.score is int && d.score >= 10 && d.score <= maxScore() && d.score % 2 == 0
+          && d.score is int && d.score >= 10 && d.score <= maxScore() && (kind() != 'arena' || d.score % 2 == 0)
           && d.ts == request.time
           && d.exp is timestamp && d.exp > request.time + duration.value(1, 'd') && d.exp < request.time + duration.value(60, 'd');
       }

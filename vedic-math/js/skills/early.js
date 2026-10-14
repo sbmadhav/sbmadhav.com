@@ -221,7 +221,7 @@ export default [
     idea: 'A digit\'s value depends on its place. In 352, the 5 is worth 50.',
     method: ['Find which place the digit is in.', 'Hundreds place times 100, tens place times 10.'],
     gen() {
-      const n = ri(101, 999), s = String(n), i = ri(0, 2), place = ['hundreds', 'tens', 'ones'][i];
+      let n, s, i; do { n = ri(101, 999); s = String(n); i = ri(0, 2); } while (s.split(s[i]).length > 2 || s[i] === '0'); const place = ['hundreds', 'tens', 'ones'][i];
       return { q: `What is the value of the digit <b>${s[i]}</b> in ${n}?`, kind: 'num', answer: +s[i] * 10 ** (2 - i), viz: V.baseTen(n),
         hints: [`The ${s[i]} is in the ${place} place.`], steps: [`${s[i]} ${place} = ${+s[i] * 10 ** (2 - i)}`] };
     } }
