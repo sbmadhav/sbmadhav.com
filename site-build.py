@@ -8,10 +8,12 @@
   (skills/ included) to ?v=<hash of that file>, so a visitor never runs a new app.js
   against old imports. The entry script, its stylesheets, explore.js and analytics.js
   are stamped the same way. The map sits between the "site-build: import map" markers
-  and is rewritten on every run.
+  and is rewritten on every run. The /design-system/ stylesheets come from the
+  sbmadhav/design-system repo, so their ?v= stamps are left as they are.
 - sw.js gets a new VERSION (hash of every file the site serves from the cache: pages,
-  scripts, Vedic Math modules, design-system CSS, fonts, icons) so any change rotates
-  the service worker cache.
+  scripts, Vedic Math modules, fonts, icons) so any change rotates the service worker cache.
+  The /design-system/ files it precaches are not in this repo, so they are not hashed; the
+  worker refreshes them in the background on every visit (stale-while-revalidate).
 
 Running it twice changes nothing the second time.
 """
@@ -73,8 +75,6 @@ assert vm_html.count('type="importmap"') == 1
 page_assets = {
     "/vedic-math/js/app.js": vm_versions["/vedic-math/js/app.js"],
     "/vedic-math/math.css": fhash("vedic-math/math.css"),
-    "/design-system/tokens.css": fhash("design-system/tokens.css"),
-    "/design-system/components.css": fhash("design-system/components.css"),
     **{"/" + p: v for p, v in versions.items() if p != "assets/app.js"},
 }
 for url, v in page_assets.items():
@@ -92,7 +92,7 @@ for entry_path in re.findall(r"'([^']+)'", precache):
     p = p + "index.html" if p == "" or p.endswith("/") else p
     if (root / p).is_file():
         cached.add(p)
-cached |= {"index.html", "vedic-math/index.html", "vedic-math/math.css", "design-system/tokens.css", "design-system/components.css", *SCRIPTS, *vm_js}
+cached |= {"index.html", "vedic-math/index.html", "vedic-math/math.css", *SCRIPTS, *vm_js}
 cached |= {p.relative_to(root).as_posix() for p in (root / "assets" / "fonts").glob("*") if p.is_file()}
 digest = hashlib.sha256()
 for p in sorted(cached):

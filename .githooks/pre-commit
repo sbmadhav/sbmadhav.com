@@ -5,7 +5,7 @@
 #
 # 1. Regenerate stamped and generated files; fail if that changed anything,
 #    so the regenerated files get staged with the commit.
-# 2. Home page colors must match design-system/tokens.json.
+# 2. Home page colors must match the pinned design tokens (scripts/design-tokens.json).
 # 3. Vedic Math unit tests, when they exist.
 
 cd "$(git rev-parse --show-toplevel)" || exit 1
@@ -15,15 +15,10 @@ fail() {
   exit 1
 }
 
-if ! python3 -c 'import markdown' 2>/dev/null; then
-  fail "design-system/build.py needs the markdown package: pip3 install markdown"
-fi
-
 # Fingerprint of unstaged changes before and after the builds
 before=$(git diff --binary --no-ext-diff | git hash-object --stdin)
 
 python3 site-build.py >/dev/null || fail "site-build.py failed"
-python3 design-system/build.py >/dev/null || fail "design-system/build.py failed"
 
 after=$(git diff --binary --no-ext-diff | git hash-object --stdin)
 if [ "$before" != "$after" ]; then
@@ -31,7 +26,7 @@ if [ "$before" != "$after" ]; then
   fail "the builds regenerated files (listed above). Review them, git add them, and commit again."
 fi
 
-python3 scripts/check-tokens.py || fail "index.html colors disagree with design-system/tokens.json"
+python3 scripts/check-tokens.py || fail "index.html colors disagree with scripts/design-tokens.json"
 
 if [ -d vedic-math/test ]; then
   command -v node >/dev/null 2>&1 || fail "node is required to run vedic-math/test"

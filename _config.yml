@@ -6,9 +6,6 @@ exclude:
   - README.md
   - site-build.py
   - scripts/
-  - design-system/README.md
-  - design-system/build.py
-  - design-system/tokens.json
   - vedic-math/cloud/
   - vedic-math/test/
   - "council-*"
