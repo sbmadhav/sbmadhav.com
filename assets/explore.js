@@ -40,8 +40,8 @@
     close: `<path d="M6 6l12 12M18 6L6 18" ${P}/>`
   };
   const icon = n => `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">${ICONS[n]}</svg>`;
-  // Which GitHub repo a page lives in: the main site repo, or a separate one served under the same domain
-  const repoChip = r => { const own = r !== HOME_REPO; return `<a class="xp-repo${own ? ' own' : ''}" href="https://github.com/sbmadhav/${r}" target="_blank" rel="noopener" aria-label="Source code: ${own ? 'separate repo' : 'main site repo'} sbmadhav/${r}">${icon('gh')}${own ? `Separate repo: ${r}` : 'Main site repo'}</a>`; };
+  // Easter egg: a faint source mark appears on hover, only on pages that live in their own repo
+  const repoChip = r => r === HOME_REPO ? '' : `<a class="xp-repo" href="https://github.com/sbmadhav/${r}" target="_blank" rel="noopener" title="Lives in its own repo: sbmadhav/${r}" aria-label="Source code, separate repo sbmadhav/${r}">${icon('gh')}</a>`;
   const both = (pro, kid) => pro === kid ? pro : `<span class="pro">${pro}</span><span class="kid">${kid}</span>`;
 
   const css = `
@@ -61,15 +61,15 @@ dialog.xpm[open]{animation:xpIn .32s cubic-bezier(.2,.9,.3,1.15)}
 .xp-page{position:relative;display:flex;gap:14px;align-items:center;padding:14px 16px;border:2px solid var(--edge);border-radius:18px;background:var(--card,var(--bg));color:var(--ink);text-decoration:none;box-shadow:0 3px 0 var(--ledge,var(--edge));transition:transform .15s,box-shadow .15s}
 .xp-page:hover{transform:translateY(-2px) rotate(-.4deg);box-shadow:0 5px 0 var(--ledge,var(--edge))}
 .xp-page .xp-ic{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--sun);color:var(--on-accent,#1C2541)}
-.xp-row{position:relative}.xp-row .xp-page{padding-bottom:42px}
+.xp-row{position:relative}
 .xp-row:nth-child(2) .xp-ic{background:var(--plum)}.xp-row:nth-child(3) .xp-ic{background:var(--teal)}.xp-row:nth-child(4) .xp-ic{background:var(--sky)}
 .xp-page b{display:block;font:600 1.1rem/1.2 var(--display,Fredoka,sans-serif)}
 .xp-page small{display:block;color:var(--ink-muted,var(--muted));font-size:14px;line-height:1.35;margin-top:2px}
 .xp-page[aria-current="page"]::after{content:"You are here";position:absolute;top:-9px;right:14px;background:var(--sun);color:var(--on-accent,#1C2541);font:700 11px/1 "Nunito Sans",sans-serif;padding:4px 8px;border-radius:99px;border:1.5px solid var(--edge)}
-.xp-repo{position:absolute;left:76px;bottom:12px;display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 7px;border:1.5px solid var(--line);border-radius:99px;background:var(--bg);color:var(--ink-muted,var(--muted));font:700 11.5px/1.2 "Nunito Sans",sans-serif;text-decoration:none}
+.xp-repo{position:absolute;top:8px;right:10px;width:22px;height:22px;display:grid;place-items:center;border-radius:50%;color:var(--ink-muted,var(--muted));opacity:0;transition:opacity .25s}
 .xp-repo svg{width:13px;height:13px}
-.xp-repo:hover{border-color:var(--edge);color:var(--ink)}
-.xp-repo.own{border-color:var(--coral)}
+.xp-row:hover .xp-repo,.xp-repo:focus-visible{opacity:.5}.xp-repo:hover{opacity:1;color:var(--coral)}
+@media (hover:none){.xp-repo{opacity:.18}}
 .xp-secs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .xp-sec{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border:1px solid var(--line);border-radius:16px;background:var(--card,var(--bg));color:var(--ink);text-decoration:none;font-weight:700;font-size:13.5px;text-align:center;transition:transform .15s,border-color .15s}
 .xp-sec:hover{transform:translateY(-2px);border-color:var(--edge)}
