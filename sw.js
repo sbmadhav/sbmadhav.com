@@ -4,6 +4,9 @@
    Scope: registered from the home page with scope "/". It leaves /state-of-voice-agents/ and
    /vedic-math/ alone (those paths are served from their own repos, so this file cannot version
    them) and every other origin's requests.
+   /design-system/ is also another repo (sbmadhav/design-system) but it is precached like the
+   rest, because the offline page needs tokens.css. VERSION cannot hash those files, so a design
+   system change reaches visitors through the background refresh below (one visit late).
 
    KILL SWITCH (retire the worker): set KILL = true below and deploy sw.js. Browsers re-check
    sw.js on the next visit; the new worker then deletes this site's caches (madhav-*), unregisters
@@ -11,7 +14,7 @@
    deployed for a few weeks so returning visitors pick it up, then sw.js can be deleted (and the
    register call in assets/app.js removed). */
 const KILL = false;
-const VERSION = '5b853a72d8';
+const VERSION = 'eeee1154d1';
 const CACHE = `madhav-${VERSION}`;
 const RUNTIME_MAX = 150; // entries kept beyond the precache list; the oldest go first
 const NETWORK_ONLY = ['/state-of-voice-agents/', '/vedic-math/'];

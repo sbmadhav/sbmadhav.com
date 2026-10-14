@@ -4,15 +4,15 @@ Personal site on GitHub Pages (served at https://sbmadhav.com, www redirects to 
 
 ## Building new pages
 
-- Every new page follows the design system in `design-system/`. Read `design-system/README.md` first.
+- Every new page follows the design system. It lives in its own repo, https://github.com/sbmadhav/design-system (a sibling clone at `../design-system`), and GitHub Pages serves it at https://sbmadhav.com/design-system/. Read its `README.md` first.
 - Every page gets the site-wide Explore menu: a `<button id="exploreBtn" class="xp-btn">` in the header plus `<script src="/assets/explore.js" defer>` (the template already has both). When you add a page, add one entry to `PAGES` at the top of `assets/explore.js`. Pages in other repos served under sbmadhav.com (for example `/state-of-voice-agents/` from the `state-of-voice-agents` repo) load the same `/assets/explore.js`.
 - Every page also loads `<script src="/assets/analytics.js" defer>` (GoatCounter: free, cookieless). Record notable actions with `window.siteTrack('area/action', 'Readable title')`; never send personal data.
-- Start from `design-system/template.html`; link `/design-system/tokens.css` then `/design-system/components.css`.
+- Start from `template.html` in the design-system repo; link `/design-system/tokens.css` then `/design-system/components.css`.
 - Use tokens (`var(--coral)`, `var(--space-6)`, `var(--radius-lg)`), never raw hex. Text on accent fills uses `var(--on-accent)`, not white.
 - Support both color schemes (Daybreak light, Deep Space dark; system default with a saved override) and kid mode (`.pro` / `.kid` spans, `body.kidmode`).
 - `/vedic-math/` is its own repo, `sbmadhav/vedic-math` (GitHub project Pages under this domain, like `/state-of-voice-agents/`). Its rules live in that repo's CLAUDE.md. It loads `/design-system/tokens.css`, `/design-system/components.css`, `/assets/explore.js`, `/assets/analytics.js`, `/assets/fonts/` and `/manifest.webmanifest` from this site by absolute URL, so do not rename or remove those. To rebuild that repo from a `vedic-math/` folder (only before the cutover), run `scripts/split-vedic-math.sh`.
 - Never use em dashes in copy.
-- If a token or the guidelines change, edit `design-system/tokens.json` or `design-system/README.md`, then run `python3 design-system/build.py` to regenerate `tokens.css` and the reference page `design-system/index.html`.
+- Token, component and guideline changes happen in the design-system repo: edit `tokens.json` or `README.md` there, run `python3 build.py` there and push its `main` (its own CLAUDE.md has the details). A push there restyles every page here. To run this site locally with styles, link the clone in: `ln -s ../design-system design-system` (ignored by git).
 
 ## Home page performance and offline (PWA)
 
@@ -23,7 +23,7 @@ Personal site on GitHub Pages (served at https://sbmadhav.com, www redirects to 
 
 ## Checks, hook and deploy
 
-- Pre-commit hook in `.githooks/pre-commit`. Enable it on a fresh clone with `git config core.hooksPath .githooks`. It runs both builds and fails if either changed a file (stage the regenerated files and commit again), then runs the token check.
-- `python3 scripts/check-tokens.py` compares the inline color variables in `index.html` (light and both dark blocks) with `design-system/tokens.json`. When a color changes, change both.
+- Pre-commit hook in `.githooks/pre-commit`. Enable it on a fresh clone with `git config core.hooksPath .githooks`. It runs `site-build.py` and fails if that changed a file (stage the regenerated files and commit again), then runs the token check.
+- `python3 scripts/check-tokens.py` compares the inline color variables in `index.html` (light and both dark blocks) with a pinned copy of the design tokens, `scripts/design-tokens.json`, so it works offline and in CI without the network. When a color changes in the design-system repo, run `python3 scripts/check-tokens.py --refresh` to update the pin, fix `index.html` until the check passes, and commit both. CI also warns (never fails) when the pin is behind the design-system repo (`--upstream`).
 - `.github/workflows/site.yml` runs the same checks on pushes and pull requests to `master`. Its `deploy` job publishes `_site/` through GitHub Actions only when the repository variable `PAGES_VIA_ACTIONS` is `true` (and Pages source is set to "GitHub Actions"); otherwise Pages keeps deploying the `master` branch with Jekyll.
 - Repo-only files are listed twice: `exclude` in `_config.yml` and the `rsync --exclude` list in the workflow. Keep them in sync when adding one.

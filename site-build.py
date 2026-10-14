@@ -5,7 +5,9 @@
 
 - index.html loads assets/app.js, explore.js and analytics.js with ?v=<hash of each file>
 - sw.js gets a new VERSION (hash of every file the site serves from the cache: pages,
-  scripts, design-system CSS, fonts, icons) so any change rotates the service worker cache.
+  scripts, fonts, icons) so any change rotates the service worker cache.
+  The /design-system/ files it precaches come from the sbmadhav/design-system repo, so they are
+  not hashed; the worker refreshes them in the background on every visit (stale-while-revalidate).
 
 /vedic-math/ is its own repo (sbmadhav/vedic-math) with its own build.py.
 
@@ -43,7 +45,7 @@ for entry_path in re.findall(r"'([^']+)'", precache):
     p = p + "index.html" if p == "" or p.endswith("/") else p
     if (root / p).is_file():
         cached.add(p)
-cached |= {"index.html", "design-system/tokens.css", "design-system/components.css", *SCRIPTS}
+cached |= {"index.html", *SCRIPTS}
 cached |= {p.relative_to(root).as_posix() for p in (root / "assets" / "fonts").glob("*") if p.is_file()}
 digest = hashlib.sha256()
 for p in sorted(cached):

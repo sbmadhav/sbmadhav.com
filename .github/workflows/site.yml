@@ -20,23 +20,24 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Install build dependencies
-        run: pip install markdown
-
-      - name: Run both builds
+      - name: Run the build
         run: |
           python3 site-build.py
-          python3 design-system/build.py
 
       - name: Generated files are committed
         run: |
           git diff --exit-code || {
-            echo "::error::The builds changed the files above. Run python3 site-build.py and python3 design-system/build.py, then commit the results."
+            echo "::error::The builds changed the files above. Run python3 site-build.py, then commit the results."
             exit 1
           }
 
-      - name: Home page colors match tokens.json
+      - name: Home page colors match the pinned tokens
         run: python3 scripts/check-tokens.py
+
+      # Warns, never fails: a color change in sbmadhav/design-system should not break this repo's CI
+      - name: Pinned tokens match sbmadhav/design-system
+        run: |
+          python3 scripts/check-tokens.py --upstream || echo "::warning::index.html or scripts/design-tokens.json is behind sbmadhav/design-system. Run python3 scripts/check-tokens.py --refresh and fix index.html."
 
   # Off until the owner sets Settings > Pages > Source to "GitHub Actions" and
   # the repository variable PAGES_VIA_ACTIONS to true. Until then the branch
@@ -69,9 +70,6 @@ jobs:
             --exclude 'README.md' \
             --exclude 'site-build.py' \
             --exclude 'scripts/' \
-            --exclude 'design-system/README.md' \
-            --exclude 'design-system/build.py' \
-            --exclude 'design-system/tokens.json' \
             --exclude 'council-*'
           touch _site/.nojekyll
           find _site -type f | sort
