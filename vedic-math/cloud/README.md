@@ -34,11 +34,13 @@ If step 4 says Authentication is not initialized, open the Authentication page i
 5. Project settings > Your apps > add a **Web app**, copy its config object, and paste it into `vedic-math/js/cloud-config.js` (keep the comment at the top):
    `export const FIREBASE = { apiKey: "...", authDomain: "...", projectId: "...", appId: "..." };`
 6. Authentication > Settings > Authorized domains: add `sbmadhav.com` (and `www.sbmadhav.com`; `localhost` is there by default).
-7. Turn on automatic deletion: Firestore Database > Time-to-live > Create policy, collection group `scores`, timestamp field `exp`. Or: `gcloud firestore fields ttls update exp --collection-group=scores --enable-ttl --project <project-id>`. The parent note on the site says entries are deleted about 30 days after the last score, so do not skip this.
+7. Turn on automatic deletion: Firestore Database > Time-to-live > Create policy, collection group `scores`, timestamp field `exp`. Or: `gcloud firestore fields ttls update exp --collection-group=scores --enable-ttl --project <project-id>`. This needs the Blaze plan; on Spark the command fails with "billing disabled". Keep `parentNote()` in `js/app.js` in step with whether the policy exists.
 8. Commit and push `cloud-config.js`.
 9. Recommended: App Check (next section) and a budget alert in Google Cloud billing (the script prints the command).
 
 The web config is public by design. Security comes from the rules and App Check (see below).
+
+The browser key (Google Cloud console > APIs & Services > Credentials, "Browser key (auto created by Firebase)") is restricted to the referrers `https://sbmadhav.com/*`, `https://www.sbmadhav.com/*`, `http://localhost/*`, `http://localhost:*/*`, `http://127.0.0.1:*/*` and `https://sbmadhav-vedic-math.firebaseapp.com/*`, and to five APIs: Firestore, Identity Toolkit, Secure Token, App Check and Firebase Installations. Add a referrer there before serving the app from another host.
 
 ## What the rules enforce
 
@@ -82,7 +84,7 @@ Board ids in the tests are built from today's date, because past and future boar
 - Players are anonymous: Firebase Anonymous Auth gives each browser a random id. No email, name, age or account.
 - An entry holds only a generated nickname (from fixed word lists, never typed), one of five avatar colors, an integer score, a server timestamp and an expiry time. The rules reject anything else. The document id is the Firebase anonymous user id; Firebase Authentication keeps that id with its created and last sign-in dates.
 - Nothing is sent unless online leaderboards are turned on in `cloud-config.js`, and the Firebase SDK loads only when a leaderboard is opened or an Arena score is sent.
-- Entries are deleted by the TTL policy about 30 days after the last score (TTL usually runs within a day of the expiry). They cannot be deleted from the browser. To honor a removal request, find the entry by nickname and color in the Firebase console and delete it.
+- TTL policies need the Blaze (billing) plan, so on Spark entries are not deleted automatically and the parent note says so. If the project moves to Blaze, set a budget alert, create the TTL policy (step 7), and change `parentNote()` back to promise deletion about 30 days after the last score. Entries cannot be deleted from the browser. To honor a removal request, find the entry by nickname and color in the Firebase console and delete it.
 - The site shows a note for parents next to the nickname (Me page) and the leaderboards (Arena, home). It is `parentNote()` in `js/app.js`; keep it in sync with this section.
 
 

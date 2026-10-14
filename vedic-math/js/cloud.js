@@ -43,7 +43,7 @@ export async function submit(board, entry) {
   const ref = fs.doc(db, 'boards', board, 'scores', uid);
   const cur = await fs.getDoc(ref);
   if (cur.exists() && cur.data().score >= score) return false;
-  const exp = fs.Timestamp.fromMillis(Date.now() + KEEP_DAYS * 864e5); /* deleted by the Firestore TTL policy on `exp` */
+  const exp = fs.Timestamp.fromMillis(Date.now() + KEEP_DAYS * 864e5); /* for a Firestore TTL policy on `exp`; TTL needs the Blaze plan, so it is off on Spark */
   await fs.setDoc(ref, { name: entry.name, avatar: entry.avatar, score, ts: fs.serverTimestamp(), exp });
   return true;
 }

@@ -597,7 +597,7 @@ function parentNote() {
     ${on ? '' : '<p>Right now nothing is sent anywhere: scores stay in this browser. If world leaderboards are turned on, this is what they keep.</p>'}
     <p>World leaderboards run on Google Firebase. Only a Daily challenge in the Arena sends a score, to two boards: today's and this week's for the league. Each entry holds exactly: the made-up nickname (picked from fixed word lists, never typed), an avatar color, the best score, the time it was saved, and the time it expires. It is filed under a random ID that Firebase gives this browser; Firebase keeps that ID with the dates it was created and last used. There is no account, sign-up or password.</p>
     <p>No names, emails, ages, photos or typed text are ever collected. Progress, badges, practice rounds and the players on this device stay in this browser only.${on && cloud.appCheckOn() ? ' To stop cheating scripts, Google reCAPTCHA checks that scores come from this site.' : ''}</p>
-    <p>Leaderboard entries are deleted automatically about ${cloud.KEEP_DAYS} days after the last score. To have an entry removed sooner, message Madhav on <a href="https://www.linkedin.com/in/sbmadhav/" target="_blank" rel="noopener">LinkedIn</a> with the nickname, color and date.</p></details>`;
+    <p>A board stops taking scores when its day or week ends. Entries are not deleted automatically. To have an entry removed, message Madhav on <a href="https://www.linkedin.com/in/sbmadhav/" target="_blank" rel="noopener">LinkedIn</a> with the nickname, color and date.</p></details>`;
 }
 async function loadBoard(el, board, n = 10) {
   if (!el) return;

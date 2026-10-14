@@ -13,6 +13,6 @@ export const FIREBASE = {
 /* Firebase App Check (optional, recommended): proves writes come from this site, not a script.
    Paste the reCAPTCHA site key registered for this web app in Firebase console > App Check.
    Empty means App Check stays off and nothing changes. Steps: /vedic-math/cloud/README.md (App Check). */
-export const appCheckSiteKey = '';
+export const appCheckSiteKey = '6Lewa-8tAAAAAAT6OzsigaH7HdazVTEc5TZKS2sH';
 /* 'enterprise' for a reCAPTCHA Enterprise key (recommended), 'v3' for a classic reCAPTCHA v3 key. */
 export const appCheckProvider = 'enterprise';
