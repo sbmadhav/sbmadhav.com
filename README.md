@@ -11,7 +11,7 @@ Personal site of Madhav Srinivasan, served by GitHub Pages at [sbmadhav.com](htt
 | `/design-system/` | Tokens, type, components and guidelines behind every page | the [`design-system`](https://github.com/sbmadhav/design-system) repo, served under this domain |
 | `/state-of-voice-agents/` | Report on conversational voice AI in healthcare and banking | the `state-of-voice-agents` repo, served under this domain |
 
-`/math/` redirects to `/vedic-math/`. `/numo/` is an older experiment. `404.html` handles every unknown path.
+`/math/` redirects to `/vedic-math/`. `404.html` handles every unknown path.
 
 ## How it is built
 
