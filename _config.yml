@@ -7,6 +7,7 @@ exclude:
   - CONTRIBUTING.md
   - SECURITY.md
   - LICENSE
+  - LICENSE-CONTENT.md
   - site-build.py
   - scripts/
   - "council-*"

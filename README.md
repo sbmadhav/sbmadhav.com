@@ -60,9 +60,9 @@ Bug fixes and accessibility improvements are welcome. The home page copy is pers
 
 ## License
 
-The code in this repo is released under the [MIT License](LICENSE).
+The code in this repo is released under the [MIT License](LICENSE). The profile text is licensed under CC BY 4.0. Photos, and Madhav's name and likeness, are not licensed. Details are in [LICENSE-CONTENT.md](LICENSE-CONTENT.md).
 
-The self-hosted fonts in `assets/fonts/` (Fredoka, Nunito Sans, Space Grotesk, JetBrains Mono) are not covered by it; they keep their own license, the SIL Open Font License 1.1.
+The self-hosted fonts in `assets/fonts/` (Fredoka, Nunito Sans, Space Grotesk, JetBrains Mono) are not covered by either; they keep their own license, the SIL Open Font License 1.1.
 
 ## Thank you, Claude
 
