@@ -42,7 +42,7 @@ jobs:
           grep -Eq "^const VERSION = '[0-9a-f]{10}';" _site/sw.js || err "_site/sw.js VERSION is not a stamped hash"
           grep -q "^const VERSION = 'dev';" sw.js || err "sw.js in git must keep VERSION = 'dev'"
           test -f _site/.nojekyll || err "_site/.nojekyll is missing"
-          for f in CLAUDE.md README.md site-build.py _config.yml scripts .github .githooks; do
+          for f in CLAUDE.md README.md CONTRIBUTING.md SECURITY.md LICENSE LICENSE-CONTENT.md site-build.py _config.yml scripts e2e .github .githooks; do
             test ! -e "_site/$f" || err "_site/$f is a repo-only file and must not be published"
           done
           find _site -type f | sort
