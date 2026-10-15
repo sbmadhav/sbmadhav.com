@@ -37,6 +37,7 @@
     in: `<rect x="3" y="3" width="18" height="18" rx="4" ${P}/><path d="M8 10.5V16M8 7.5v.01M12 16v-3.2a2.3 2.3 0 0 1 4.6 0V16M12 10.5V16" ${P}/>`,
     gh: `<path d="M9 19c-4 1.3-4-2-6-2.5M15 21v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" ${P}/>`,
     install: `<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14" ${P}/>`,
+    pause: `<rect x="4" y="4" width="16" height="16" rx="5" ${P}/><path d="M10 9v6M14 9v6" ${P}/>`,
     close: `<path d="M6 6l12 12M18 6L6 18" ${P}/>`
   };
   const icon = n => `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">${ICONS[n]}</svg>`;
@@ -78,10 +79,13 @@ dialog.xpm[open]{animation:xpIn .32s cubic-bezier(.2,.9,.3,1.15)}
 .xp-link{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:2px solid var(--edge);border-radius:999px;background:var(--card,var(--bg));color:var(--ink);text-decoration:none;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
 .xp-link svg{width:18px;height:18px}
 dialog.xpm [hidden]{display:none!important}
+.xp-link[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.xp-note{margin:8px 0 0;color:var(--ink-muted,var(--muted));font-size:13px;line-height:1.4}
 .xp-help{margin:12px 0 0;padding:12px 14px;border:1.5px dashed var(--edge);border-radius:var(--radius-md,16px);background:var(--card,var(--bg));color:var(--ink);font-size:14px;line-height:1.45}
 .xp-foot{margin-top:22px;color:var(--ink-muted,var(--muted));font-size:13px}
 dialog.xpm :focus-visible{outline:3px solid var(--focus,var(--accent,#0E6B63));outline-offset:3px}
-@media (prefers-reduced-motion:reduce){dialog.xpm[open]{animation:none}.xp-page,.xp-sec,.xp-btn{transition:none}}`;
+@media (prefers-reduced-motion:reduce){dialog.xpm[open]{animation:none}.xp-page,.xp-sec,.xp-btn{transition:none}}
+html.motion-paused dialog.xpm[open]{animation:none}html.motion-paused .xp-page,html.motion-paused .xp-sec,html.motion-paused .xp-btn{transition:none}`;
 
   function build() {
     const here = location.pathname.replace(/index\.html$/, '');
@@ -98,6 +102,9 @@ dialog.xpm :focus-visible{outline:3px solid var(--focus,var(--accent,#0E6B63));o
       <div class="xp-k">${both('Elsewhere', 'Say hi')}</div>
       <div class="xp-links">${LINKS.map(l => `<a class="xp-link" href="${l.href}" target="_blank" rel="noopener">${icon(l.icon)}${l.label}</a>`).join('')}<button class="xp-link" id="xpInstall" aria-expanded="false" aria-controls="xpInstallHelp"${installed() ? ' hidden' : ''}>${icon('install')}${both('Install app', 'Add to my screen')}</button></div>
       <p class="xp-help" id="xpInstallHelp" role="status" hidden></p>
+      <div class="xp-k">${both('Motion', 'Wiggles')}</div>
+      <button class="xp-link" id="xpMotion" aria-pressed="${motionPaused()}" aria-describedby="xpMotionNote">${icon('pause')}${both('Pause motion', 'Stop the wiggles')}</button>
+      <p class="xp-note" id="xpMotionNote">${both('Stops the looping animation on every page of this site. Your device setting for reduced motion does the same.', 'Makes the floating, bobbing and twinkling things on every page hold still.')}</p>
       <p class="xp-foot">${both('Works offline once you have visited.', 'Bolt saves the site so it works even without internet!')}</p>
     </div>`;
     document.body.appendChild(d);
@@ -113,6 +120,11 @@ dialog.xpm :focus-visible{outline:3px solid var(--focus,var(--accent,#0E6B63));o
       e.preventDefault(); close();
       const target = document.querySelector(a.getAttribute('href'));
       if (target) requestAnimationFrame(() => { target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); history.replaceState(null, '', a.getAttribute('href')); });
+    });
+    d.querySelector('#xpMotion').addEventListener('click', () => {
+      const paused = !motionPaused();
+      setMotion(paused, true);
+      if (window.siteTrack) window.siteTrack(paused ? 'explore/motion-pause' : 'explore/motion-play', paused ? 'Motion paused' : 'Motion resumed');
     });
     // Install: the browser's own prompt when it offers one, otherwise the steps for this browser
     const inst = d.querySelector('#xpInstall'), help = d.querySelector('#xpInstallHelp');
@@ -156,7 +168,27 @@ dialog.xpm :focus-visible{outline:3px solid var(--focus,var(--accent,#0E6B63));o
     return both('Open the browser menu (the three dots), then choose <b>Install</b> or <b>Add to Home screen</b>. If it is not there, the app may already be installed.', 'Open the browser menu (the three dots), then pick <b>Install</b> or <b>Add to Home screen</b>.');
   }
 
+  /* Pause motion (WCAG 2.2.2): one site-wide switch, remembered on this device. It puts the class
+     motion-paused on <html>, and every page treats that class exactly like prefers-reduced-motion:
+     CSS uses `html.motion-paused` next to its reduced-motion rules, and scripts that draw decoration
+     check window.siteMotion.paused() and listen for the `sitemotion` event on document. */
   let dlg = null;
+  const root = document.documentElement;
+  const MOTION_KEY = 'motion';
+  const motionPaused = () => root.classList.contains('motion-paused');
+  function setMotion(paused, save) {
+    root.classList.toggle('motion-paused', paused);
+    if (save) { try { if (paused) localStorage.setItem(MOTION_KEY, 'paused'); else localStorage.removeItem(MOTION_KEY); } catch (e) {} }
+    const b = dlg && dlg.querySelector('#xpMotion');
+    if (b) b.setAttribute('aria-pressed', String(paused));
+    document.dispatchEvent(new CustomEvent('sitemotion', { detail: { paused } }));
+  }
+  let savedMotion = null;
+  try { savedMotion = localStorage.getItem(MOTION_KEY); } catch (e) {}
+  if (savedMotion === 'paused' && !motionPaused()) setMotion(true, false);
+  window.siteMotion = { paused: motionPaused, set: p => setMotion(!!p, true) };
+  addEventListener('storage', e => { if (e.key === MOTION_KEY) setMotion(e.newValue === 'paused', false); });
+
   const btn = document.getElementById('exploreBtn');
   if (!btn) return;
   btn.setAttribute('aria-haspopup', 'dialog');
