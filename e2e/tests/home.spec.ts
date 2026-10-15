@@ -75,6 +75,23 @@ test.describe('Home page', () => {
     await expect(page.locator('#play .kid .maze')).toBeVisible();
   });
 
+  test('Deep Space blurs only the sticky header, so WebKit keeps rendering', async ({ page }) => {
+    // A backdrop-filter on every card, button and chip made Linux WebKit stop painting the page
+    // (no animation frames, so clicks never settled) whenever it loaded in Deep Space.
+    for (const setup of ['system', 'saved'] as const) {
+      await page.emulateMedia({ colorScheme: setup === 'system' ? 'dark' : 'light' });
+      await page.goto('/');
+      if (setup === 'saved') { await page.evaluate(() => localStorage.setItem('theme', 'dark')); await page.reload(); }
+      const blurred = await page.evaluate(() => [...document.querySelectorAll('body *')]
+        .filter(el => { const f = getComputedStyle(el).backdropFilter || (getComputedStyle(el) as any).webkitBackdropFilter; return f && f !== 'none'; })
+        .map(el => el.tagName.toLowerCase() + (el.className ? '.' + String(el.className).split(' ')[0] : '')));
+      expect(blurred, setup).toEqual(['header.nav']);
+      // Frames keep coming after a reload
+      await page.reload();
+      expect(await page.evaluate(() => new Promise(r => { const t = setTimeout(() => r('stalled'), 3000); requestAnimationFrame(() => { clearTimeout(t); r('ok'); }); })), setup).toBe('ok');
+    }
+  });
+
   for (const system of ['light', 'dark'] as const) {
     test(`color scheme: follows the ${system} system setting, switches, persists, and returns to System`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: system });
