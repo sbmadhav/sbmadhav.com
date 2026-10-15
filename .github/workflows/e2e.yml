@@ -1,0 +1,76 @@
+name: E2E (live site)
+
+# Playwright end-to-end tests (e2e/) against the LIVE https://sbmadhav.com and its real
+# dependencies: the design-system, vedic-math and state-of-voice-agents repos served under the
+# same domain, fonts, the service worker. GoatCounter is answered locally so runs are not counted.
+# No pull_request trigger (a PR is not live yet) and no secrets.
+
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Site to test (default https://sbmadhav.com)'
+        required: false
+        default: ''
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: e2e
+    env:
+      BASE_URL: ${{ inputs.base_url || 'https://sbmadhav.com' }}
+    steps:
+      - uses: actions/checkout@v6
+
+      # On a push, GitHub Pages deploys in the background. Wait until the live files match this
+      # commit's build (index.html and sw.js carry the stamped versions, explore.js is shared by every page).
+      - name: Wait for the Pages deploy
+        if: github.event_name == 'push'
+        run: |
+          # The deploy publishes a stamped build, so compare against the same build of this commit
+          python3 "$GITHUB_WORKSPACE/site-build.py" --out "$GITHUB_WORKSPACE/_site" >/dev/null
+          for i in $(seq 1 45); do
+            ok=1
+            for f in index.html sw.js assets/explore.js; do
+              want=$(sha256sum "$GITHUB_WORKSPACE/_site/$f" | cut -d' ' -f1)
+              got=$(curl -fsSL "https://sbmadhav.com/$f?deploy-check=${GITHUB_SHA}-${i}" | sha256sum | cut -d' ' -f1) || got=none
+              [ "$got" = "$want" ] || { ok=0; echo "Try $i: live $f is not this commit yet."; }
+            done
+            if [ $ok = 1 ]; then echo "Live site matches this commit (try $i)."; exit 0; fi
+            sleep 20
+          done
+          echo "::warning::The live site still differs from this commit after about 15 minutes. Testing what is live."
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium webkit
+
+      - name: Playwright tests
+        run: npx playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: e2e/playwright-report
+          retention-days: 14

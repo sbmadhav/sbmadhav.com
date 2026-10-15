@@ -68,7 +68,7 @@ dialog.xpm[open]{animation:xpIn .32s cubic-bezier(.2,.9,.3,1.15)}
 .xp-page[aria-current="page"]::after{content:"You are here";position:absolute;top:-9px;right:14px;background:var(--sun);color:var(--on-accent,#1C2541);font:700 11px/1 "Nunito Sans",sans-serif;padding:4px 8px;border-radius:99px;border:1.5px solid var(--edge)}
 .xp-repo{position:absolute;top:8px;right:10px;width:22px;height:22px;display:grid;place-items:center;border-radius:50%;color:var(--ink-muted,var(--muted));opacity:0;transition:opacity .25s}
 .xp-repo svg{width:13px;height:13px}
-.xp-row:hover .xp-repo,.xp-repo:focus-visible{opacity:.5}.xp-repo:hover{opacity:1;color:var(--coral)}
+.xp-row:hover .xp-repo,.xp-repo:focus-visible{opacity:.5}.xp-row .xp-repo:hover{opacity:1;color:var(--coral)}
 @media (hover:none){.xp-repo{opacity:.18}}
 .xp-secs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .xp-sec{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border:1px solid var(--line);border-radius:16px;background:var(--card,var(--bg));color:var(--ink);text-decoration:none;font-weight:700;font-size:13.5px;text-align:center;transition:transform .15s,border-color .15s}
@@ -77,6 +77,8 @@ dialog.xpm[open]{animation:xpIn .32s cubic-bezier(.2,.9,.3,1.15)}
 .xp-links{display:flex;gap:8px;flex-wrap:wrap}
 .xp-link{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:2px solid var(--edge);border-radius:999px;background:var(--card,var(--bg));color:var(--ink);text-decoration:none;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
 .xp-link svg{width:18px;height:18px}
+dialog.xpm [hidden]{display:none!important}
+.xp-help{margin:12px 0 0;padding:12px 14px;border:1.5px dashed var(--edge);border-radius:var(--radius-md,16px);background:var(--card,var(--bg));color:var(--ink);font-size:14px;line-height:1.45}
 .xp-foot{margin-top:22px;color:var(--ink-muted,var(--muted));font-size:13px}
 dialog.xpm :focus-visible{outline:3px solid var(--sky);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){dialog.xpm[open]{animation:none}.xp-page,.xp-sec,.xp-btn{transition:none}}`;
@@ -94,7 +96,8 @@ dialog.xpm :focus-visible{outline:3px solid var(--sky);outline-offset:3px}
       <div class="xp-k">${both('On the home page', 'Fun stops')}</div>
       <nav class="xp-secs" aria-label="Home page sections">${SECTIONS.map(s => `<a class="xp-sec" href="${here === '/' ? s.href.slice(1) : s.href}">${icon(s.icon)}${both(s.pro, s.kid)}</a>`).join('')}</nav>
       <div class="xp-k">${both('Elsewhere', 'Say hi')}</div>
-      <div class="xp-links">${LINKS.map(l => `<a class="xp-link" href="${l.href}" target="_blank" rel="noopener">${icon(l.icon)}${l.label}</a>`).join('')}<button class="xp-link" id="xpInstall" hidden>${icon('install')}${both('Install app', 'Add to my screen')}</button></div>
+      <div class="xp-links">${LINKS.map(l => `<a class="xp-link" href="${l.href}" target="_blank" rel="noopener">${icon(l.icon)}${l.label}</a>`).join('')}<button class="xp-link" id="xpInstall" aria-expanded="false" aria-controls="xpInstallHelp"${installed() ? ' hidden' : ''}>${icon('install')}${both('Install app', 'Add to my screen')}</button></div>
+      <p class="xp-help" id="xpInstallHelp" role="status" hidden></p>
       <p class="xp-foot">${both('Works offline once you have visited.', 'Bolt saves the site so it works even without internet!')}</p>
     </div>`;
     document.body.appendChild(d);
@@ -111,11 +114,46 @@ dialog.xpm :focus-visible{outline:3px solid var(--sky);outline-offset:3px}
       const target = document.querySelector(a.getAttribute('href'));
       if (target) requestAnimationFrame(() => { target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); history.replaceState(null, '', a.getAttribute('href')); });
     });
-    // Install prompt, when the browser offers one
-    let deferred = null; const inst = d.querySelector('#xpInstall');
-    addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; inst.hidden = false; });
-    inst.addEventListener('click', async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; inst.hidden = true; });
+    // Install: the browser's own prompt when it offers one, otherwise the steps for this browser
+    const inst = d.querySelector('#xpInstall'), help = d.querySelector('#xpInstallHelp');
+    const showHelp = open => { help.innerHTML = open ? installSteps() : ''; help.hidden = !open; inst.setAttribute('aria-expanded', String(open)); };
+    inst.addEventListener('click', async () => {
+      if (deferred) {
+        const e = deferred; deferred = null; showHelp(false);
+        if (window.siteTrack) window.siteTrack('explore/install-prompt', 'Install app: browser prompt');
+        try { await e.prompt(); const choice = await e.userChoice; if (choice && choice.outcome === 'accepted') return syncInstall(true); } catch (err) { showHelp(true); }
+        return;
+      }
+      if (window.siteTrack && help.hidden) window.siteTrack('explore/install-help', 'Install app: steps shown');
+      showHelp(help.hidden);
+    });
     return d;
+  }
+
+  /* Install. Listen from the start (this script runs before load) so an early beforeinstallprompt is not
+     missed. Browsers without that event (Safari, Firefox, or Chrome once installed or dismissed) get
+     short steps instead. The button hides when the site already runs as an installed app. */
+  let deferred = null;
+  const installed = () => ['standalone', 'fullscreen', 'minimal-ui', 'window-controls-overlay'].some(m => matchMedia(`(display-mode: ${m})`).matches) || navigator.standalone === true;
+  function syncInstall(done) {
+    const inst = dlg && dlg.querySelector('#xpInstall'), help = dlg && dlg.querySelector('#xpInstallHelp');
+    if (!inst) return;
+    inst.hidden = done || installed();
+    if (inst.hidden) { help.hidden = true; inst.setAttribute('aria-expanded', 'false'); }
+  }
+  addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; syncInstall(); });
+  addEventListener('appinstalled', () => { deferred = null; syncInstall(true); });
+  function installSteps() {
+    const ua = navigator.userAgent;
+    const ios = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    const android = /Android/.test(ua);
+    const firefox = /Firefox\/|FxiOS/.test(ua);
+    const safari = /Safari\//.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|SamsungBrowser|Android/.test(ua);
+    if (ios) return both('Tap the Share button, then <b>Add to Home Screen</b>.', 'Tap Share (the square with an arrow), then <b>Add to Home Screen</b>.');
+    if (firefox && android) return both('Open the Firefox menu, then <b>Add to Home screen</b>.', 'Tap the Firefox menu, then <b>Add to Home screen</b>.');
+    if (firefox) return both('Firefox on computers cannot install sites as apps. Open this page in Chrome, Edge or Safari to install it.', 'Firefox cannot do this one. Ask a grown-up to open this page in Chrome, Edge or Safari.');
+    if (safari) return both('In Safari, choose <b>File</b>, then <b>Add to Dock</b>.', 'In Safari, click <b>File</b>, then <b>Add to Dock</b>.');
+    return both('Open the browser menu (the three dots), then choose <b>Install</b> or <b>Add to Home screen</b>. If it is not there, the app may already be installed.', 'Open the browser menu (the three dots), then pick <b>Install</b> or <b>Add to Home screen</b>.');
   }
 
   let dlg = null;

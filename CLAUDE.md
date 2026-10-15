@@ -28,3 +28,11 @@ Personal site on GitHub Pages (served at https://sbmadhav.com, www redirects to 
 - `python3 scripts/check-tokens.py` compares the inline color variables in `index.html` (light and both dark blocks) with a pinned copy of the design tokens, `scripts/design-tokens.json`, so it works offline and in CI without the network. When a color changes in the design-system repo, run `python3 scripts/check-tokens.py --refresh` to update the pin, fix `index.html` until the check passes, and commit both. CI also warns (never fails) when the pin is behind the design-system repo (`--upstream`).
 - `.github/workflows/site.yml` runs the token checks and the build on pushes and pull requests to `master`, and checks that `_site/` is stamped and holds no repo-only files. Its `deploy` job publishes that `_site/` through GitHub Actions only when the repository variable `PAGES_VIA_ACTIONS` is `true` (and Pages source is set to "GitHub Actions"); otherwise Pages deploys the `master` branch with Jekyll, which publishes the unstamped source.
 - Repo-only files are listed once, in `exclude` in `_config.yml` (one `- item` per line). `site-build.py` and Jekyll both read it. Paths starting with `.` or `_` are always left out.
+
+## End-to-end tests (Playwright)
+
+- `e2e/` holds Playwright tests that run against the LIVE site and its real dependencies (the design-system, vedic-math and state-of-voice-agents repos under the same domain, fonts, the service worker). Specs are in `e2e/tests/`; `fixtures.ts` answers GoatCounter locally so runs never count as visits.
+- Every change that affects behavior updates or adds the matching Playwright test in `e2e/` in the same commit. Run `cd e2e && npm ci && npx playwright test` before pushing.
+- To test a branch before it is live: `cd e2e && node local-server.mjs 8123` (serves this checkout and proxies the other repos' paths to the live site), then `BASE_URL=http://localhost:8123 npx playwright test`. The service worker checks need https, so they skip locally.
+- Known live issues are `test.fixme` with a note (for example `KNOWN` in `e2e/tests/a11y.spec.ts`); remove the entry once fixed.
+- `.github/workflows/e2e.yml` runs the suite daily, on demand, and after each push to `master` (it waits until the live files match the commit).

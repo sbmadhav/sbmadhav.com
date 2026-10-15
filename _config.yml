@@ -10,3 +10,4 @@ exclude:
   - site-build.py
   - scripts/
   - "council-*"
+  - e2e/
