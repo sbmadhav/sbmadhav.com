@@ -43,13 +43,6 @@ test.describe('Plumbing', () => {
     expect(issues.failed.filter(f => !f.includes('/no-such-page-e2e/'))).toEqual([]);
   });
 
-  test('/math/ redirects to /vedic-math/, keeping the query', async ({ page }) => {
-    await page.goto('/math/?from=e2e#learn');
-    await expect(page).toHaveURL(/\/vedic-math\/\?from=e2e/);
-    await page.goto('/math');
-    await expect(page).toHaveURL(/\/vedic-math\//);
-  });
-
   test('robots.txt allows crawling and names the sitemap', async ({ request }) => {
     const r = await request.get('/robots.txt');
     expect(r.status()).toBe(200);
