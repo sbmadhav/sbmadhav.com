@@ -33,6 +33,23 @@ test.describe('Explore menu', () => {
     if (browserName !== 'webkit') await expect(btn).toBeFocused();
   });
 
+  test('the focus ring inside the menu uses the focus token (3:1 against the ground), not a fill', async ({ page, browserName }) => {
+    test.skip(browserName === 'webkit', 'Safari does not move focus to buttons with Tab by default');
+    await page.goto('/');
+    const dlg = await openExplore(page);
+    await page.keyboard.press('Tab');
+    const [outline, focus] = await dlg.evaluate(() => {
+      const el = document.activeElement as HTMLElement;
+      const probe = document.createElement('i');
+      probe.style.color = 'var(--focus)';
+      document.body.append(probe);
+      const want = getComputedStyle(probe).color;
+      probe.remove();
+      return [getComputedStyle(el).outlineColor, want];
+    });
+    expect(outline).toBe(focus);
+  });
+
   test('lists every page, section and outside link', async ({ page }) => {
     await page.goto('/');
     const dlg = await openExplore(page);

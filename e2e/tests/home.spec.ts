@@ -102,13 +102,13 @@ test.describe('Home page', () => {
       const other = system === 'light' ? 'dark' : 'light';
 
       await expect(root).not.toHaveAttribute('data-theme', /./);
-      await expect(meta).toHaveAttribute('content', system === 'dark' ? '#0A0B18' : '#FFF8EE');
+      await expect(meta).toHaveAttribute('content', system === 'dark' ? '#0F1218' : '#F6F7F9');
       const systemBg = await bg();
 
       // Switch away from the system scheme: an explicit, saved override
       await page.locator('#themeBtn').click();
       await expect(root).toHaveAttribute('data-theme', other);
-      await expect(meta).toHaveAttribute('content', other === 'dark' ? '#0A0B18' : '#FFF8EE');
+      await expect(meta).toHaveAttribute('content', other === 'dark' ? '#0F1218' : '#F6F7F9');
       expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe(other);
       await expect.poll(bg).not.toBe(systemBg);
 
