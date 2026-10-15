@@ -111,6 +111,23 @@ test.describe('Robot Maze (kid mode)', () => {
     await expect(page.locator('#runBtn')).toBeDisabled();
   });
 
+  test('the board is a labelled picture that says where Bolt, the star and the rocks are', async ({ page }) => {
+    await page.goto('/?kid#play');
+    const board = page.getByRole('img', { name: /^Maze board/ });
+    await expect(board).toHaveAttribute('id', 'mazeBoard');
+    await expect(board).toHaveAttribute('aria-label', 'Maze board, 6 by 6 squares. Bolt is at column 1, row 3, facing right. The star is at column 5, row 3. No rocks.');
+    await expect(page.getByRole('group', { name: 'Levels' })).toBeVisible();
+    await expect(page.getByRole('group', { name: 'Blocks' })).toBeVisible();
+    // After a run the label follows Bolt
+    await page.locator('.palette button[data-k="F"]').click();
+    await page.locator('#runBtn').click();
+    await expect(page.locator('#mazeMsg')).toContainText('So close', { timeout: 10_000 });
+    await expect(board).toHaveAttribute('aria-label', /Bolt is at column 2, row 3, facing right/);
+    // Clear puts Bolt back at the start
+    await page.locator('#clearBtn').click();
+    await expect(board).toHaveAttribute('aria-label', /Bolt is at column 1, row 3/);
+  });
+
   test('walking off the board is caught', async ({ page }) => {
     await page.goto('/?kid#play');
     await page.locator('.palette button[data-k="L"]').click();

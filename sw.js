@@ -12,10 +12,14 @@
    system change reaches visitors through the background refresh below (one visit late).
 
    KILL SWITCH (retire the worker): set KILL = true below and deploy sw.js. Browsers re-check
-   sw.js on the next visit; the new worker then deletes this site's caches (madhav-*), unregisters
-   itself and reloads open tabs so they come straight from the network. Keep the kill version
-   deployed for a few weeks so returning visitors pick it up, then sw.js can be deleted (and the
-   register call in assets/app.js removed). */
+   sw.js on the next visit; the new worker then deletes this site's caches (madhav-*) and
+   unregisters itself. It does not reload open tabs: the home page would register sw.js again on
+   load and loop. Open tabs keep working (the retired worker has no fetch handler, so their
+   requests go to the network) and their next navigation comes straight from the network.
+   assets/app.js reads this file before registering and skips registration (and removes any
+   leftover registration) while it says `const KILL = true;`, so keep that exact line format
+   (site-build.py checks it). Keep the kill version deployed for a few weeks so returning visitors
+   pick it up, then sw.js can be deleted and the register call in assets/app.js removed. */
 const KILL = false;
 const VERSION = 'dev';
 const CACHE = `madhav-${VERSION}`;
@@ -51,10 +55,8 @@ if (VERSION === 'dev') {
     event.waitUntil((async () => {
       const keys = await caches.keys();
       await Promise.all(keys.filter(k => k.startsWith('madhav-')).map(k => caches.delete(k)));
-      await self.clients.claim();
       await self.registration.unregister();
-      const tabs = await self.clients.matchAll({ type: 'window' });
-      await Promise.all(tabs.map(t => t.navigate(t.url).catch(() => null)));
+      // No clients.claim() and no tab reloads: see KILL SWITCH above
     })());
   });
 } else {
@@ -75,6 +77,7 @@ if (VERSION === 'dev') {
     if (req.method !== 'GET') return;
     const url = new URL(req.url);
     if (url.origin !== location.origin) return;
+    if (url.pathname === location.pathname) return; // this file: app.js reads it fresh to see the kill switch
     if (NETWORK_ONLY.some(p => url.pathname.startsWith(p) || url.pathname === p.slice(0, -1))) return;
 
     // Pages: network first so updates show up; this page's cached copy when offline or slow

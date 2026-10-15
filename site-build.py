@@ -123,6 +123,8 @@ def main():
         fail("sw.js has no `const VERSION = '...';` line")
     if m.group(1) != "dev":
         fail(f"sw.js has VERSION = '{m.group(1)}'; the source must say 'dev'")
+    if not re.search(r"^const KILL = (true|false);$", sw, re.M):
+        fail("sw.js has no `const KILL = true;` or `const KILL = false;` line (assets/app.js reads it)")
     sw = stamp(sw, versions, "sw.js")
     precache = re.search(r"const PRECACHE = \[(.*?)\];", sw, re.S).group(1)
     cached = set()

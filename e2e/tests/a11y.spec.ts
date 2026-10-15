@@ -27,7 +27,6 @@ const SCENARIOS: { name: string; path: string; scheme: 'light' | 'dark'; kid?: b
 // Violations seen on the live site when this suite was written. Each entry is a real bug to fix;
 // remove it from this list once fixed so the test guards it again.
 const KNOWN: Record<string, string> = {
-  'home, kid mode': 'Known issue (live, 2026-10-14): serious aria-prohibited-attr on #mazeBoard. The Robot Maze board is a <div aria-label="Maze board"> with no role, so the label is not allowed. Fix: give it role="img" or role="group" (or drop the aria-label).',
 };
 
 test.describe('Accessibility (axe, serious and critical)', () => {
