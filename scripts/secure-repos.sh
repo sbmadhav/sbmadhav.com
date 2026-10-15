@@ -238,14 +238,18 @@ secure_repo() {
 
   projects=$(jq -r '.has_projects | tostring' <<<"$info")
   if [ "$AUTHED" = 1 ]; then
+    # Needs the read:project token scope (gh auth refresh -s read:project). Without it
+    # the count is unknown and projects are left as they are.
     project_count=$(gh api graphql \
       -f query='query($o:String!,$r:String!){repository(owner:$o,name:$r){projectsV2(first:1){totalCount}}}' \
-      -f o="$OWNER" -f r="$REPO" --jq '.data.repository.projectsV2.totalCount')
+      -f o="$OWNER" -f r="$REPO" --jq '.data.repository.projectsV2.totalCount' 2>/dev/null) || project_count=unknown
   else
     project_count=0
   fi
   if [ "$projects" = false ]; then
     note "projects" "already off"
+  elif [ "$project_count" = unknown ]; then
+    note "projects" "could not count (token lacks read:project), left on"
   elif [ "$project_count" != 0 ]; then
     note "projects" "$project_count linked, left on"
   else
