@@ -663,6 +663,15 @@
     });
     resetBot();
   }
+  /* The board is a picture (role="img"): its label says where Bolt, the star and the rocks are, so
+     the puzzle can be solved without seeing it. Columns and rows count from the top left. */
+  const DIRNAME = ['right', 'down', 'left', 'up'];
+  const sq = ([x, y]) => `column ${x + 1}, row ${y + 1}`;
+  function describeBoard(pos){
+    const M = MAZES[mz], [x, y, d] = pos ? [pos.x, pos.y, pos.d] : M.start;
+    const rocks = M.rocks.length ? `Rocks at ${M.rocks.map(sq).join('; ')}.` : 'No rocks.';
+    board.setAttribute('aria-label', `Maze board, ${N} by ${N} squares. Bolt is at ${sq([x, y])}, facing ${DIRNAME[d]}. The star is at ${sq(M.goal)}. ${rocks}`);
+  }
   function placeBot(x, y, d){
     const b = $('#mbot'); if (!b) return;
     b.style.left = (x * 100 / N) + '%'; b.style.top = (y * 100 / N) + '%';
@@ -672,6 +681,7 @@
     const [x, y, d] = MAZES[mz].start; botPos = { x, y, d, turns: d };
     board.querySelectorAll('.trail').forEach(c => c.classList.remove('trail'));
     placeBot(x, y, d);
+    describeBoard(botPos);
   }
   function renderProg(active = -1){
     if (!prog.length){ progEl.innerHTML = '<span class="prog-empty">Tap the blocks above to build Bolt\'s program.</span>'; }
@@ -721,7 +731,7 @@
     running = false; renderProg();
     setMazeMsg('So close! Bolt stopped before the star. Add more blocks and run again.', 'warn');
   });
-  function placeBotXY(){ const b = $('#mbot'); b.style.left = (botPos.x * 100 / N) + '%'; b.style.top = (botPos.y * 100 / N) + '%'; }
+  function placeBotXY(){ const b = $('#mbot'); b.style.left = (botPos.x * 100 / N) + '%'; b.style.top = (botPos.y * 100 / N) + '%'; describeBoard(botPos); }
   function win(used){
     running = false;
     const M = MAZES[mz], stars = used <= M.par ? 3 : used <= M.par + 2 ? 2 : 1;
@@ -872,7 +882,20 @@
 
   /* ---------- Offline support (PWA) ---------- */
   if ('serviceWorker' in navigator && location.protocol === 'https:'){
-    afterLoad(() => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    afterLoad(() => startWorker().catch(() => {}));
+  }
+  /* sw.js has a kill switch (const KILL = true). While it is on, do not register the worker: it
+     would install and retire itself on every visit. Remove a leftover registration and this
+     site's caches instead, in case the browser has not picked up the killed worker yet. */
+  async function startWorker(){
+    const res = await fetch('sw.js', { cache: 'no-cache' });
+    if (res.ok && /^const KILL = true;/m.test(await res.text())){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+      if (window.caches){ const keys = await caches.keys(); await Promise.all(keys.filter(k => k.startsWith('madhav-')).map(k => caches.delete(k))); }
+      return;
+    }
+    await navigator.serviceWorker.register('sw.js');
   }
 
   /* ---------- Init ---------- */

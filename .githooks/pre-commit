@@ -3,9 +3,9 @@
 #   git config core.hooksPath .githooks
 # Skip in an emergency with: git commit --no-verify
 #
-# 1. Regenerate stamped and generated files; fail if that changed anything,
-#    so the regenerated files get staged with the commit.
-# 2. Home page colors must match the pinned design tokens (scripts/design-tokens.json).
+# 1. Home page colors must match the pinned design tokens (scripts/design-tokens.json).
+# 2. The site builds (site-build.py into a throwaway directory). This also fails if the
+#    source carries cache stamps, which only the CI deploy adds.
 # Vedic Math has its own repo (sbmadhav/vedic-math) with its own hook.
 
 cd "$(git rev-parse --show-toplevel)" || exit 1
@@ -15,17 +15,10 @@ fail() {
   exit 1
 }
 
-# Fingerprint of unstaged changes before and after the builds
-before=$(git diff --binary --no-ext-diff | git hash-object --stdin)
-
-python3 site-build.py >/dev/null || fail "site-build.py failed"
-
-after=$(git diff --binary --no-ext-diff | git hash-object --stdin)
-if [ "$before" != "$after" ]; then
-  git diff --stat >&2
-  fail "the builds regenerated files (listed above). Review them, git add them, and commit again."
-fi
-
 python3 scripts/check-tokens.py || fail "index.html colors disagree with scripts/design-tokens.json"
+
+tmp=$(mktemp -d) || fail "could not make a temp directory"
+trap 'rm -rf "$tmp"' EXIT
+python3 site-build.py --out "$tmp/site" >/dev/null || fail "site-build.py failed (see above)"
 
 exit 0

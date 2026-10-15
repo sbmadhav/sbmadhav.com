@@ -49,10 +49,17 @@ Open http://localhost:8000. Pages use absolute paths such as `/design-system/tok
 
 | Check | Command |
 |---|---|
-| Generated files are current | `python3 site-build.py && git diff --exit-code` |
 | Home page colors match the pinned design tokens | `python3 scripts/check-tokens.py` |
+| The site builds | `python3 site-build.py --out /tmp/site` |
+| End-to-end tests | `cd e2e && npm ci && npx playwright test` |
 
-The pre-commit hook runs both. CI runs the same checks on every pull request. If `site-build.py` changes a file, commit that file with your change.
+The pre-commit hook runs the first two. CI runs them on every pull request and checks that the build holds no repo-only files. Cache versions are stamped only by the CI deploy, never in git, so keep `sw.js` at `VERSION = 'dev'`.
+
+## Tests
+
+Every change that affects behavior updates or adds the matching Playwright test in `e2e/` in the same commit. Run `cd e2e && npm ci && npx playwright test` before pushing.
+
+The tests run against the live site by default. To test your branch before it is live, run `node local-server.mjs 8123` in `e2e/`, then `BASE_URL=http://localhost:8123 npx playwright test`.
 
 ## Style rules
 
@@ -67,7 +74,7 @@ The pre-commit hook runs both. CI runs the same checks on every pull request. If
 
 ## Repo-only files
 
-GitHub Pages publishes every file it is not told to skip. If you add a file that is not part of the site (docs, scripts, config), add it to both `exclude` in `_config.yml` and the `rsync --exclude` list in `.github/workflows/site.yml`.
+GitHub Pages publishes every file it is not told to skip. If you add a file that is not part of the site (docs, scripts, config), add it to `exclude` in `_config.yml`. That is the one list: `site-build.py` and Jekyll both read it. Paths starting with `.` or `_` are always left out.
 
 ## Security problems
 

@@ -18,12 +18,12 @@ Personal site of Madhav Srinivasan, served by GitHub Pages at [sbmadhav.com](htt
 Static HTML, CSS and JavaScript. No framework, no bundler, no `package.json` for the site itself.
 
 - **Design system.** Lives in its own repo, [sbmadhav/design-system](https://github.com/sbmadhav/design-system), published at `/design-system/`. Its `tokens.json` is the source of truth for colors (light "Daybreak" and dark "Deep Space"), type, spacing and radii; its `build.py` generates `tokens.css` (including the `@font-face` rules for the self-hosted fonts in this repo's `assets/fonts/`) and the reference page. This repo keeps a pinned copy of `tokens.json` in `scripts/design-tokens.json` for the home page color check.
-- **Cache stamping.** `python3 site-build.py` stamps `?v=<hash>` on the home page's scripts and a new cache `VERSION` in `sw.js`.
+- **Build and cache stamping.** Git holds unstamped source. `python3 site-build.py --out _site` copies the publishable files into `_site/` and stamps the copies: `?v=<hash>` on the shared scripts in every page, and a cache `VERSION` in `sw.js`. CI runs it and publishes `_site/`, so version numbers never appear in diffs.
 - **Offline.** `sw.js` precaches the site so repeat visits load instantly and work offline; `manifest.webmanifest` makes it installable.
 - **Shared chrome.** Every page loads `assets/explore.js` (the site-wide Explore menu; pages are listed in `PAGES` at its top) and `assets/analytics.js` (GoatCounter, cookieless, loaded after the page is idle).
 - **Other repos under this domain.** `/vedic-math/` and `/state-of-voice-agents/` are GitHub project Pages from their own repos. They load the shared files above (and Vedic Math the design-system CSS and fonts) by absolute URL, and the service worker leaves their paths to the network.
 
-Repo-only files (this README, `CLAUDE.md`, `CONTRIBUTING.md`, `SECURITY.md`, `LICENSE`, build scripts, `scripts/`) are kept out of the published site by `exclude` in `_config.yml` and by the matching `rsync --exclude` list in the workflow.
+Repo-only files (this README, `CLAUDE.md`, `CONTRIBUTING.md`, `SECURITY.md`, `LICENSE`, `LICENSE-CONTENT.md`, build scripts, `scripts/`, `e2e/`) are kept out of the published site by `exclude` in `_config.yml`, the one list both `site-build.py` and Jekyll read. Paths starting with `.` or `_` are always left out.
 
 ## Run locally
 
@@ -31,13 +31,13 @@ Repo-only files (this README, `CLAUDE.md`, `CONTRIBUTING.md`, `SECURITY.md`, `LI
 python3 -m http.server 8000
 ```
 
-Then open http://localhost:8000. Pages use absolute paths (`/assets/...`, `/design-system/...`), so serve from the repo root. For styles, clone the design-system repo next to this one and link it in once: `ln -s ../design-system design-system`. To try `/vedic-math/` locally, do the same with `sbmadhav/vedic-math`: `ln -s ../vedic-math vedic-math`. Git ignores both links.
+Then open http://localhost:8000. The source is unstamped and the service worker only registers over https, so a plain local server always shows your latest edits. To see what visitors get, run `python3 site-build.py` and serve `_site/` instead. Pages use absolute paths (`/assets/...`, `/design-system/...`), so serve from the repo root. For styles, clone the design-system repo next to this one and link it in once: `ln -s ../design-system design-system`. To try `/vedic-math/` locally, do the same with `sbmadhav/vedic-math`: `ln -s ../vedic-math vedic-math`. Git ignores both links.
 
 ## Checks
 
 | Check | Command |
 |---|---|
-| Generated files are current | `python3 site-build.py && git diff --exit-code` |
+| The site builds, and the source has no cache stamps | `python3 site-build.py --out _site` |
 | Home page colors match the pinned `tokens.json` | `python3 scripts/check-tokens.py` (`--refresh` updates the pin from the design-system repo) |
 
 A pre-commit hook in `.githooks/` runs both (well under a second). Enable it once per clone:
@@ -46,7 +46,11 @@ A pre-commit hook in `.githooks/` runs both (well under a second). Enable it onc
 git config core.hooksPath .githooks
 ```
 
-CI (`.github/workflows/site.yml`) runs the same checks on every push and pull request to `master`. Its `deploy` job publishes to GitHub Pages through Actions, but only once the repository variable `PAGES_VIA_ACTIONS` is `true`; until then Pages deploys from the `master` branch with Jekyll.
+CI (`.github/workflows/site.yml`) runs the same checks on every push and pull request to `master`, plus a check that `_site/` is stamped and holds no repo-only files.
+
+## Deploy
+
+On a push to `master`, CI builds `_site/` and its `deploy` job publishes it to GitHub Pages. That needs two settings: **Settings > Pages > Source** set to "GitHub Actions", and the repository variable `PAGES_VIA_ACTIONS` set to `true` (Settings > Secrets and variables > Actions > Variables). Without them Pages deploys the `master` branch with Jekyll, which publishes the unstamped source: the site still works, but browsers are not told when scripts change and the service worker runs in its no-cache `'dev'` mode.
 
 ## How it is maintained
 
