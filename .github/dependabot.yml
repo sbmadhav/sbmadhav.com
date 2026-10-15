@@ -1,0 +1,20 @@
+# Weekly update PRs for the actions in .github/workflows (pinned to commit SHAs, the
+# version tag in a trailing comment) and the e2e test dependencies. The site itself has no
+# package manager dependencies.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /e2e
+    schedule:
+      interval: weekly
+    groups:
+      e2e:
+        patterns: ["*"]
