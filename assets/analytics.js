@@ -16,11 +16,13 @@
   const off = optedOut || local;
 
   const queue = [];
-  const send = e => window.goatcounter.count(e);
+  const ready = () => !!(window.goatcounter && typeof window.goatcounter.count === 'function');
+  // Never throws: if count.js is blocked or not there yet, keep the event queued instead
+  const send = e => { if (ready()) window.goatcounter.count(e); else queue.push(e); };
   window.siteTrack = (name, title) => {
     if (off || !name) return;
     const e = { path: String(name).slice(0, 120), title: (title || name).toString().slice(0, 120), event: true };
-    if (window.goatcounter && typeof window.goatcounter.count === 'function') send(e); else queue.push(e);
+    send(e);
   };
   if (off) return;
 
@@ -37,7 +39,7 @@
     if (location.pathname === lastPath) return;
     lastPath = location.pathname;
     const pv = { path: location.pathname, title: document.title };
-    setTimeout(() => { pv.title = document.title; if (window.goatcounter && window.goatcounter.count) send(pv); else queue.push(pv); }, 150);
+    setTimeout(() => { pv.title = document.title; send(pv); }, 150);
   };
   ['pushState', 'replaceState'].forEach(m => {
     const orig = history[m];
@@ -50,7 +52,7 @@
     s.async = true;
     s.src = SCRIPT;
     s.dataset.goatcounter = ENDPOINT;
-    s.onload = () => { const pending = queue.splice(0); setTimeout(() => pending.forEach(send), 300); };
+    s.onload = () => setTimeout(() => queue.splice(0).forEach(send), 300);
     document.head.appendChild(s);
   }
   const idle = fn => ('requestIdleCallback' in window) ? requestIdleCallback(fn, { timeout: 4000 }) : setTimeout(fn, 1500);

@@ -4,6 +4,24 @@ import { test, expect, isHttps } from './fixtures';
 const pngSize = (b: Buffer) => ({ w: b.readUInt32BE(16), h: b.readUInt32BE(20) });
 
 test.describe('Plumbing', () => {
+  test('analytics never throws when count.js is blocked or broken', async ({ page, baseURL }) => {
+    test.skip(!isHttps(baseURL), 'analytics.js is off on localhost');
+    // count.js loads but never defines window.goatcounter (an ad blocker stub, a CDN error page)
+    await page.route(/^https:\/\/gc\.zgo\.at\//, async route => {
+      await new Promise(r => setTimeout(r, 1500)); // slow, so events queue before it loads
+      await route.fulfill({ status: 200, contentType: 'text/javascript', body: '/* blocked */' });
+    });
+    const errors: string[] = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto('/');
+    await page.waitForFunction(() => typeof (window as any).siteTrack === 'function');
+    await page.evaluate(() => { for (let i = 0; i < 3; i++) (window as any).siteTrack('e2e/blocked-' + i, 'E2E blocked analytics'); });
+    await page.waitForFunction(() => !!document.querySelector('script[data-goatcounter]'), null, { timeout: 15_000 });
+    await page.waitForTimeout(2500); // count.js answers after 1.5 s, then the flush runs 300 ms later
+    await page.evaluate(() => (window as any).siteTrack('e2e/after-load', 'E2E after load'));
+    expect(errors).toEqual([]);
+  });
+
   test('unknown paths get the 404 page, with the asked-for address and working controls', async ({ page }) => {
     const res = await page.goto('/no-such-page-e2e/really');
     expect(res?.status()).toBe(404);
