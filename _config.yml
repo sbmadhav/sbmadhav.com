@@ -1,6 +1,9 @@
-# GitHub Pages builds this static site with Jekyll (branch deploy). No theme or layouts:
-# every page is hand-written HTML. Keep repo-only files out of the published site.
-# The Actions deploy in .github/workflows/site.yml removes the same list; keep them in sync.
+# The one list of repo-only files kept out of the published site. Two readers:
+# - site-build.py (the CI deploy) reads it to build _site/;
+# - Jekyll reads it if Pages ever deploys the master branch directly.
+# Add an entry here only; nothing else needs to change. Paths that start with "." or "_"
+# (.github/, .githooks/, _site/, this file) are always left out, so they need no entry.
+# One "- item" per line: site-build.py reads this list without a YAML library.
 exclude:
   - CLAUDE.md
   - README.md
