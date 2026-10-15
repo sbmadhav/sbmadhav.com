@@ -70,7 +70,8 @@ jobs:
             --exclude 'README.md' \
             --exclude 'site-build.py' \
             --exclude 'scripts/' \
-            --exclude 'council-*'
+            --exclude 'council-*' \
+            --exclude 'e2e/'
           touch _site/.nojekyll
           find _site -type f | sort
 
