@@ -50,8 +50,8 @@
     const set = isKid() ? lines.kid : lines.pro;
     say(set[li++ % set.length]);
     const m = $('#mouth'); m.setAttribute('d','M68 90 q12 14 24 0');
-    $('#antenna').setAttribute('fill','#FFC53D');
-    setTimeout(() => { m.setAttribute('d','M68 92 q12 9 24 0'); $('#antenna').setAttribute('fill','#FF6B5B'); }, 600);
+    $('#antenna').setAttribute('fill','#F2B544');
+    setTimeout(() => { m.setAttribute('d','M68 92 q12 9 24 0'); $('#antenna').setAttribute('fill','#EE7A63'); }, 600);
   });
   // eyes follow pointer
   const pupils = [...document.querySelectorAll('.pupil')];
@@ -286,7 +286,7 @@
   /* ---------- Confetti + easter egg ---------- */
   function burst(n){
     if (reduce) return;
-    const colors = ['#FF6B5B','#1FA39A','#FFC53D','#5B8DEF','#A88EEA'];
+    const colors = ['#EE7A63','#4FB3A6','#F2B544','#4FB3A6','#EE7A63'];
     for (let i=0;i<n;i++){
       const c = document.createElement('i'); c.className='confetti';
       c.style.left = Math.random()*100+'vw'; c.style.background = colors[i%colors.length];
@@ -319,8 +319,8 @@
     const n = Math.round(W*H/6500);
     stars = Array.from({length:n}, () => ({x:Math.random()*W, y:Math.random()*H*1.6, r:Math.random()*1.5+.4, p:Math.random()*6.28, s:.4+Math.random()*1.2, z:.15+Math.random()*.5, c:Math.random()<.15}));
   }
-  const PAL = ['#FF6B5B','#1FA39A','#FFC53D','#5B8DEF','#A88EEA'];
-  const PAL_D = ['#FF8F87','#45D9C3','#D6F075','#73BCFF','#B6A4F7'];
+  const PAL = ['#EE7A63','#4FB3A6','#F2B544','#4FB3A6','#EE7A63'];
+  const PAL_D = ['#F08C77','#5CC7B8','#F2C062','#5CC7B8','#F08C77'];
   function drawStars(t){
     cx.clearRect(0,0,W,H);
     const dark = isDark(), sy = scrollY;
@@ -330,7 +330,7 @@
       if (y < -4 || y > H+4) continue;
       const tw = .55 + .45*Math.sin(st.p + t/1000*st.s*boost);
       cx.globalAlpha = (dark ? 1 : .3) * tw;
-      cx.fillStyle = (st.c || (dark && st.r > 1.4)) ? (dark ? PAL_D : PAL)[(st.r*10|0)%5] : (dark ? '#EEEAFF' : '#1C2541');
+      cx.fillStyle = (st.c || (dark && st.r > 1.4)) ? (dark ? PAL_D : PAL)[(st.r*10|0)%5] : (dark ? '#E9EDF3' : '#151B2B');
       cx.beginPath();
       if (st.r > 1.6){ // little sparkle
         const r = st.r*1.6;
@@ -342,14 +342,14 @@
     cx.globalAlpha = 1;
   }
   const SVGS = {
-    planet:'<svg viewBox="0 0 120 80"><ellipse cx="60" cy="44" rx="56" ry="14" fill="none" stroke="#8E6BD8" stroke-width="6" opacity=".5"/><circle cx="60" cy="40" r="26" fill="#FF6B5B" stroke="#1C2541" stroke-width="3"/><path d="M38 34c10 4 30 4 44-2M36 46c14 4 32 4 48-2" stroke="#1C2541" stroke-width="2.5" fill="none" opacity=".35"/><path d="M6 46c10 8 98 8 108 0" fill="none" stroke="#8E6BD8" stroke-width="6" stroke-linecap="round"/></svg>',
-    rocket:'<svg viewBox="0 0 80 120"><path d="M40 6c16 14 22 36 18 62H22C18 42 24 20 40 6z" fill="#F3F0E8" stroke="#1C2541" stroke-width="3"/><circle cx="40" cy="40" r="9" fill="#5B8DEF" stroke="#1C2541" stroke-width="3"/><path d="M22 58l-12 18 14-2M58 58l12 18-14-2" fill="#FF6B5B" stroke="#1C2541" stroke-width="3" stroke-linejoin="round"/><path d="M30 70c2 16 8 26 10 34 2-8 8-18 10-34z" fill="#FFC53D" stroke="#1C2541" stroke-width="2.5"/></svg>',
-    astro:'<svg viewBox="0 0 100 110"><rect x="26" y="52" width="48" height="42" rx="16" fill="#F3F0E8" stroke="#1C2541" stroke-width="3"/><rect x="10" y="58" width="18" height="12" rx="6" fill="#F3F0E8" stroke="#1C2541" stroke-width="3" transform="rotate(-30 19 64)"/><rect x="72" y="58" width="18" height="12" rx="6" fill="#F3F0E8" stroke="#1C2541" stroke-width="3" transform="rotate(30 81 64)"/><circle cx="50" cy="36" r="26" fill="#F3F0E8" stroke="#1C2541" stroke-width="3"/><rect x="32" y="24" width="36" height="24" rx="12" fill="#1FA39A" stroke="#1C2541" stroke-width="3"/><circle cx="43" cy="36" r="3.5" fill="#fff"/><circle cx="57" cy="36" r="3.5" fill="#fff"/><rect x="40" y="66" width="20" height="12" rx="3" fill="#FFC53D" stroke="#1C2541" stroke-width="2"/></svg>',
-    sat:'<svg viewBox="0 0 140 70"><rect x="4" y="22" width="40" height="26" rx="3" fill="#5B8DEF" stroke="#1C2541" stroke-width="3"/><path d="M17 22v26M30 22v26M4 35h40" stroke="#1C2541" stroke-width="1.8"/><rect x="96" y="22" width="40" height="26" rx="3" fill="#5B8DEF" stroke="#1C2541" stroke-width="3"/><path d="M109 22v26M122 22v26M96 35h40" stroke="#1C2541" stroke-width="1.8"/><path d="M44 35h10M86 35h10" stroke="#1C2541" stroke-width="3"/><rect x="54" y="20" width="32" height="30" rx="8" fill="#FFC53D" stroke="#1C2541" stroke-width="3"/><path d="M70 20V8" stroke="#1C2541" stroke-width="3"/><circle cx="70" cy="7" r="4" fill="#FF6B5B" stroke="#1C2541" stroke-width="2"/></svg>',
-    moon:'<svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="32" fill="#E8E1D2" stroke="#1C2541" stroke-width="3"/><circle cx="28" cy="30" r="7" fill="#CFC5B2"/><circle cx="50" cy="50" r="9" fill="#CFC5B2"/><circle cx="52" cy="24" r="4" fill="#CFC5B2"/></svg>',
-    ufo:'<svg viewBox="0 0 120 70"><path d="M40 30a20 18 0 0 1 40 0" fill="#9FE3DA" stroke="#1C2541" stroke-width="3"/><ellipse cx="60" cy="36" rx="52" ry="14" fill="#8E6BD8" stroke="#1C2541" stroke-width="3"/><circle cx="30" cy="38" r="4" fill="#FFC53D"/><circle cx="60" cy="42" r="4" fill="#FFC53D"/><circle cx="90" cy="38" r="4" fill="#FFC53D"/></svg>',
-    rock:'<svg viewBox="0 0 80 70"><path d="M14 30l12-18 26-4 18 16 2 24-18 16-28-2L8 46z" fill="#B8A98F" stroke="#1C2541" stroke-width="3" stroke-linejoin="round"/><circle cx="34" cy="30" r="6" fill="#9C8C72"/><circle cx="52" cy="46" r="4" fill="#9C8C72"/></svg>',
-    ring:'<svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="24" fill="#1FA39A" stroke="#1C2541" stroke-width="3"/><path d="M24 30c10-6 26-6 34 6" stroke="#fff" stroke-width="3" fill="none" opacity=".5" stroke-linecap="round"/></svg>'
+    planet:'<svg viewBox="0 0 120 80"><ellipse cx="60" cy="44" rx="56" ry="14" fill="none" stroke="#4FB3A6" stroke-width="6" opacity=".5"/><circle cx="60" cy="40" r="26" fill="#EE7A63" stroke="#151B2B" stroke-width="3"/><path d="M38 34c10 4 30 4 44-2M36 46c14 4 32 4 48-2" stroke="#151B2B" stroke-width="2.5" fill="none" opacity=".35"/><path d="M6 46c10 8 98 8 108 0" fill="none" stroke="#4FB3A6" stroke-width="6" stroke-linecap="round"/></svg>',
+    rocket:'<svg viewBox="0 0 80 120"><path d="M40 6c16 14 22 36 18 62H22C18 42 24 20 40 6z" fill="#EEF1F5" stroke="#151B2B" stroke-width="3"/><circle cx="40" cy="40" r="9" fill="#4FB3A6" stroke="#151B2B" stroke-width="3"/><path d="M22 58l-12 18 14-2M58 58l12 18-14-2" fill="#EE7A63" stroke="#151B2B" stroke-width="3" stroke-linejoin="round"/><path d="M30 70c2 16 8 26 10 34 2-8 8-18 10-34z" fill="#F2B544" stroke="#151B2B" stroke-width="2.5"/></svg>',
+    astro:'<svg viewBox="0 0 100 110"><rect x="26" y="52" width="48" height="42" rx="16" fill="#EEF1F5" stroke="#151B2B" stroke-width="3"/><rect x="10" y="58" width="18" height="12" rx="6" fill="#EEF1F5" stroke="#151B2B" stroke-width="3" transform="rotate(-30 19 64)"/><rect x="72" y="58" width="18" height="12" rx="6" fill="#EEF1F5" stroke="#151B2B" stroke-width="3" transform="rotate(30 81 64)"/><circle cx="50" cy="36" r="26" fill="#EEF1F5" stroke="#151B2B" stroke-width="3"/><rect x="32" y="24" width="36" height="24" rx="12" fill="#4FB3A6" stroke="#151B2B" stroke-width="3"/><circle cx="43" cy="36" r="3.5" fill="#fff"/><circle cx="57" cy="36" r="3.5" fill="#fff"/><rect x="40" y="66" width="20" height="12" rx="3" fill="#F2B544" stroke="#151B2B" stroke-width="2"/></svg>',
+    sat:'<svg viewBox="0 0 140 70"><rect x="4" y="22" width="40" height="26" rx="3" fill="#4FB3A6" stroke="#151B2B" stroke-width="3"/><path d="M17 22v26M30 22v26M4 35h40" stroke="#151B2B" stroke-width="1.8"/><rect x="96" y="22" width="40" height="26" rx="3" fill="#4FB3A6" stroke="#151B2B" stroke-width="3"/><path d="M109 22v26M122 22v26M96 35h40" stroke="#151B2B" stroke-width="1.8"/><path d="M44 35h10M86 35h10" stroke="#151B2B" stroke-width="3"/><rect x="54" y="20" width="32" height="30" rx="8" fill="#F2B544" stroke="#151B2B" stroke-width="3"/><path d="M70 20V8" stroke="#151B2B" stroke-width="3"/><circle cx="70" cy="7" r="4" fill="#EE7A63" stroke="#151B2B" stroke-width="2"/></svg>',
+    moon:'<svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="32" fill="#E1E5EB" stroke="#151B2B" stroke-width="3"/><circle cx="28" cy="30" r="7" fill="#C3CAD4"/><circle cx="50" cy="50" r="9" fill="#C3CAD4"/><circle cx="52" cy="24" r="4" fill="#C3CAD4"/></svg>',
+    ufo:'<svg viewBox="0 0 120 70"><path d="M40 30a20 18 0 0 1 40 0" fill="#9FE3DA" stroke="#151B2B" stroke-width="3"/><ellipse cx="60" cy="36" rx="52" ry="14" fill="#EE7A63" stroke="#151B2B" stroke-width="3"/><circle cx="30" cy="38" r="4" fill="#F2B544"/><circle cx="60" cy="42" r="4" fill="#F2B544"/><circle cx="90" cy="38" r="4" fill="#F2B544"/></svg>',
+    rock:'<svg viewBox="0 0 80 70"><path d="M14 30l12-18 26-4 18 16 2 24-18 16-28-2L8 46z" fill="#A7AFBB" stroke="#151B2B" stroke-width="3" stroke-linejoin="round"/><circle cx="34" cy="30" r="6" fill="#8C95A3"/><circle cx="52" cy="46" r="4" fill="#8C95A3"/></svg>',
+    ring:'<svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="24" fill="#4FB3A6" stroke="#151B2B" stroke-width="3"/><path d="M24 30c10-6 26-6 34 6" stroke="#fff" stroke-width="3" fill="none" opacity=".5" stroke-linecap="round"/></svg>'
   };
   const SPEC = [
     {k:'planet', w:150, y:.14, d:95,  dir:1},
@@ -645,9 +645,9 @@
     let html = '';
     for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){
       const k = x + ',' + y, goal = M.goal[0] === x && M.goal[1] === y;
-      html += `<div class="cell${rocks.has(k) ? ' rock' : ''}" data-xy="${k}">${rocks.has(k) ? '<svg viewBox="0 0 80 70"><path d="M14 30l12-18 26-4 18 16 2 24-18 16-28-2L8 46z" fill="#B8A98F" stroke="#1C2541" stroke-width="4" stroke-linejoin="round"/><circle cx="34" cy="30" r="6" fill="#9C8C72"/></svg>' : ''}${goal ? '<svg class="goal" viewBox="0 0 32 32"><use href="#i-star"/></svg>' : ''}</div>`;
+      html += `<div class="cell${rocks.has(k) ? ' rock' : ''}" data-xy="${k}">${rocks.has(k) ? '<svg viewBox="0 0 80 70"><path d="M14 30l12-18 26-4 18 16 2 24-18 16-28-2L8 46z" fill="#A7AFBB" stroke="#151B2B" stroke-width="4" stroke-linejoin="round"/><circle cx="34" cy="30" r="6" fill="#8C95A3"/></svg>' : ''}${goal ? '<svg class="goal" viewBox="0 0 32 32"><use href="#i-star"/></svg>' : ''}</div>`;
     }
-    html += `<div class="mbot" id="mbot"><div class="mbot-in"><svg viewBox="0 0 64 64"><rect x="10" y="14" width="44" height="38" rx="13" fill="#1FA39A" stroke="#1C2541" stroke-width="3"/><circle cx="25" cy="32" r="6" fill="#fff"/><circle cx="39" cy="32" r="6" fill="#fff"/><circle cx="27" cy="32" r="2.6" fill="#1C2541"/><circle cx="41" cy="32" r="2.6" fill="#1C2541"/><path d="M54 26l8 7-8 7z" fill="#FF6B5B" stroke="#1C2541" stroke-width="2.5" stroke-linejoin="round"/></svg></div></div>`;
+    html += `<div class="mbot" id="mbot"><div class="mbot-in"><svg viewBox="0 0 64 64"><rect x="10" y="14" width="44" height="38" rx="13" fill="#4FB3A6" stroke="#151B2B" stroke-width="3"/><circle cx="25" cy="32" r="6" fill="#fff"/><circle cx="39" cy="32" r="6" fill="#fff"/><circle cx="27" cy="32" r="2.6" fill="#151B2B"/><circle cx="41" cy="32" r="2.6" fill="#151B2B"/><path d="M54 26l8 7-8 7z" fill="#EE7A63" stroke="#151B2B" stroke-width="2.5" stroke-linejoin="round"/></svg></div></div>`;
     board.innerHTML = html;
     $('#mazeLevel').textContent = `Level ${mz + 1} of ${MAZES.length}`;
     $('#mazeTip').textContent = M.tip;
@@ -864,7 +864,7 @@
   const effTheme = () => root.dataset.theme || sysTheme();
   function syncTheme(){
     const t = effTheme();
-    metaTheme.setAttribute('content', t === 'dark' ? '#0A0B18' : '#FFF8EE');
+    metaTheme.setAttribute('content', t === 'dark' ? '#0F1218' : '#F6F7F9');
     themeBtn.setAttribute('aria-label', t === 'dark' ? 'Switch to Daybreak (light) scheme' : 'Switch to Deep Space (dark) scheme');
     themeBtn.title = themeBtn.getAttribute('aria-label') + (root.dataset.theme ? '' : ' (following your system)');
   }

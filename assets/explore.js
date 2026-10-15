@@ -47,7 +47,7 @@
   const css = `
 dialog.xpm{position:fixed;inset:0 0 0 auto;margin:0;height:100dvh;max-height:100dvh;width:min(440px,100vw);max-width:100vw;padding:0;border:0;border-left:2px solid var(--edge);background:var(--bg);color:var(--ink);overflow:auto;font-family:"Nunito Sans",system-ui,sans-serif;box-shadow:-20px 0 60px -20px rgba(0,0,0,.35)}
 dialog.xpm:not([open]){display:none!important}
-dialog.xpm::backdrop{background:rgba(7,6,26,.45);backdrop-filter:blur(3px)}
+dialog.xpm::backdrop{background:rgba(10,12,17,.45);backdrop-filter:blur(3px)}
 dialog.xpm[open]{animation:xpIn .32s cubic-bezier(.2,.9,.3,1.15)}
 @keyframes xpIn{from{transform:translateX(40px);opacity:0}}
 @media (max-width:600px){dialog.xpm{inset:auto 0 0 0;width:100vw;height:auto;max-height:88dvh;border-left:0;border-top:2px solid var(--edge);border-radius:24px 24px 0 0}dialog.xpm[open]{animation-name:xpUp}@keyframes xpUp{from{transform:translateY(60px);opacity:0}}}
@@ -60,12 +60,12 @@ dialog.xpm[open]{animation:xpIn .32s cubic-bezier(.2,.9,.3,1.15)}
 .xp-pages{display:grid;gap:10px}
 .xp-page{position:relative;display:flex;gap:14px;align-items:center;padding:14px 16px;border:2px solid var(--edge);border-radius:18px;background:var(--card,var(--bg));color:var(--ink);text-decoration:none;box-shadow:0 3px 0 var(--ledge,var(--edge));transition:transform .15s,box-shadow .15s}
 .xp-page:hover{transform:translateY(-2px) rotate(-.4deg);box-shadow:0 5px 0 var(--ledge,var(--edge))}
-.xp-page .xp-ic{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--sun);color:var(--on-accent,#1C2541)}
+.xp-page .xp-ic{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--sun);color:var(--on-accent,#151B2B)}
 .xp-row{position:relative}
 .xp-row:nth-child(2) .xp-ic{background:var(--plum)}.xp-row:nth-child(3) .xp-ic{background:var(--teal)}.xp-row:nth-child(4) .xp-ic{background:var(--sky)}
 .xp-page b{display:block;font:600 1.1rem/1.2 var(--display,Fredoka,sans-serif)}
 .xp-page small{display:block;color:var(--ink-muted,var(--muted));font-size:14px;line-height:1.35;margin-top:2px}
-.xp-page[aria-current="page"]::after{content:"You are here";position:absolute;top:-9px;right:14px;background:var(--sun);color:var(--on-accent,#1C2541);font:700 11px/1 "Nunito Sans",sans-serif;padding:4px 8px;border-radius:99px;border:1.5px solid var(--edge)}
+.xp-page[aria-current="page"]::after{content:"You are here";position:absolute;top:-9px;right:14px;background:var(--sun);color:var(--on-accent,#151B2B);font:700 11px/1 "Nunito Sans",sans-serif;padding:4px 8px;border-radius:99px;border:1.5px solid var(--edge)}
 .xp-repo{position:absolute;top:8px;right:10px;width:22px;height:22px;display:grid;place-items:center;border-radius:50%;color:var(--ink-muted,var(--muted));opacity:0;transition:opacity .25s}
 .xp-repo svg{width:13px;height:13px}
 .xp-row:hover .xp-repo,.xp-repo:focus-visible{opacity:.5}.xp-row .xp-repo:hover{opacity:1;color:var(--coral)}
@@ -80,7 +80,7 @@ dialog.xpm[open]{animation:xpIn .32s cubic-bezier(.2,.9,.3,1.15)}
 dialog.xpm [hidden]{display:none!important}
 .xp-help{margin:12px 0 0;padding:12px 14px;border:1.5px dashed var(--edge);border-radius:var(--radius-md,16px);background:var(--card,var(--bg));color:var(--ink);font-size:14px;line-height:1.45}
 .xp-foot{margin-top:22px;color:var(--ink-muted,var(--muted));font-size:13px}
-dialog.xpm :focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+dialog.xpm :focus-visible{outline:3px solid var(--focus,var(--accent,#0E6B63));outline-offset:3px}
 @media (prefers-reduced-motion:reduce){dialog.xpm[open]{animation:none}.xp-page,.xp-sec,.xp-btn{transition:none}}`;
 
   function build() {
