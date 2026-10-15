@@ -4,7 +4,9 @@
     get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
     set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
   };
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Reduced motion: the device setting, or Pause motion in the Explore menu (html.motion-paused)
+  const reduceQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const reduced = () => reduceQ.matches || document.documentElement.classList.contains('motion-paused');
   const track = (name, title) => { try { window.siteTrack && window.siteTrack(name, title); } catch (e) {} };
   let musicOn = false;
   $('#yr').textContent = new Date().getFullYear();
@@ -128,10 +130,10 @@
     $('#answer').textContent = '...'; $('#answer').classList.remove('caret');
     $('#st1').classList.remove('on'); $('#st2').classList.remove('on');
   }
-  const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
+  const wait = ms => new Promise(r => setTimeout(r, reduced() ? 0 : ms));
   async function typeInto(el, text, id, speed=22){
     el.textContent = ''; el.classList.add('caret');
-    if (reduce) { el.textContent = text; el.classList.remove('caret'); return; }
+    if (reduced()) { el.textContent = text; el.classList.remove('caret'); return; }
     for (const ch of text){ if (id !== runId) return; el.textContent += ch; await wait(speed); }
     el.classList.remove('caret');
   }
@@ -285,7 +287,7 @@
 
   /* ---------- Confetti + easter egg ---------- */
   function burst(n){
-    if (reduce) return;
+    if (reduced()) return;
     const colors = ['#EE7A63','#4FB3A6','#F2B544','#4FB3A6','#EE7A63'];
     for (let i=0;i<n;i++){
       const c = document.createElement('i'); c.className='confetti';
@@ -299,7 +301,7 @@
   $('#logo').addEventListener('click', () => {
     clearTimeout(clickT); clickT = setTimeout(() => clicks = 0, 1200);
     if (++clicks >= 5){ clicks = 0; burst(120); say(isKid() ? "You found the secret party button!" : "Easter egg unlocked. Ship the confetti."); }
-    else window.scrollTo({ top:0, behavior: reduce ? 'auto' : 'smooth' });
+    else window.scrollTo({ top:0, behavior: reduced() ? 'auto' : 'smooth' });
   });
 
   /* ---------- Reveal on scroll ---------- */
@@ -386,18 +388,27 @@
     el.style.left = (30 + Math.random()*70) + 'vw'; el.style.top = (Math.random()*50) + 'vh';
     space.appendChild(el); setTimeout(() => el.remove(), 1500);
   }
-  // The backdrop is decoration: start it only after the page is ready and the browser is idle
+  // The backdrop is decoration: start it only after the page is ready and the browser is idle.
+  // It holds still under reduced motion or Pause motion, and follows that switch live.
+  let rafId = 0, shootT = 0;
+  const loop = t => { if (reduced()) { rafId = 0; return; } drawStars(t); drawFloaters(t); rafId = requestAnimationFrame(loop); };
+  const still = () => { drawStars(0); drawFloaters(20000); };
+  function motion(){
+    if (reduced()){
+      cancelAnimationFrame(rafId); rafId = 0; clearInterval(shootT); shootT = 0;
+      space.querySelectorAll('.shoot').forEach(n => n.remove());
+      still();
+    } else {
+      if (!rafId) rafId = requestAnimationFrame(loop);
+      if (!shootT) shootT = setInterval(() => { if (Math.random() < (musicOn ? .7 : .35)) shoot(); }, 4000);
+    }
+  }
   function startBackdrop(){
     sizeStars(); sizeFloaters();
-    addEventListener('resize', () => { sizeStars(); sizeFloaters(); });
-    if (reduce){
-      drawStars(0); drawFloaters(20000);
-      addEventListener('scroll', () => drawStars(0), {passive:true});
-    } else {
-      const loop = t => { drawStars(t); drawFloaters(t); requestAnimationFrame(loop); };
-      requestAnimationFrame(loop);
-      setInterval(() => { if (Math.random() < (musicOn ? .7 : .35)) shoot(); }, 4000);
-    }
+    addEventListener('resize', () => { sizeStars(); sizeFloaters(); if (reduced()) still(); });
+    addEventListener('scroll', () => { if (reduced()) drawStars(0); }, {passive:true});
+    motion();
+    document.addEventListener('sitemotion', motion);
     space.classList.add('on');
   }
   const whenIdle = fn => ('requestIdleCallback' in window) ? requestIdleCallback(fn, { timeout: 2500 }) : setTimeout(fn, 600);
@@ -702,7 +713,7 @@
   $('#undoBtn').addEventListener('click', () => { if (!running){ prog.pop(); renderProg(); } });
   $('#clearBtn').addEventListener('click', () => { if (!running){ prog = []; renderProg(); resetBot(); setMazeMsg(''); } });
   function setMazeMsg(t, kind = ''){ mazeMsg.textContent = t; mazeMsg.className = 'maze-msg ' + kind; }
-  const pause = ms => new Promise(r => setTimeout(r, reduce ? 60 : ms));
+  const pause = ms => new Promise(r => setTimeout(r, reduced() ? 60 : ms));
   $('#runBtn').addEventListener('click', async () => {
     if (running || !prog.length) return;
     running = true; resetBot(); setMazeMsg('Running...'); renderProg();
