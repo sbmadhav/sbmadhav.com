@@ -1,5 +1,3 @@
-_ds2/
-_ds_build/
 # Local symlinks to sibling checkouts of sbmadhav/vedic-math and sbmadhav/design-system (served under this domain in production)
 /vedic-math
 /design-system

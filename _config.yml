@@ -13,5 +13,4 @@ exclude:
   - LICENSE-CONTENT.md
   - site-build.py
   - scripts/
-  - "council-*"
   - e2e/

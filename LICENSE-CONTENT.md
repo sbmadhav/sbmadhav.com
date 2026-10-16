@@ -12,7 +12,7 @@ The following are licensed under [Creative Commons Attribution 4.0 International
 
 No license is granted for the following. All rights reserved.
 
-- Photos: `assets/profile.jpg`, `assets/profile.webp`, `assets/profile-240.webp` and `assets/abu.webp`.
+- Photos: `assets/profile.jpg` and `assets/profile.webp`.
 - The name Madhav Srinivasan and his likeness, including use that suggests endorsement.
 
 ## Fonts
