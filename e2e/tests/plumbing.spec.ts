@@ -7,7 +7,7 @@ test.describe('Plumbing', () => {
   test('analytics never throws when count.js is blocked or broken', async ({ page, baseURL }) => {
     test.skip(!isHttps(baseURL), 'analytics.js is off on localhost');
     // count.js loads but never defines window.goatcounter (an ad blocker stub, a CDN error page)
-    await page.route(/^https:\/\/gc\.zgo\.at\//, async route => {
+    await page.route(/\/assets\/count\.js(\?|$)/, async route => {
       await new Promise(r => setTimeout(r, 1500)); // slow, so events queue before it loads
       await route.fulfill({ status: 200, contentType: 'text/javascript', body: '/* blocked */' });
     });
@@ -107,7 +107,7 @@ test.describe('Plumbing', () => {
   });
 
   test('shared files other repos load by absolute URL are served', async ({ request }) => {
-    for (const p of ['/assets/explore.js', '/assets/analytics.js', '/design-system/tokens.css', '/design-system/components.css', '/manifest.webmanifest']) {
+    for (const p of ['/assets/explore.js', '/assets/analytics.js', '/assets/count.js', '/design-system/tokens.css', '/design-system/components.css', '/manifest.webmanifest']) {
       const r = await request.get(p);
       expect(r.status(), p).toBe(200);
     }

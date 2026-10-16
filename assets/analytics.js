@@ -4,12 +4,13 @@
    - Counts page views (including in-app page changes in single-page apps) and a few named events (games played, music, kid mode, menu use, outbound links).
    - Loads only after the page has finished loading and the browser is idle, so it never slows the first view.
    - Respects Do Not Track and Global Privacy Control, and skips local development.
+   - count.js is served from this site (assets/count.js), so no third-party script runs here; only the beacons go to GoatCounter.
 
    Pages call window.siteTrack('event-name', 'Readable title') for custom events; it is always safe to call. */
 (() => {
   const CODE = 'sbmadhav';                                   // GoatCounter site code: https://sbmadhav.goatcounter.com
   const ENDPOINT = `https://${CODE}.goatcounter.com/count`;
-  const SCRIPT = 'https://gc.zgo.at/count.js';
+  const SCRIPT = '/assets/count.js';                         // GoatCounter's count.js, vendored (see the top of that file)
 
   const optedOut = navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.globalPrivacyControl === true;
   const local = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|.*\.local|.*\.test)$/.test(location.hostname);

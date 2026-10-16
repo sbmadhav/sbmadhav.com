@@ -41,6 +41,10 @@ jobs:
           for s in app explore analytics; do
             grep -Eq "assets/$s\.js\?v=[0-9a-f]{10}\"" _site/index.html || err "_site/index.html loads assets/$s.js without a ?v= stamp"
           done
+          for f in index.html 404.html; do
+            grep -q '<meta http-equiv="Content-Security-Policy" content="default-src' "_site/$f" || err "_site/$f has no Content-Security-Policy <meta>"
+          done
+          ! grep -q 'gc\.zgo\.at' _site/assets/analytics.js || err "analytics.js must load the vendored /assets/count.js, not gc.zgo.at"
           grep -Eq "^const VERSION = '[0-9a-f]{10}';" _site/sw.js || err "_site/sw.js VERSION is not a stamped hash"
           grep -q "^const VERSION = 'dev';" sw.js || err "sw.js in git must keep VERSION = 'dev'"
           test -f _site/.nojekyll || err "_site/.nojekyll is missing"
