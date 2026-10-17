@@ -100,7 +100,8 @@ test.describe('Content-Security-Policy', () => {
     await page.goto('/no-such-page-e2e/csp', { waitUntil: 'load' });
     await policy(page, baseURL);
     await expect(page.locator('#missing code')).toHaveText('/no-such-page-e2e/csp'); // the hashed 404 script ran
-    await page.locator('.md-modes [data-mode="dark"]').click();
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.locator('#themeBtn').click(); // the design system's header.js, same origin
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await page.locator('#exploreBtn').click();
     await expect(page.locator('dialog.xpm')).toBeVisible();

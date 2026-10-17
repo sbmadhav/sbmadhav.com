@@ -31,15 +31,13 @@ test.describe('Plumbing', () => {
     await expect(page.locator('.bolt')).toBeVisible();
     expect(await page.locator('.bolt').evaluate((i: HTMLImageElement) => i.naturalWidth > 0)).toBe(true);
 
-    // Color mode buttons: System, Daybreak, Deep Space (saved, shared with the home page)
-    await page.locator('.md-modes [data-mode="dark"]').click();
+    // The shared header's sun/moon button (design system header.js): saved, shared with the home page
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.locator('#themeBtn').click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await expect(page.locator('.md-modes [data-mode="dark"]')).toHaveAttribute('aria-pressed', 'true');
-    await page.locator('.md-modes [data-mode="light"]').click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
     await page.reload();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await page.locator('.md-modes [data-mode="system"]').click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await page.locator('#themeBtn').click();
     await expect(page.locator('html')).not.toHaveAttribute('data-theme', /./);
 
     // Kid mode on the 404 page uses the same saved setting as the home page
@@ -107,7 +105,7 @@ test.describe('Plumbing', () => {
   });
 
   test('shared files other repos load by absolute URL are served', async ({ request }) => {
-    for (const p of ['/assets/explore.js', '/assets/analytics.js', '/assets/count.js', '/design-system/tokens.css', '/design-system/components.css', '/manifest.webmanifest']) {
+    for (const p of ['/assets/explore.js', '/assets/analytics.js', '/assets/count.js', '/design-system/tokens.css', '/design-system/components.css', '/design-system/v/2.1.0/tokens.css', '/design-system/v/2.1.0/components.css', '/design-system/v/2.1.0/header.js', '/manifest.webmanifest']) {
       const r = await request.get(p);
       expect(r.status(), p).toBe(200);
     }
