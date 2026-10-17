@@ -242,7 +242,9 @@ def check_design_system(files):
             if a.get("integrity") != want or a.get("crossorigin") != "anonymous":
                 fail(f'{f}:{line} {name} needs integrity="{want}" crossorigin="anonymous" (the hash of scripts/design-system/{name})')
             seen[name] = seen.get(name, 0) + 1
-        if seen and seen != {n: 1 for n in DS_RUNTIME}:
+        # Pages with the shared header need all three (header.js runs its theme button); any other page that
+        # loads the design system needs each exactly once too
+        if (seen or f in HEADER_PAGES) and seen != {n: 1 for n in DS_RUNTIME}:
             fail(f"{f} must load each of {', '.join(DS_RUNTIME)} from {base} exactly once (found {seen})")
     for page in HEADER_PAGES:
         if page not in files:
