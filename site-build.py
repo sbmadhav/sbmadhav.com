@@ -19,14 +19,21 @@ What the build does:
   icons), so any change rotates the service worker cache. The /design-system/ files it
   precaches come from the sbmadhav/design-system repo, so they are not hashed; the worker
   refreshes them in the background on every visit (stale-while-revalidate).
+- Adds a Content-Security-Policy <meta> (plus an explicit Referrer-Policy) right after
+  <meta charset> in every copied .html file. Inline scripts are allowed by their sha256, which
+  the build computes, so the hashes are never edited by hand. GitHub Pages cannot send headers,
+  so this is the only way to ship a CSP; a <meta> policy cannot carry frame-ancestors,
+  report-uri or sandbox. The build fails on inline event handler attributes (onclick="...") and
+  javascript: URLs, which the policy would block.
+- Checks that assets/count.js (GoatCounter, vendored) still matches the upstream hash it records.
 - Writes .nojekyll so Pages serves the output as is.
 
-It fails if the source carries stamps (a ?v= on those scripts, or a VERSION other than
-'dev'), so they cannot creep back into git.
+It fails if the source carries stamps (a ?v= on those scripts, a VERSION other than 'dev', or
+a Content-Security-Policy <meta>), so they cannot creep back into git.
 
 /vedic-math/ is its own repo (sbmadhav/vedic-math) with its own build.py.
 """
-import argparse, fnmatch, hashlib, pathlib, re, shutil, subprocess, sys
+import argparse, base64, fnmatch, hashlib, pathlib, re, shutil, subprocess, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
 SCRIPTS = ["assets/app.js", "assets/explore.js", "assets/analytics.js"]
@@ -82,6 +89,73 @@ def stamp(text, versions, where):
     return text
 
 
+# Every origin a page here loads from. Fonts, images, scripts and styles are self-hosted or come
+# from the other repos served under this origin (/design-system/, ...). The only third party is
+# GoatCounter's beacon: sendBeacon (connect-src), or an <img> when sendBeacon fails (img-src).
+# Styles need 'unsafe-inline': the pages have a critical <style> block, and scripts build markup
+# with style="" attributes. 'INLINE_SCRIPTS' is replaced by the hashes of the page's inline scripts.
+GOATCOUNTER = "https://sbmadhav.goatcounter.com"
+CSP = "; ".join([
+    "default-src 'self'",
+    "script-src 'self' INLINE_SCRIPTS",
+    "style-src 'self' 'unsafe-inline'",
+    f"img-src 'self' data: {GOATCOUNTER}",
+    "font-src 'self'",
+    f"connect-src 'self' {GOATCOUNTER}",
+    "manifest-src 'self'",
+    "worker-src 'self'",
+    "frame-src 'none'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+])
+CSP_META = re.compile(r"""<meta\s+http-equiv=["']?Content-Security-Policy""", re.I)
+# Scripts that run: no type, or a JavaScript type. Data blocks (application/ld+json) never run.
+INLINE_SCRIPT = re.compile(r"<script(?![^>]*\bsrc=)([^>]*)>(.*?)</script>", re.S | re.I)
+RUNS = re.compile(r"""\btype=["']?(text/javascript|module|application/javascript)\b""", re.I)
+
+
+def add_csp(text, where):
+    """Insert the CSP and referrer <meta> tags after <meta charset>, hashing the inline scripts."""
+    if CSP_META.search(text):
+        fail(f"{where} already has a Content-Security-Policy <meta>; the build adds it, the source must not")
+    handler = re.search(r"""<[a-z][^>]*\s(on[a-z]+)\s*=""", text, re.I)
+    if handler:
+        fail(f"{where} has an inline event handler ({handler.group(1)}=...), which the CSP blocks; use addEventListener")
+    if re.search(r"""(href|src|action)\s*=\s*["']?\s*javascript:""", text, re.I):
+        fail(f"{where} has a javascript: URL, which the CSP blocks")
+    hashes = []
+    for m in INLINE_SCRIPT.finditer(text):
+        if "type=" in m.group(1).lower() and not RUNS.search(m.group(1)):
+            continue
+        digest = base64.b64encode(hashlib.sha256(m.group(2).encode()).digest()).decode()
+        hashes.append(f"'sha256-{digest}'")
+    policy = CSP.replace(" INLINE_SCRIPTS", "".join(" " + x for x in dict.fromkeys(hashes)))
+    charset = re.search(r"<meta charset=[\"']?utf-8[\"']?\s*/?>\n?", text, re.I)
+    if not charset:
+        fail(f"{where} has no <meta charset=\"utf-8\"> to put the CSP after")
+    tags = (f'<meta http-equiv="Content-Security-Policy" content="{policy}">\n'
+            '<meta name="referrer" content="strict-origin-when-cross-origin">\n')
+    return text[:charset.end()] + tags + text[charset.end():]
+
+
+def check_vendored_count_js():
+    """assets/count.js is GoatCounter's count.js below a header comment that records its sha384."""
+    f = ROOT / "assets/count.js"
+    if not f.exists():
+        return
+    text = f.read_text()
+    want = re.search(r"sha384 of the upstream file: ([A-Za-z0-9+/=]+)", text)
+    head_end = text.find("*/\n")
+    if not want or head_end < 0:
+        fail("assets/count.js has no header recording the upstream sha384")
+    body = text[head_end + 3:].encode()
+    got = base64.b64encode(hashlib.sha384(body).digest()).decode()
+    if got != want.group(1):
+        fail(f"assets/count.js differs from the upstream file its header names (sha384 {got}); "
+             "update the header when updating the file")
+
+
 def main():
     ap = argparse.ArgumentParser(description="Build the site into an output directory with cache stamps.")
     ap.add_argument("--out", help="output directory, emptied first (default: _site/ in the repo)")
@@ -105,14 +179,14 @@ def main():
     (out / ".nojekyll").write_bytes(b"")
 
     versions = {p: h((ROOT / p).read_bytes()) for p in SCRIPTS}
+    check_vendored_count_js()
 
     # ---------- pages ----------
     for f in files:
         if f.endswith(".html"):
             src = (ROOT / f).read_text()
-            new = stamp(src, versions, f)
-            if new != src:
-                (out / f).write_text(new)
+            new = add_csp(stamp(src, versions, f), f)
+            (out / f).write_text(new)
     if "?v=" not in (out / "index.html").read_text():
         fail("index.html loads none of the stamped scripts")
 

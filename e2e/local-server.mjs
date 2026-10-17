@@ -1,14 +1,18 @@
 // Serves this checkout for local end-to-end runs. Paths that live in other repos
 // (/design-system/, /vedic-math/, /state-of-voice-agents/) come from the live site,
 // so the suite runs exactly as on sbmadhav.com but with this branch's files.
-//   node local-server.mjs [port]     (default 8123; 8000 is often taken)
+//   node local-server.mjs [port] [dir]   (default 8123; 8000 is often taken)
+// dir (relative to the checkout) serves a build instead, for example _site from
+// `python3 site-build.py --out _site`, which carries the stamps and the Content-Security-Policy.
 // Listens on 127.0.0.1 only and never serves a file outside this checkout.
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const checkout = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const root = path.resolve(checkout, process.argv[3] || '.');
+if (root !== checkout && !root.startsWith(checkout + path.sep)) throw new Error('dir must be inside the checkout');
 const port = +(process.argv[2] || process.env.PORT || 8123);
 const host = process.env.HOST || '127.0.0.1';
 const LIVE = 'https://sbmadhav.com';
@@ -47,4 +51,4 @@ http.createServer(async (req, res) => {
     const nf = await readFile(path.join(root, '404.html'));
     res.writeHead(404, { 'content-type': TYPES['.html'] }); res.end(nf);
   } catch (e) { res.writeHead(500); res.end(String(e)); }
-}).listen(port, host, () => console.log(`sbmadhav.com (this checkout) on http://localhost:${port}`));
+}).listen(port, host, () => console.log(`sbmadhav.com (${root === checkout ? 'this checkout' : path.relative(checkout, root)}) on http://localhost:${port}`));
