@@ -28,10 +28,20 @@ jobs:
       - name: The shared header matches the pinned design system
         run: python3 scripts/design-system/compose.py --check scripts/design-system/header.html index.html 404.html
 
-      # Warns, never fails: a new design-system release should not break this repo's CI (moving to it is a deliberate change)
+      # The versioned files never change, so a vendored copy that differs (and with it a Subresource Integrity
+      # hash in the pages) fails. A fetch failure only warns, so a network problem does not block the build.
       - name: Vendored design-system files match the published release
         run: |
-          python3 scripts/check-tokens.py --upstream || echo "::warning::scripts/design-system/ differs from the published release, or a newer design-system release is out. See DS_VERSION in site-build.py."
+          set +e
+          python3 scripts/check-tokens.py --upstream
+          code=$?
+          if [ "$code" = 3 ]; then echo "::warning::could not fetch the published design system; the comparison was skipped"; exit 0; fi
+          exit $code
+
+      # Warns, never fails: moving to a new design-system release is a deliberate change
+      - name: Newer design-system release
+        run: |
+          python3 scripts/check-tokens.py --latest || echo "::warning::a newer design-system release is out (or versions.json could not be fetched). See DS_VERSION in site-build.py."
 
       # Also fails if the source carries stamps (?v= on the scripts, or sw.js VERSION other than 'dev')
       - name: Build _site with cache stamps
@@ -50,7 +60,7 @@ jobs:
           ! grep -q 'gc\.zgo\.at' _site/assets/analytics.js || err "analytics.js must load the vendored /assets/count.js, not gc.zgo.at"
           ds=$(sed -n 's/^DS_VERSION = "\(.*\)"$/\1/p' site-build.py)
           for f in index.html 404.html; do
-            grep -q "href=\"/design-system/v/$ds/tokens.css\"" "_site/$f" || err "_site/$f does not link the pinned design system $ds"
+            grep -q "href=\"/design-system/v/$ds/tokens.css\" integrity=\"sha384-" "_site/$f" || err "_site/$f does not link the pinned design system $ds with integrity"
             grep -q 'class="md-header"' "_site/$f" || err "_site/$f has no shared header"
           done
           grep -Eq "^const VERSION = '[0-9a-f]{10}';" _site/sw.js || err "_site/sw.js VERSION is not a stamped hash"

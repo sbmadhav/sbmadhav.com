@@ -40,6 +40,11 @@ for (const p of PAGES) {
         .map(e => new URL((e as HTMLLinkElement).href || (e as HTMLScriptElement).src).pathname.replace(/\?.*$/, ''))
         .filter(u => u.startsWith('/design-system/')));
       expect(refs).toEqual([`/design-system/v/${DS}/tokens.css`, `/design-system/v/${DS}/components.css`, `/design-system/v/${DS}/header.js`]);
+      // Subresource Integrity: each pinned file carries the sha384 of the published file (a wrong hash would block it)
+      const sri = await page.evaluate(() => [...document.querySelectorAll('link[href*="/design-system/v/"], script[src*="/design-system/v/"]')]
+        .map(e => ({ crossorigin: e.getAttribute('crossorigin'), integrity: /^sha384-[A-Za-z0-9+/]{64}$/.test(e.getAttribute('integrity') || '') })));
+      expect(sri).toEqual(Array(3).fill({ crossorigin: 'anonymous', integrity: true }));
+      expect(await page.evaluate(() => typeof (window as any).siteTheme?.get), 'header.js ran').toBe('function');
       // The type comes from the tokens: body text is the body style (17px)
       expect(await page.evaluate(() => getComputedStyle(document.body).fontSize)).toBe('17px');
     });

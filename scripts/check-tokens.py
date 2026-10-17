@@ -2,7 +2,11 @@
 """Check that the pages use the pinned design system instead of copies of it.
 
     python3 scripts/check-tokens.py             offline check (the pre-commit hook and CI)
-    python3 scripts/check-tokens.py --upstream  also compare the pin with the published releases (CI warns on failure)
+    python3 scripts/check-tokens.py --upstream  also compare the vendored files with the published release
+    python3 scripts/check-tokens.py --latest    also report a newer release than the pinned one
+
+Exit codes: 0 fine, 1 a real problem (a copied token, a pin mismatch, a vendored file that differs from the
+published one), 3 a fetch failed so the comparison could not run, 4 a newer release exists (--latest).
 
 The pages link the pinned release, /design-system/v/<version>/tokens.css and components.css, and take every
 color, type style, spacing step and font from it. Until design system 2.1 the home page kept inline copies of
@@ -12,27 +16,27 @@ so the offline check fails when:
   --coral, --ink-muted or --space-4, instead of using the linked one;
 - scripts/design-tokens.json (the pinned tokens.json) is not the version that site-build.py pins (DS_VERSION).
 
---upstream (needs the network) also checks that the vendored files in scripts/design-system/ and
-scripts/design-tokens.json are byte-for-byte the published https://sbmadhav.com/design-system/v/<version>/ files,
-and reports when a newer release than the pinned one exists (moving to it is a deliberate change: see
-site-build.py, DS_VERSION).
+--upstream (needs the network) also checks that the vendored files in scripts/design-system/ (the header
+partials, compose.py and the three runtime files whose sha384 the pages carry as Subresource Integrity) and
+scripts/design-tokens.json are byte-for-byte the published https://sbmadhav.com/design-system/v/<version>/ files.
+--latest reports when a newer release than the pinned one exists (moving to it is a deliberate change: see
+DS_VERSION in site-build.py).
 """
 import json, pathlib, re, subprocess, sys, urllib.error, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PINNED = ROOT / "scripts" / "design-tokens.json"
-VENDORED = {"header.html": ROOT / "scripts/design-system/header.html",
-            "music.html": ROOT / "scripts/design-system/music.html",
-            "compose.py": ROOT / "scripts/design-system/compose.py",
-            "tokens.json": PINNED}
+VENDORED = {name: ROOT / "scripts/design-system" / name
+            for name in ("header.html", "music.html", "compose.py", "tokens.css", "components.css", "header.js")}
+VENDORED["tokens.json"] = PINNED
 PAGES = ["index.html", "404.html"]
 SITE = "https://sbmadhav.com/design-system"
 
 
 def ds_version():
     m = re.search(r'^DS_VERSION = "([^"]+)"', (ROOT / "site-build.py").read_text(), re.M)
-    if not m:
-        sys.exit("check-tokens: no DS_VERSION in site-build.py")
+    if not m or not re.fullmatch(r"\d+\.\d+\.\d+", m.group(1)):
+        sys.exit("check-tokens: no DS_VERSION (major.minor.patch) in site-build.py")
     return m.group(1)
 
 
@@ -43,6 +47,9 @@ def token_names(tokens):
 
 
 def fetch(url):
+    # Only the published design system on this site's own origin is ever fetched (fixed host, version checked above)
+    if not url.startswith(SITE + "/"):
+        raise ValueError(f"refusing to fetch {url}")
     try:
         with urllib.request.urlopen(url, timeout=15) as r:
             return r.read()
@@ -65,22 +72,35 @@ for page in PAGES:
         if name in names or name.startswith(("text-", "space-", "radius-", "shadow-", "cat-", "bolt-")):
             problems.append(f"  {page} defines --{name} itself; use the one from /design-system/v/{version}/tokens.css")
 
+unfetched = []
 if "--upstream" in sys.argv:
     for name, path in VENDORED.items():
         url = f"{SITE}/v/{version}/{name}"
         try:
             live = fetch(url)
         except Exception as e:
-            sys.exit(f"check-tokens: could not fetch {url}: {e}")
+            unfetched.append(f"  could not fetch {url}: {e}")
+            continue
         if live != path.read_bytes():
-            problems.append(f"  {path.relative_to(ROOT)} differs from {url}")
-    latest = json.loads(fetch(f"{SITE}/versions.json")).get("latest")
+            problems.append(f"  {path.relative_to(ROOT)} differs from {url} (versioned files never change: restore the published copy)")
+
+if "--latest" in sys.argv:
+    try:
+        latest = json.loads(fetch(f"{SITE}/versions.json")).get("latest")
+    except Exception as e:
+        latest = None
+        unfetched.append(f"  could not fetch {SITE}/versions.json: {e}")
     if latest and latest != version:
-        problems.append(f"  design system {latest} is out; this site pins {version} (move on purpose: see DS_VERSION in site-build.py)")
+        print(f"check-tokens: design system {latest} is out; this site pins {version} (move on purpose: see DS_VERSION in site-build.py)")
+        sys.exit(4)
 
 if problems:
     print("check-tokens: the pages are out of step with the pinned design system")
     print("\n".join(problems))
     sys.exit(1)
+if unfetched:
+    print("check-tokens: could not compare with the published release")
+    print("\n".join(unfetched))
+    sys.exit(3)
 print(f"check-tokens: the pages use design system {version} and define none of its tokens themselves"
       + (" (vendored files match the published release)" if "--upstream" in sys.argv else ""))

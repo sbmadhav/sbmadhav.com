@@ -27,8 +27,10 @@ What the build does:
   javascript: URLs, which the policy would block.
 - Checks that assets/count.js (GoatCounter, vendored) still matches the upstream hash it records.
 - Writes .nojekyll so Pages serves the output as is.
-- Checks the pinned design system (DS_VERSION): every page links /design-system/v/<DS_VERSION>/ (never the
-  unversioned latest files or another version), and the shared header in each page in HEADER_PAGES matches
+- Checks the pinned design system (DS_VERSION): every page loads tokens.css, components.css and header.js
+  from /design-system/v/<DS_VERSION>/ once each, with integrity (sha384 of the vendored copy in
+  scripts/design-system/) and crossorigin="anonymous" (never the unversioned latest files or another
+  version; the tags are read with an HTML parser), sw.js precaches that release, and the shared header in each page in HEADER_PAGES matches
   the pinned header.html in scripts/design-system/, composed with that release's compose.py. The header is
   committed composed, so a Jekyll branch deploy shows the same page. `python3 site-build.py --compose`
   re-renders it in the source after moving to a new version or changing a page's slots.
@@ -38,12 +40,12 @@ a Content-Security-Policy <meta>), so they cannot creep back into git.
 
 /vedic-math/ is its own repo (sbmadhav/vedic-math) with its own build.py.
 """
-import argparse, base64, fnmatch, hashlib, json, pathlib, re, shutil, subprocess, sys
+import argparse, base64, fnmatch, hashlib, html.parser, json, pathlib, re, shutil, subprocess, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
 SCRIPTS = ["assets/app.js", "assets/explore.js", "assets/analytics.js"]
-# The design-system release the pages pin. scripts/design-system/ holds that release's header.html, music.html and
-# compose.py (byte-for-byte copies of https://sbmadhav.com/design-system/v/<DS_VERSION>/...), and
+# The design-system release the pages pin. scripts/design-system/ holds that release's header.html, music.html,
+# compose.py, tokens.css, components.css and header.js (byte-for-byte copies of https://sbmadhav.com/design-system/v/<DS_VERSION>/...), and
 # scripts/design-tokens.json its tokens.json. To move to a new version: copy the new files there, change DS_VERSION
 # and the /design-system/v/<version>/ links in the pages, run `python3 site-build.py --compose`, review the diff.
 DS_VERSION = "2.1.0"
@@ -197,22 +199,58 @@ def compose_headers(write):
         print(f"site-build.py: composed the header in {page}")
 
 
-DS_LINK = re.compile(r"""(?:href|src)=["']/design-system/(v/([^/"']+)/)?(tokens\.css|components\.css|header\.js)["']""")
+DS_RUNTIME = {"tokens.css": "link", "components.css": "link", "header.js": "script"}
+
+
+def sri(data):
+    return "sha384-" + base64.b64encode(hashlib.sha384(data).digest()).decode()
+
+
+class Tags(html.parser.HTMLParser):
+    """The <link> and <script> start tags of a page, with their attributes (comments and text are not tags)."""
+    def __init__(self):
+        super().__init__()
+        self.tags = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag in ("link", "script"):
+            self.tags.append((tag, dict(attrs), self.getpos()[0]))
+
+    handle_startendtag = handle_starttag
 
 
 def check_design_system(files):
-    """Pages pin DS_VERSION, and the vendored files are that version."""
+    """Pages load the pinned release once each, with Subresource Integrity; the pins agree."""
     pinned = json.loads((ROOT / "scripts" / "design-tokens.json").read_text()).get("version")
     if pinned != DS_VERSION:
         fail(f"scripts/design-tokens.json is design system {pinned}, DS_VERSION is {DS_VERSION}")
-    for f in files:
-        if not f.endswith(".html"):
-            continue
-        for m in DS_LINK.finditer((ROOT / f).read_text()):
-            if not m.group(1):
-                fail(f"{f} links /design-system/{m.group(3)}, the unversioned latest; pin /design-system/v/{DS_VERSION}/{m.group(3)}")
-            if m.group(2) != DS_VERSION:
-                fail(f"{f} links design system {m.group(2)} ({m.group(3)}); this site pins {DS_VERSION}")
+    base = f"/design-system/v/{DS_VERSION}/"
+    for f in [f for f in files if f.endswith(".html")]:
+        parser = Tags()
+        parser.feed((ROOT / f).read_text())
+        seen = {}
+        for tag, a, line in parser.tags:
+            url = (a.get("href") if tag == "link" else a.get("src")) or ""
+            if not url.startswith("/design-system/") or url.startswith("/design-system/icons/"):
+                continue
+            name = url.rsplit("/", 1)[-1]
+            if not url.startswith(base) or name not in DS_RUNTIME:
+                fail(f"{f}:{line} loads {url}; pages load only tokens.css, components.css and header.js from {base}")
+            if DS_RUNTIME[name] != tag or (tag == "link" and a.get("rel") != "stylesheet") or (tag == "script" and "defer" not in a):
+                fail(f"{f}:{line} {name} must be a " + ('<link rel="stylesheet">' if DS_RUNTIME[name] == "link" else "<script defer>"))
+            want = sri((DS_DIR / name).read_bytes())
+            if a.get("integrity") != want or a.get("crossorigin") != "anonymous":
+                fail(f'{f}:{line} {name} needs integrity="{want}" crossorigin="anonymous" (the hash of scripts/design-system/{name})')
+            seen[name] = seen.get(name, 0) + 1
+        if seen and seen != {n: 1 for n in DS_RUNTIME}:
+            fail(f"{f} must load each of {', '.join(DS_RUNTIME)} from {base} exactly once (found {seen})")
+    for page in HEADER_PAGES:
+        if page not in files:
+            fail(f"{page} is missing")
+    # The worker precaches the pinned files: the same release as the pages
+    sw_pins = set(re.findall(r"""['"]/?design-system/v/([^/'"]+)/""", (ROOT / "sw.js").read_text()))
+    if sw_pins != {DS_VERSION}:
+        fail(f"sw.js precaches design system {', '.join(sorted(sw_pins)) or 'none'}; this site pins {DS_VERSION}")
     compose_headers(write=False)
 
 
