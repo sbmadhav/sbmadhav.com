@@ -2,3 +2,6 @@
 /vedic-math
 /design-system
 _site/
+
+# Python bytecode (site-build.py imports the vendored scripts/design-system/compose.py)
+__pycache__/

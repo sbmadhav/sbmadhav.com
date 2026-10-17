@@ -170,6 +170,7 @@ def check_vendored_count_js():
 
 def load_compose():
     import importlib.util
+    sys.dont_write_bytecode = True  # no __pycache__ next to the vendored compose.py
     spec = importlib.util.spec_from_file_location("ds_compose", DS_DIR / "compose.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
