@@ -52,8 +52,8 @@
     const set = isKid() ? lines.kid : lines.pro;
     say(set[li++ % set.length]);
     const m = $('#mouth'); m.setAttribute('d','M68 90 q12 14 24 0');
-    $('#antenna').setAttribute('fill','#F2B544');
-    setTimeout(() => { m.setAttribute('d','M68 92 q12 9 24 0'); $('#antenna').setAttribute('fill','#EE7A63'); }, 600);
+    $('#antenna').setAttribute('fill','var(--bolt-belly)');
+    setTimeout(() => { m.setAttribute('d','M68 92 q12 9 24 0'); $('#antenna').setAttribute('fill','var(--bolt-accent)'); }, 600);
   });
   // eyes follow pointer
   const pupils = [...document.querySelectorAll('.pupil')];
@@ -279,7 +279,7 @@
     });
     const xp = Math.round(((i+1) / LEVELS.length) * 100);
     $('#detail').innerHTML = `<div class="badge"><svg aria-hidden="true"><use href="#${L.icon}"/></svg></div>
-      <div><span class="lv mono" style="color:var(--muted)">${L.lv}</span>
+      <div><span class="lv mono" style="color:var(--ink-muted)">${L.lv}</span>
       <h3>${L.name[k]}</h3><div class="role">${L.role[k]}</div>
       <ul>${L[k].map(x => `<li>${x}</li>`).join('')}</ul>
       <div class="xp">XP <span class="bar"><i style="width:${xp}%"></i></span> ${xp}%</div></div>`;
@@ -288,7 +288,7 @@
   /* ---------- Confetti + easter egg ---------- */
   function burst(n){
     if (reduced()) return;
-    const colors = ['#EE7A63','#4FB3A6','#F2B544','#4FB3A6','#EE7A63'];
+    const colors = ['var(--coral)','var(--teal)','var(--sun)','var(--teal)','var(--coral)'];
     for (let i=0;i<n;i++){
       const c = document.createElement('i'); c.className='confetti';
       c.style.left = Math.random()*100+'vw'; c.style.background = colors[i%colors.length];
@@ -298,7 +298,11 @@
     }
   }
   let clicks = 0, clickT;
-  $('#logo').addEventListener('click', () => {
+  // The header's brand (Bolt and the name) links home. On the home page it scrolls to the top instead, and five
+  // quick clicks unlock the easter egg.
+  $('.md-brand').addEventListener('click', e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;   // new tab or window: let the link work
+    e.preventDefault();
     clearTimeout(clickT); clickT = setTimeout(() => clicks = 0, 1200);
     if (++clicks >= 5){ clicks = 0; burst(120); say(isKid() ? "You found the secret party button!" : "Easter egg unlocked. Ship the confetti."); }
     else window.scrollTo({ top:0, behavior: reduced() ? 'auto' : 'smooth' });
@@ -321,8 +325,15 @@
     const n = Math.round(W*H/6500);
     stars = Array.from({length:n}, () => ({x:Math.random()*W, y:Math.random()*H*1.6, r:Math.random()*1.5+.4, p:Math.random()*6.28, s:.4+Math.random()*1.2, z:.15+Math.random()*.5, c:Math.random()<.15}));
   }
-  const PAL = ['#EE7A63','#4FB3A6','#F2B544','#4FB3A6','#EE7A63'];
-  const PAL_D = ['#F08C77','#5CC7B8','#F2C062','#5CC7B8','#F08C77'];
+  // Star colors are the scheme's tokens, read when the scheme changes (a canvas cannot use var())
+  let pal = [], ink = '';
+  function readPalette(){
+    const cs = getComputedStyle(document.documentElement), v = n => cs.getPropertyValue(n).trim();
+    pal = ['--coral','--teal','--sun','--teal','--coral'].map(v); ink = v('--ink');
+  }
+  readPalette();
+  document.addEventListener('sitetheme', readPalette);
+  darkQ.addEventListener ? darkQ.addEventListener('change', readPalette) : darkQ.addListener(readPalette);
   function drawStars(t){
     cx.clearRect(0,0,W,H);
     const dark = isDark(), sy = scrollY;
@@ -332,7 +343,7 @@
       if (y < -4 || y > H+4) continue;
       const tw = .55 + .45*Math.sin(st.p + t/1000*st.s*boost);
       cx.globalAlpha = (dark ? 1 : .3) * tw;
-      cx.fillStyle = (st.c || (dark && st.r > 1.4)) ? (dark ? PAL_D : PAL)[(st.r*10|0)%5] : (dark ? '#E9EDF3' : '#151B2B');
+      cx.fillStyle = (st.c || (dark && st.r > 1.4)) ? pal[(st.r*10|0)%5] : ink;
       cx.beginPath();
       if (st.r > 1.6){ // little sparkle
         const r = st.r*1.6;
@@ -868,28 +879,13 @@
   drawScenario();
 
 
-  /* ---------- Color scheme toggle (system by default) ---------- */
-  const root = document.documentElement, themeBtn = $('#themeBtn'), metaTheme = document.querySelector('meta[name="theme-color"]');
-  const sysMQ = window.matchMedia('(prefers-color-scheme: dark)');
-  const sysTheme = () => sysMQ.matches ? 'dark' : 'light';
-  const effTheme = () => root.dataset.theme || sysTheme();
-  function syncTheme(){
-    const t = effTheme();
-    metaTheme.setAttribute('content', t === 'dark' ? '#0F1218' : '#F6F7F9');
-    themeBtn.setAttribute('aria-label', t === 'dark' ? 'Switch to Daybreak (light) scheme' : 'Switch to Deep Space (dark) scheme');
-    themeBtn.title = themeBtn.getAttribute('aria-label') + (root.dataset.theme ? '' : ' (following your system)');
-  }
-  themeBtn.addEventListener('click', () => {
-    const next = effTheme() === 'dark' ? 'light' : 'dark';
-    track('theme/' + next, 'Color scheme switched');
-    document.body.classList.add('theme-anim'); setTimeout(() => document.body.classList.remove('theme-anim'), 700);
-    if (next === sysTheme()){ delete root.dataset.theme; store.set('theme',''); }   // back to matching system: follow system again
-    else { root.dataset.theme = next; store.set('theme', next); }
-    syncTheme();
-    say(next === 'dark' ? (isKid() ? 'Whoa! We just blasted into deep space!' : 'Deep Space scheme. Same content, new orbit.') : (isKid() ? 'Good morning, sunshine!' : 'Daybreak scheme. Back on solid ground.'));
+  /* ---------- Color scheme ---------- */
+  // The sun/moon button in the shared header is run by the design system's header.js (the one theme control on
+  // sbmadhav.com: it saves the choice, keeps theme-color in step and records theme/<scheme>). Bolt just reacts.
+  document.addEventListener('sitetheme', e => {
+    const dark = e.detail && e.detail.theme === 'dark';
+    say(dark ? (isKid() ? 'Whoa! We just blasted into deep space!' : 'Deep Space scheme. Same content, new orbit.') : (isKid() ? 'Good morning, sunshine!' : 'Daybreak scheme. Back on solid ground.'));
   });
-  sysMQ.addEventListener ? sysMQ.addEventListener('change', syncTheme) : sysMQ.addListener(syncTheme);
-  syncTheme();
 
   /* ---------- Offline support (PWA) ---------- */
   if ('serviceWorker' in navigator && location.protocol === 'https:'){

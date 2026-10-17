@@ -3,9 +3,11 @@
 #   git config core.hooksPath .githooks
 # Skip in an emergency with: git commit --no-verify
 #
-# 1. Home page colors must match the pinned design tokens (scripts/design-tokens.json).
+# 1. The pages define no design-system tokens themselves and pin the release in
+#    scripts/design-tokens.json (scripts/check-tokens.py).
 # 2. The site builds (site-build.py into a throwaway directory). This also fails if the
-#    source carries cache stamps, which only the CI deploy adds.
+#    source carries cache stamps, which only the CI deploy adds, or if a page's shared
+#    header is out of step with the pinned design system (fix: python3 site-build.py --compose).
 # Vedic Math has its own repo (sbmadhav/vedic-math) with its own hook.
 
 cd "$(git rev-parse --show-toplevel)" || exit 1
@@ -15,7 +17,7 @@ fail() {
   exit 1
 }
 
-python3 scripts/check-tokens.py || fail "index.html colors disagree with scripts/design-tokens.json"
+python3 scripts/check-tokens.py || fail "a page copies design-system tokens, or the pins disagree (see above)"
 
 tmp=$(mktemp -d) || fail "could not make a temp directory"
 trap 'rm -rf "$tmp"' EXIT

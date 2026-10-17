@@ -27,16 +27,28 @@ What the build does:
   javascript: URLs, which the policy would block.
 - Checks that assets/count.js (GoatCounter, vendored) still matches the upstream hash it records.
 - Writes .nojekyll so Pages serves the output as is.
+- Checks the pinned design system (DS_VERSION): every page links /design-system/v/<DS_VERSION>/ (never the
+  unversioned latest files or another version), and the shared header in each page in HEADER_PAGES matches
+  the pinned header.html in scripts/design-system/, composed with that release's compose.py. The header is
+  committed composed, so a Jekyll branch deploy shows the same page. `python3 site-build.py --compose`
+  re-renders it in the source after moving to a new version or changing a page's slots.
 
 It fails if the source carries stamps (a ?v= on those scripts, a VERSION other than 'dev', or
 a Content-Security-Policy <meta>), so they cannot creep back into git.
 
 /vedic-math/ is its own repo (sbmadhav/vedic-math) with its own build.py.
 """
-import argparse, base64, fnmatch, hashlib, pathlib, re, shutil, subprocess, sys
+import argparse, base64, fnmatch, hashlib, json, pathlib, re, shutil, subprocess, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
 SCRIPTS = ["assets/app.js", "assets/explore.js", "assets/analytics.js"]
+# The design-system release the pages pin. scripts/design-system/ holds that release's header.html, music.html and
+# compose.py (byte-for-byte copies of https://sbmadhav.com/design-system/v/<DS_VERSION>/...), and
+# scripts/design-tokens.json its tokens.json. To move to a new version: copy the new files there, change DS_VERSION
+# and the /design-system/v/<version>/ links in the pages, run `python3 site-build.py --compose`, review the diff.
+DS_VERSION = "2.1.0"
+DS_DIR = ROOT / "scripts" / "design-system"
+HEADER_PAGES = ["index.html", "404.html"]
 
 h = lambda b: hashlib.sha256(b).hexdigest()[:10]
 
@@ -156,10 +168,63 @@ def check_vendored_count_js():
              "update the header when updating the file")
 
 
+def load_compose():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("ds_compose", DS_DIR / "compose.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def compose_headers(write):
+    """Re-render the shared header of each page in HEADER_PAGES from the pinned header.html.
+    write=False: fail if any page differs (the build and CI). write=True: update the pages (--compose)."""
+    compose = load_compose()
+    partial = (DS_DIR / "header.html").read_text()
+    for page in HEADER_PAGES:
+        before = (ROOT / page).read_text()
+        try:
+            after = compose.compose(before, partial)
+        except compose.ComposeError as e:
+            fail(f"{page}: {e}")
+        if after == before:
+            continue
+        if not write:
+            fail(f"the header in {page} differs from scripts/design-system/header.html (design system {DS_VERSION}); "
+                 "run python3 site-build.py --compose and commit the result")
+        (ROOT / page).write_text(after)
+        print(f"site-build.py: composed the header in {page}")
+
+
+DS_LINK = re.compile(r"""(?:href|src)=["']/design-system/(v/([^/"']+)/)?(tokens\.css|components\.css|header\.js)["']""")
+
+
+def check_design_system(files):
+    """Pages pin DS_VERSION, and the vendored files are that version."""
+    pinned = json.loads((ROOT / "scripts" / "design-tokens.json").read_text()).get("version")
+    if pinned != DS_VERSION:
+        fail(f"scripts/design-tokens.json is design system {pinned}, DS_VERSION is {DS_VERSION}")
+    for f in files:
+        if not f.endswith(".html"):
+            continue
+        for m in DS_LINK.finditer((ROOT / f).read_text()):
+            if not m.group(1):
+                fail(f"{f} links /design-system/{m.group(3)}, the unversioned latest; pin /design-system/v/{DS_VERSION}/{m.group(3)}")
+            if m.group(2) != DS_VERSION:
+                fail(f"{f} links design system {m.group(2)} ({m.group(3)}); this site pins {DS_VERSION}")
+    compose_headers(write=False)
+
+
 def main():
     ap = argparse.ArgumentParser(description="Build the site into an output directory with cache stamps.")
     ap.add_argument("--out", help="output directory, emptied first (default: _site/ in the repo)")
-    arg = ap.parse_args().out
+    ap.add_argument("--compose", action="store_true",
+                    help="re-render the shared header in the source pages from scripts/design-system/header.html, then stop")
+    args = ap.parse_args()
+    if args.compose:
+        compose_headers(write=True)
+        return
+    arg = args.out
     out = pathlib.Path(arg).resolve() if arg else ROOT / "_site"
     if out == ROOT or ROOT.is_relative_to(out):
         fail("--out must not be the repo itself")
@@ -169,6 +234,7 @@ def main():
             fail(f"{out} is not empty and is not an earlier build (no .nojekyll); refusing to delete it")
         shutil.rmtree(out)
     files = publishable()
+    check_design_system(files)
     for required in ["index.html", "sw.js", *SCRIPTS]:
         if required not in files:
             fail(f"{required} is missing from the publishable files")

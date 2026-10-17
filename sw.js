@@ -8,7 +8,9 @@
    /vedic-math/ alone (those paths are served from their own repos, so this file cannot version
    them) and every other origin's requests.
    /design-system/ is also another repo (sbmadhav/design-system) but it is precached like the
-   rest, because the offline page needs tokens.css. VERSION cannot hash those files, so a design
+   rest, because the pages need tokens.css, components.css and header.js offline (the pinned
+   /design-system/v/<version>/ copies the pages link, plus the unversioned latest for the offline
+   reference page). VERSION cannot hash those files, so a design
    system change reaches visitors through the background refresh below (one visit late).
 
    KILL SWITCH (retire the worker): set KILL = true below and deploy sw.js. Browsers re-check
@@ -41,7 +43,11 @@ const PRECACHE = [
   'manifest.webmanifest',
   'design-system/',
   'design-system/tokens.css',
-  'design-system/components.css'
+  'design-system/components.css',
+  // The release the pages pin (DS_VERSION in site-build.py). These URLs never change once published.
+  'design-system/v/2.1.0/tokens.css',
+  'design-system/v/2.1.0/components.css',
+  'design-system/v/2.1.0/header.js'
 ];
 const PRECACHED = new Set(PRECACHE.map(p => new URL(p, self.registration.scope).href));
 

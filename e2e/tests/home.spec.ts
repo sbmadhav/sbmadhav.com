@@ -31,8 +31,10 @@ test.describe('Home page', () => {
   test('header nav anchors scroll to their sections', async ({ page }, info) => {
     test.skip(info.project.name === 'mobile', 'The header section nav is hidden below 1180px; the Explore menu covers phones');
     await page.goto('/');
-    for (const id of ['work', 'lab', 'bugs', 'play', 'journey', 'hello']) {
-      await page.locator(`header nav a[href="#${id}"]`).click();
+    // Five links: with six, the header did not hold the controls inside the content width
+    await expect(page.locator('header .md-nav a')).toHaveCount(5);
+    for (const id of ['work', 'lab', 'bugs', 'play', 'journey']) {
+      await page.locator(`header .md-nav a[href="#${id}"]`).click();
       await expect(page).toHaveURL(new RegExp(`#${id}$`));
       await expect(page.locator(`#${id}`)).toBeInViewport();
     }
@@ -75,7 +77,7 @@ test.describe('Home page', () => {
     await expect(page.locator('#play .kid .maze')).toBeVisible();
   });
 
-  test('Deep Space blurs only the sticky header, so WebKit keeps rendering', async ({ page }) => {
+  test('Deep Space blurs only the sticky header and its kid mode switch, so WebKit keeps rendering', async ({ page }) => {
     // A backdrop-filter on every card, button and chip made Linux WebKit stop painting the page
     // (no animation frames, so clicks never settled) whenever it loaded in Deep Space.
     for (const setup of ['system', 'saved'] as const) {
@@ -85,7 +87,8 @@ test.describe('Home page', () => {
       const blurred = await page.evaluate(() => [...document.querySelectorAll('body *')]
         .filter(el => { const f = getComputedStyle(el).backdropFilter || (getComputedStyle(el) as any).webkitBackdropFilter; return f && f !== 'none'; })
         .map(el => el.tagName.toLowerCase() + (el.className ? '.' + String(el.className).split(' ')[0] : '')));
-      expect(blurred, setup).toEqual(['header.nav']);
+      // The header, plus the design system's glass on its kid mode switch (md-switch); never the page's own cards
+      expect(blurred, setup).toEqual(['header.md-header', 'button.md-switch']);
       // Frames keep coming after a reload
       await page.reload();
       expect(await page.evaluate(() => new Promise(r => { const t = setTimeout(() => r('stalled'), 3000); requestAnimationFrame(() => { clearTimeout(t); r('ok'); }); })), setup).toBe('ok');
@@ -123,6 +126,15 @@ test.describe('Home page', () => {
       await expect(page.locator('html')).not.toHaveAttribute('data-theme', /./);
       await expect.poll(bg).toBe(systemBg);
     });
+
+    test(`color scheme (${system} system): Bolt reacts to the header's theme button`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: system });
+      await page.goto('/');
+      await page.locator('#themeBtn').click();
+      await expect(page.locator('#bubble')).toHaveClass(/show/);
+      await expect(page.locator('#bubble')).toHaveText(system === 'light' ? /Deep Space|deep space/ : /Daybreak|sunshine/);
+      await expect(page.locator('#themeBtn')).toHaveAttribute('aria-label', system === 'light' ? 'Switch to Daybreak (light) scheme' : 'Switch to Deep Space (dark) scheme');
+    });
   }
 
   test('Bolt talks when clicked, in both modes', async ({ page }) => {
@@ -140,11 +152,14 @@ test.describe('Home page', () => {
     await expect(page.locator('#bubble')).toHaveText("It's MAA-dhuv.");
   });
 
-  test('logo clicked five times unlocks the easter egg', async ({ page }) => {
+  test('logo clicked five times unlocks the easter egg, without leaving the page', async ({ page }) => {
     await page.goto('/');
-    const logo = page.locator('#logo');
+    const logo = page.locator('header .md-brand');
+    await expect(logo).toHaveAttribute('href', '/');
+    await page.evaluate(() => { (window as any).__stay = 1; });
     for (let i = 0; i < 5; i++) await logo.click();
     await expect(page.locator('#bubble')).toHaveText(/Easter egg|secret party/);
+    expect(await page.evaluate(() => (window as any).__stay), 'the brand link scrolls instead of reloading the home page').toBe(1);
   });
 
   test('music player starts, changes track and stops (generated audio, no files)', async ({ page }) => {
